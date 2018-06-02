@@ -29,6 +29,7 @@ public class FileLogger {
     private int numFilesToSave = 50;
     private int debugLevel;
     private boolean enableLogd = false;
+    private String eventTag = "";
 
     public FileLogger(ElapsedTime elapsedTime) {
         open();
@@ -58,6 +59,10 @@ public class FileLogger {
     public void setDebugLevel(int debug) {
         this.debugLevel = debug;
         writeEvent("SETTING:", "Debug Level Set " + this.debugLevel);
+    }
+
+    public void setEventTag(String event) {
+        this.eventTag = event;
     }
 
     public boolean getLogdEnabled() {
@@ -149,27 +154,49 @@ public class FileLogger {
         isOpen = false;
     }
 
+    public synchronized void writeEvent(String desc) {
+        if (this.enableLogd) {
+            Log.d(this.eventTag.toUpperCase(), desc);
+        }
+        if (isOpen)
+            this.write(this.elapsedTime.toString() + "," + System.currentTimeMillis() + "," + Thread.currentThread().getId() + "," + this.eventTag + "," + desc);
+    }
+
     public synchronized void writeEvent(String event, String desc) {
         if (this.enableLogd) {
             if (event.length() > 23) {
-                event = event.substring(0, 22);
+                this.eventTag = event.substring(0, 22);
+            } else {
+                this.eventTag = event;
             }
-            Log.d(event.toUpperCase(), desc);
+            Log.d(this.eventTag.toUpperCase(), desc);
         }
         if (isOpen)
-            this.write(this.elapsedTime.toString() + "," + System.currentTimeMillis() + "," + Thread.currentThread().getId() + "," + event + "," + desc);
+            this.write(this.elapsedTime.toString() + "," + System.currentTimeMillis() + "," + Thread.currentThread().getId() + "," + this.eventTag + "," + desc);
     }
 
     public synchronized void writeEvent(int debug, String event, String desc) {
         if ( this.debugLevel >= debug ) {
             if (this.enableLogd) {
                 if (event.length() > 23) {
-                    event = event.substring(0, 22);
+                    this.eventTag = event.substring(0, 22);
+                } else {
+                    this.eventTag = event;
                 }
-                Log.d(event.toUpperCase(), desc);
+                Log.d(this.eventTag.toUpperCase(), desc);
             }
             if (isOpen)
-                this.write(this.elapsedTime.toString() + "," + System.currentTimeMillis() + "," + Thread.currentThread().getId() + "," + event + "," + desc);
+                this.write(this.elapsedTime.toString() + "," + System.currentTimeMillis() + "," + Thread.currentThread().getId() + "," + this.eventTag + "," + desc);
+        }
+    }
+
+    public synchronized void writeEvent(int debug, String desc) {
+        if ( this.debugLevel >= debug ) {
+            if (this.enableLogd) {
+                Log.d(this.eventTag.toUpperCase(), desc);
+            }
+            if (isOpen)
+                this.write(this.elapsedTime.toString() + "," + System.currentTimeMillis() + "," + Thread.currentThread().getId() + "," + this.eventTag + "," + desc);
         }
     }
 

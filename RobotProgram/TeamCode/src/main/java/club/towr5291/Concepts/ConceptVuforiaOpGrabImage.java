@@ -415,49 +415,47 @@ public class ConceptVuforiaOpGrabImage extends OpModeMasterLinear
                     float[] poseData = Arrays.copyOfRange(pose.transposed().getData(), 0, 12);
                     rawPose.setData(poseData);
 
-                    Vec2F upperLeft  = Tool.projectPoint(vuforia.getCameraCalibration(), rawPose, new Vec3F(-TARGET_WIDTH / 2,  TARGET_HEIGHT / 2, 0));
-                    Vec2F upperRight = Tool.projectPoint(vuforia.getCameraCalibration(), rawPose, new Vec3F( TARGET_WIDTH / 2,  TARGET_HEIGHT / 2, 0));
-                    Vec2F lowerRight = Tool.projectPoint(vuforia.getCameraCalibration(), rawPose, new Vec3F( TARGET_WIDTH / 2, -TARGET_HEIGHT / 2, 0));
-                    Vec2F lowerLeft  = Tool.projectPoint(vuforia.getCameraCalibration(), rawPose, new Vec3F(-TARGET_WIDTH / 2, -TARGET_HEIGHT / 2, 0));
+                    Vec2F upperLeft = Tool.projectPoint(vuforia.getCameraCalibration(), rawPose, new Vec3F(-TARGET_WIDTH / 2, TARGET_HEIGHT / 2, 0));
+                    Vec2F upperRight = Tool.projectPoint(vuforia.getCameraCalibration(), rawPose, new Vec3F(TARGET_WIDTH / 2, TARGET_HEIGHT / 2, 0));
+                    Vec2F lowerRight = Tool.projectPoint(vuforia.getCameraCalibration(), rawPose, new Vec3F(TARGET_WIDTH / 2, -TARGET_HEIGHT / 2, 0));
+                    Vec2F lowerLeft = Tool.projectPoint(vuforia.getCameraCalibration(), rawPose, new Vec3F(-TARGET_WIDTH / 2, -TARGET_HEIGHT / 2, 0));
 
                     double dblMidPointTopx = (upperRight.getData()[0] + upperLeft.getData()[0]) / 2;
                     double dblMidPointTopy = (upperRight.getData()[1] + upperLeft.getData()[1]) / 2;
                     double dblMidPointBotx = (lowerRight.getData()[0] + lowerLeft.getData()[0]) / 2;
                     double dblMidPointBoty = (lowerRight.getData()[1] + lowerLeft.getData()[1]) / 2;
 
-                    double width  = Math.sqrt((Math.pow((upperRight.getData()[1] - upperLeft.getData()[1]),2)) + (Math.pow((upperRight.getData()[0] - upperLeft.getData()[0]),2)));
-                    double height = Math.sqrt((Math.pow((dblMidPointTopy - dblMidPointBoty),2)) + (Math.pow((dblMidPointTopx - dblMidPointBotx),2)));
+                    double width = Math.sqrt((Math.pow((upperRight.getData()[1] - upperLeft.getData()[1]), 2)) + (Math.pow((upperRight.getData()[0] - upperLeft.getData()[0]), 2)));
+                    double height = Math.sqrt((Math.pow((dblMidPointTopy - dblMidPointBoty), 2)) + (Math.pow((dblMidPointTopx - dblMidPointBotx), 2)));
 
                     //width is equal to 254 mm, so width of beacon is 220mm, height of beacon is 150mm
                     //pixels per mm width, using a known size of the target
                     double dblWidthPixelsPermm = width / TARGET_WIDTH;
                     double dblHeightPixelsPermm = height / TARGET_HEIGHT;
 
-                    if (debug >= 1)
-                    {
+                    if (debug >= 1) {
                         try {
-                            fileLogger.writeEvent("Vuforia", "upperLeft 0 "  + upperLeft.getData()[0]);
-                            fileLogger.writeEvent("Vuforia", "upperLeft 1 "  + upperLeft.getData()[1]);
+                            fileLogger.writeEvent("Vuforia", "upperLeft 0 " + upperLeft.getData()[0]);
+                            fileLogger.writeEvent("Vuforia", "upperLeft 1 " + upperLeft.getData()[1]);
 
-                            fileLogger.writeEvent("Vuforia", "upperRight 0 "  + upperRight.getData()[0]);
-                            fileLogger.writeEvent("Vuforia", "upperRight 1 "  + upperRight.getData()[1]);
+                            fileLogger.writeEvent("Vuforia", "upperRight 0 " + upperRight.getData()[0]);
+                            fileLogger.writeEvent("Vuforia", "upperRight 1 " + upperRight.getData()[1]);
 
-                            fileLogger.writeEvent("Vuforia", "lowerLeft 0 "  + lowerLeft.getData()[0]);
-                            fileLogger.writeEvent("Vuforia", "lowerLeft 1 "  + lowerLeft.getData()[1]);
+                            fileLogger.writeEvent("Vuforia", "lowerLeft 0 " + lowerLeft.getData()[0]);
+                            fileLogger.writeEvent("Vuforia", "lowerLeft 1 " + lowerLeft.getData()[1]);
 
-                            fileLogger.writeEvent("Vuforia", "lowerRight 0 "  + lowerRight.getData()[0]);
-                            fileLogger.writeEvent("Vuforia", "lowerRight 1 "  + lowerRight.getData()[1]);
+                            fileLogger.writeEvent("Vuforia", "lowerRight 0 " + lowerRight.getData()[0]);
+                            fileLogger.writeEvent("Vuforia", "lowerRight 1 " + lowerRight.getData()[1]);
 
-                            fileLogger.writeEvent("Vuforia", "dblMidPointTopx "  + dblMidPointTopx);
-                            fileLogger.writeEvent("Vuforia", "dblMidPointTopy "  + dblMidPointTopy);
-                            fileLogger.writeEvent("Vuforia", "dblMidPointBotx "  + dblMidPointBotx);
-                            fileLogger.writeEvent("Vuforia", "dblMidPointBoty "  + dblMidPointBoty);
+                            fileLogger.writeEvent("Vuforia", "dblMidPointTopx " + dblMidPointTopx);
+                            fileLogger.writeEvent("Vuforia", "dblMidPointTopy " + dblMidPointTopy);
+                            fileLogger.writeEvent("Vuforia", "dblMidPointBotx " + dblMidPointBotx);
+                            fileLogger.writeEvent("Vuforia", "dblMidPointBoty " + dblMidPointBoty);
 
-                            fileLogger.writeEvent("Vuforia", "width in pixels "  + width);
-                            fileLogger.writeEvent("Vuforia", "height in pixels "  + height);
-                        }
-                            catch (Exception e) {
-                                //fileLogger.writeEvent("Vuforia", "OOOPS" );
+                            fileLogger.writeEvent("Vuforia", "width in pixels " + width);
+                            fileLogger.writeEvent("Vuforia", "height in pixels " + height);
+                        } catch (Exception e) {
+                            //fileLogger.writeEvent("Vuforia", "OOOPS" );
                         }
                     }
                 }
@@ -483,10 +481,11 @@ public class ConceptVuforiaOpGrabImage extends OpModeMasterLinear
             Utils.bitmapToMat(bm, tmp);
 
             frame.close();
-            Log.d("fl", "Debug Level Before" + fileLogger.getDebugLevel() );
-            Colour = JewelColour.JewelAnalysisOCV(fileLogger, tmp, loop);
-            loop++;
-
+            Log.d("fl", "Debug Level Before" + fileLogger.getDebugLevel());
+            if (!(Colour == Constants.ObjectColours.OBJECT_RED_BLUE)) {
+                Colour = JewelColour.JewelAnalysisOCV(fileLogger, tmp, loop, false, 3, true);
+                loop++;
+            }
             for (VuforiaTrackable trackable : allTrackables) {
                 /**
                  * getUpdatedRobotLocation() will return null if no new information is available since
@@ -498,7 +497,6 @@ public class ConceptVuforiaOpGrabImage extends OpModeMasterLinear
                 OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener)trackable.getListener()).getUpdatedRobotLocation();
                 if (robotLocationTransform != null) {
                     lastLocation = robotLocationTransform;
-
                 }
             }
             /**
@@ -516,10 +514,7 @@ public class ConceptVuforiaOpGrabImage extends OpModeMasterLinear
 
                 // Robot bearing (in Cartesian system) position is defined by the standard Matrix z rotation
                 robotBearing = rot.thirdAngle;
-                if (robotBearing < 0)
-                {
-                    robotBearing = 360 + robotBearing;
-                }
+                if (robotBearing < 0) robotBearing = 360 + robotBearing;
 
                 dashboard.displayCenterPrintf(1,200, "*** Vision Data***");
                 dashboard.displayPrintf(2, "Pos X " + robotX);
@@ -571,7 +566,6 @@ public class ConceptVuforiaOpGrabImage extends OpModeMasterLinear
             fileLogger.close();
             fileLogger = null;
         }
-
     }
 
     /**
@@ -581,5 +575,4 @@ public class ConceptVuforiaOpGrabImage extends OpModeMasterLinear
     String format(OpenGLMatrix transformationMatrix) {
         return transformationMatrix.formatAsTransform();
     }
-
 }
