@@ -45,11 +45,11 @@ public class FileLogger {
         setLogdEnabled(false);
     }
 
-    public FileLogger(ElapsedTime elapsedTime, int debug, boolean enabled) {
+    public FileLogger(ElapsedTime elapsedTime, int debug, boolean logdenabled) {
         open();
         this.elapsedTime = elapsedTime;
         setDebugLevel(debug);
-        setLogdEnabled(enabled);
+        setLogdEnabled(logdenabled);
     }
 
     public int getDebugLevel() {
@@ -69,8 +69,8 @@ public class FileLogger {
         return this.enableLogd;
     }
 
-    public void setLogdEnabled(boolean enabled) {
-        this.enableLogd = enabled;
+    public void setLogdEnabled(boolean logdenabled) {
+        this.enableLogd = logdenabled;
         writeEvent("SETTING:", "logd enabled? " + this.enableLogd);
 
     }

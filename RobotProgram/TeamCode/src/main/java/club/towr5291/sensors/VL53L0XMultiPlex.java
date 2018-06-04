@@ -1,12 +1,10 @@
-package club.towr5291.libraries;
+package club.towr5291.sensors;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.I2cDevice;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynchImpl;
-
-import club.towr5291.libraries.VL53L0X;
 
 /**
  * Created by ianhaden on 26/5/18.

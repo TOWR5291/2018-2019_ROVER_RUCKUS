@@ -1,12 +1,10 @@
 package club.towr5291.Concepts;
 
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import club.towr5291.functions.FileLogger;
-import club.towr5291.libraries.VL53L0X;
-import club.towr5291.libraries.VL53L0XMultiPlex;
+import club.towr5291.sensors.VL53L0XMultiPlex;
 import club.towr5291.opmodes.OpModeMasterLinear;
 
 /**

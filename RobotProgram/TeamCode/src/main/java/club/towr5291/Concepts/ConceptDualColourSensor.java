@@ -1,5 +1,6 @@
 package club.towr5291.Concepts;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -45,6 +46,7 @@ import club.towr5291.functions.MultiplexAdaFruitColorSensor;
  * Adafruit color sensors plugged into the I2C multiplexer on ports 0 and 3.
  */
 @TeleOp(name="MultiplexColorSensorTest", group="5291Concept")
+@Disabled
 public class ConceptDualColourSensor extends OpMode
 {
     MultiplexAdaFruitColorSensor muxColor;

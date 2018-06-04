@@ -9,8 +9,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import java.util.HashMap;
 
 import club.towr5291.functions.FileLogger;
-import club.towr5291.libraries.LibraryStateSegAuto;
 import club.towr5291.functions.ReadStepFile;
+import club.towr5291.libraries.LibraryStateSegAuto;
 
 
 /**
@@ -38,9 +38,9 @@ import club.towr5291.functions.ReadStepFile;
  2017-03-11 - Ian Haden - Modified to use the class to load the sequence
 ***/
 
-@TeleOp(name = "Concept Read Steps", group = "5291Concept")
+@TeleOp(name = "Concept Read Steps Rover Ruckus", group = "5291Concept")
 
-public class ConceptReadStepFile extends LinearOpMode {
+public class ConceptReadStepFileRoverRuckus extends LinearOpMode {
 
     private String teamNumber;
     private String allianceParkPosition;

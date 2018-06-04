@@ -12,7 +12,7 @@ import club.towr5291.functions.Constants;
  * Created by ianhaden on 26/5/18.
  */
 
-public class LEDControl {
+public class LEDControl5291 {
 
     private HardwareMap hardwareMap;
     private DigitalChannel greenLeftLedChannel;
@@ -47,7 +47,7 @@ public class LEDControl {
     private int flashOnVariableTime;
     private int flashOffVariableTime;
     private boolean reverseVariableTime;
-    private int maxFlashRate = 150;
+    private int maxFlashRate = 100;
     private int minFlashRate = 1500;
     private double maxFlashRateIncrease = 1.25;
     private double minFlashRateDecrease = 0.75;
@@ -56,7 +56,7 @@ public class LEDControl {
 
     private ElapsedTime mStateTime = new ElapsedTime();     // Time into current state, used for the timeout
 
-    public LEDControl(HardwareMap hardwareMapIn, String LeftGreenTag, String LeftRedTag, String LeftBlueTag, String RightGreenTag, String RightRedTag, String RightBlueTag) {
+    public LEDControl5291(HardwareMap hardwareMapIn, String LeftGreenTag, String LeftRedTag, String LeftBlueTag, String RightGreenTag, String RightRedTag, String RightBlueTag) {
         this.hardwareMap = hardwareMapIn;
         this.greenLeftLedChannel = hardwareMap.get(DigitalChannel.class, LeftGreenTag);    //  Use generic form of device mapping
         this.redLeftLedChannel = hardwareMap.get(DigitalChannel.class, LeftRedTag);    //  Use generic form of device mapping
@@ -369,88 +369,88 @@ public class LEDControl {
     private void LedStateLeft (Constants.LEDColours Colour) {
         switch (Colour) {
             case LED_WHITE:
-                if (!this.greenLeftLastState)
+                if (this.greenLeftLastState)
                     this.greenLeftLedChannel.setState(LedOn);
-                if (!this.redLeftLastState)
+                if (this.redLeftLastState)
                     this.redLeftLedChannel.setState(LedOn);
-                if (!this.blueLeftLastState)
+                if (this.blueLeftLastState)
                     this.blueLeftLedChannel.setState(LedOn);
                 this.greenLeftLastState = LedOn;
                 this.redLeftLastState = LedOn;
                 this.blueLeftLastState = LedOn;
                 break;
             case LED_RED:
-                if (this.greenLeftLastState)
+                if (!this.greenLeftLastState)
                     this.greenLeftLedChannel.setState(LedOff);
-                if (!this.redLeftLastState)
+                if (this.redLeftLastState)
                     this.redLeftLedChannel.setState(LedOn);
-                if (this.blueLeftLastState)
+                if (!this.blueLeftLastState)
                     this.blueLeftLedChannel.setState(LedOff);
                 this.greenLeftLastState = LedOff;
                 this.redLeftLastState = LedOn;
                 this.blueLeftLastState = LedOff;
                 break;
             case LED_BLUE:
-                if (this.greenLeftLastState)
+                if (!this.greenLeftLastState)
                     this.greenLeftLedChannel.setState(LedOff);
-                if (this.redLeftLastState)
+                if (!this.redLeftLastState)
                     this.redLeftLedChannel.setState(LedOff);
-                if (!this.blueLeftLastState)
+                if (this.blueLeftLastState)
                     this.blueLeftLedChannel.setState(LedOn);
                 this.greenLeftLastState = LedOff;
                 this.redLeftLastState = LedOff;
                 this.blueLeftLastState = LedOn;
                 break;
             case LED_CYAN:
-                if (!this.greenLeftLastState)
+                if (this.greenLeftLastState)
                     this.greenLeftLedChannel.setState(LedOn);
-                if (this.redLeftLastState)
+                if (!this.redLeftLastState)
                     this.redLeftLedChannel.setState(LedOff);
-                if (!this.blueLeftLastState)
+                if (this.blueLeftLastState)
                     this.blueLeftLedChannel.setState(LedOn);
                 this.greenLeftLastState = LedOn;
                 this.redLeftLastState = LedOff;
                 this.blueLeftLastState = LedOn;
                 break;
             case LED_GREEN:
-                if (!this.greenLeftLastState)
+                if (this.greenLeftLastState)
                     this.greenLeftLedChannel.setState(LedOn);
-                if (this.redLeftLastState)
+                if (!this.redLeftLastState)
                     this.redLeftLedChannel.setState(LedOff);
-                if (this.blueLeftLastState)
+                if (!this.blueLeftLastState)
                     this.blueLeftLedChannel.setState(LedOff);
                 this.greenLeftLastState = LedOn;
                 this.redLeftLastState = LedOff;
                 this.blueLeftLastState = LedOff;
                 break;
             case LED_MAGENTA:
-                if (this.greenLeftLastState)
+                if (!this.greenLeftLastState)
                     this.greenLeftLedChannel.setState(LedOff);
-                if (!this.redLeftLastState)
+                if (this.redLeftLastState)
                     this.redLeftLedChannel.setState(LedOn);
-                if (!this.blueLeftLastState)
+                if (this.blueLeftLastState)
                     this.blueLeftLedChannel.setState(LedOn);
                 this.greenLeftLastState = LedOff;
                 this.redLeftLastState = LedOn;
                 this.blueLeftLastState = LedOn;
                 break;
             case LED_YELLOW:
-                if (!this.greenLeftLastState)
+                if (this.greenLeftLastState)
                     this.greenLeftLedChannel.setState(LedOn);
-                if (!this.redLeftLastState)
+                if (this.redLeftLastState)
                     this.redLeftLedChannel.setState(LedOn);
-                if (this.blueLeftLastState)
+                if (!this.blueLeftLastState)
                     this.blueLeftLedChannel.setState(LedOff);
                 this.greenLeftLastState = LedOn;
                 this.redLeftLastState = LedOn;
                 this.blueLeftLastState = LedOff;
                 break;
             case LED_OFF:
-                if (this.greenLeftLastState)
+                if (!this.greenLeftLastState)
                     this.greenLeftLedChannel.setState(LedOff);
-                if (this.redLeftLastState)
+                if (!this.redLeftLastState)
                     this.redLeftLedChannel.setState(LedOff);
-                if (this.blueLeftLastState)
+                if (!this.blueLeftLastState)
                     this.blueLeftLedChannel.setState(LedOff);
                 this.greenLeftLastState = LedOff;
                 this.redLeftLastState = LedOff;
@@ -464,44 +464,44 @@ public class LEDControl {
     private void LedStateRight (Constants.LEDColours Colour) {
         switch (Colour) {
             case LED_WHITE:
-                if (!this.greenRightLastState)
+                if (this.greenRightLastState)
                     this.greenRightLedChannel.setState(LedOn);
-                if (!this.redRightLastState)
+                if (this.redRightLastState)
                     this.redRightLedChannel.setState(LedOn);
-                if (!this.blueRightLastState)
+                if (this.blueRightLastState)
                     this.blueRightLedChannel.setState(LedOn);
                 this.greenRightLastState = LedOn;
                 this.redRightLastState = LedOn;
                 this.blueRightLastState = LedOn;
                 break;
             case LED_RED:
-                if (this.greenRightLastState)
+                if (!this.greenRightLastState)
                     this.greenRightLedChannel.setState(LedOff);
-                if (!this.redRightLastState)
+                if (this.redRightLastState)
                     this.redRightLedChannel.setState(LedOn);
-                if (this.blueRightLastState)
+                if (!this.blueRightLastState)
                     this.blueRightLedChannel.setState(LedOff);
                 this.greenRightLastState = LedOff;
                 this.redRightLastState = LedOn;
                 this.blueRightLastState = LedOff;
                 break;
             case LED_BLUE:
-                if (this.greenRightLastState)
+                if (!this.greenRightLastState)
                     this.greenRightLedChannel.setState(LedOff);
-                if (this.redRightLastState)
+                if (!this.redRightLastState)
                     this.redRightLedChannel.setState(LedOff);
-                if (!this.blueRightLastState)
+                if (this.blueRightLastState)
                     this.blueRightLedChannel.setState(LedOn);
                 this.greenRightLastState = LedOff;
                 this.redRightLastState = LedOff;
                 this.blueRightLastState = LedOn;
                 break;
             case LED_CYAN:
-                if (!this.greenRightLastState)
+                if (this.greenRightLastState)
                     this.greenRightLedChannel.setState(LedOn);
-                if (this.redRightLastState)
+                if (!this.redRightLastState)
                     this.redRightLedChannel.setState(LedOff);
-                if (!this.blueRightLastState)
+                if (this.blueRightLastState)
                     this.blueRightLedChannel.setState(LedOn);
                 this.greenRightLedChannel.setState(LedOn);
                 this.redRightLedChannel.setState(LedOff);
@@ -511,44 +511,44 @@ public class LEDControl {
                 this.blueRightLastState = LedOn;
                 break;
             case LED_GREEN:
-                if (!this.greenRightLastState)
+                if (this.greenRightLastState)
                     this.greenRightLedChannel.setState(LedOn);
-                if (this.redRightLastState)
+                if (!this.redRightLastState)
                     this.redRightLedChannel.setState(LedOff);
-                if (this.blueRightLastState)
+                if (!this.blueRightLastState)
                     this.blueRightLedChannel.setState(LedOff);
                 this.greenRightLastState = LedOn;
                 this.redRightLastState = LedOff;
                 this.blueRightLastState = LedOff;
                 break;
             case LED_MAGENTA:
-                if (this.greenRightLastState)
+                if (!this.greenRightLastState)
                     this.greenRightLedChannel.setState(LedOff);
-                if (!this.redRightLastState)
+                if (this.redRightLastState)
                     this.redRightLedChannel.setState(LedOn);
-                if (!this.blueRightLastState)
+                if (this.blueRightLastState)
                     this.blueRightLedChannel.setState(LedOn);
                 this.greenRightLastState = LedOff;
                 this.redRightLastState = LedOn;
                 this.blueRightLastState = LedOn;
                 break;
             case LED_YELLOW:
-                if (!this.greenRightLastState)
+                if (this.greenRightLastState)
                     this.greenRightLedChannel.setState(LedOn);
-                if (!this.redRightLastState)
+                if (this.redRightLastState)
                     this.redRightLedChannel.setState(LedOn);
-                if (this.blueRightLastState)
+                if (!this.blueRightLastState)
                     this.blueRightLedChannel.setState(LedOff);
                 this.greenRightLastState = LedOn;
                 this.redRightLastState = LedOn;
                 this.blueRightLastState = LedOff;
                 break;
             case LED_OFF:
-                if (this.greenRightLastState)
+                if (!this.greenRightLastState)
                     this.greenRightLedChannel.setState(LedOff);
-                if (this.redRightLastState)
+                if (!this.redRightLastState)
                     this.redRightLedChannel.setState(LedOff);
-                if (this.blueRightLastState)
+                if (!this.blueRightLastState)
                     this.blueRightLedChannel.setState(LedOff);
                 this.greenRightLastState = LedOff;
                 this.redRightLastState = LedOff;
@@ -573,11 +573,11 @@ public class LEDControl {
         while (b2 != this.blueRightLedChannel.getState())
             this.blueRightLedChannel.setState(b2);
 
-        this.greenLeftLastState = g1;
-        this.redLeftLastState = r1;
-        this.blueLeftLastState = b1;
+        this.greenLeftLastState  = g1;
+        this.redLeftLastState    = r1;
+        this.blueLeftLastState   = b1;
         this.greenRightLastState = g2;
-        this.redRightLastState = r2;
-        this.blueRightLastState = b2;
+        this.redRightLastState   = r2;
+        this.blueRightLastState  = b2;
     }
 }

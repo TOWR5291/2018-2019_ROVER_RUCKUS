@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.exception.RobotCoreException;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import club.towr5291.functions.FileLogger;
-import club.towr5291.libraries.LibraryAdafruitIMU;
+import club.towr5291.sensors.Adafruit_BNO055_Custom;
 
 /**
  * Created by Owner on 8/31/2015.
@@ -19,7 +19,7 @@ public class ConceptAdafruitIMUAndrew extends OpMode {
 
     private ElapsedTime runtime = new ElapsedTime();
     private FileLogger fileLogger;
-    LibraryAdafruitIMU adafruitBNO055;
+    Adafruit_BNO055_Custom adafruitBNO055;
 
     //The following arrays contain both the Euler angles reported by the IMU (indices = 0) AND the
     // Tait-Bryan angles calculated from the 4 components of the quaternion vector (indices = 1)
@@ -43,14 +43,14 @@ public class ConceptAdafruitIMUAndrew extends OpMode {
 
         systemTime = System.nanoTime();
         try {
-            adafruitBNO055 = new LibraryAdafruitIMU(hardwareMap, "bno055"
+            adafruitBNO055 = new Adafruit_BNO055_Custom(hardwareMap, "bno055"
 
                     //The following was required when the definition of the "I2cDevice" class was incomplete.
                     //, "cdim", 5
 
-                    , (byte)(LibraryAdafruitIMU.BNO055_ADDRESS_A * 2)//By convention the FTC SDK always does 8-bit I2C bus
+                    , (byte)(Adafruit_BNO055_Custom.BNO055_ADDRESS_A * 2)//By convention the FTC SDK always does 8-bit I2C bus
                     //addressing
-                    , (byte)LibraryAdafruitIMU.OPERATION_MODE_IMU);
+                    , (byte) Adafruit_BNO055_Custom.OPERATION_MODE_IMU);
         } catch (RobotCoreException e){
             fileLogger.writeEvent("FtcRobotController", "Exception: " + e.getMessage());
         }

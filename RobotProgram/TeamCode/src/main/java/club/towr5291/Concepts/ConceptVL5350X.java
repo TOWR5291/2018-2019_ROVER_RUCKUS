@@ -4,10 +4,8 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-
 import club.towr5291.functions.FileLogger;
-import club.towr5291.libraries.VL53L0X;
+import club.towr5291.sensors.VL53L0X;
 
 /**
  * Created by Ian Haden on 5/24/2018.

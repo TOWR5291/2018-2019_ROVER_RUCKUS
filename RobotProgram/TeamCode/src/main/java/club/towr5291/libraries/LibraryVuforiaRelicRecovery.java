@@ -48,7 +48,7 @@ public class LibraryVuforiaRelicRecovery {
         return this.allTrackables;
     }
 
-    public VuforiaTrackables LibraryVuforiaRelicRecovery(HardwareMap hardwareMap, String teamNumber, String allianceColor, String allianceStartPosition) {
+    public VuforiaTrackables LibraryVuforiaRelicRecovery(HardwareMap hardwareMap, robotConfig robotConfiguration) {
         //load all the vuforia stuff
 
         /*
@@ -60,7 +60,7 @@ public class LibraryVuforiaRelicRecovery {
         // OR...  Do Not Activate the Camera Monitor View, to save power
         // VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
 
-        switch (teamNumber) {
+        switch (robotConfiguration.getTeamNumber()) {
             case "5291":
                 parameters.vuforiaLicenseKey = "AVATY7T/////AAAAGQJxfNYzLUgGjSx0aOEU0Q0rpcfZO2h2sY1MhUZUr+Bu6RgoUMUP/nERGmD87ybv1/lM2LBFDxcBGRHkXvxtkHel4XEUCsNHFTGWYcVkMIZqctQsIrTe13MnUvSOfQj8ig7xw3iULcwDpY+xAftW61dKTJ0IAOCxx2F0QjJWqRJBxrEUR/DfQi4LyrgnciNMXCiZ8KFyBdC63XMYkQj2joTN579+2u5f8aSCe8jkAFnBLcB1slyaU9lhnlTEMcFjwrLBcWoYIFAZluvFT0LpqZRlS1/XYf45QBSJztFKHIsj1rbCgotAE36novnAQBs74ewnWsJifokJGOYWdFJveWzn3GE9OEH23Y5l7kFDu4wc";
                 break;
@@ -189,22 +189,22 @@ public class LibraryVuforiaRelicRecovery {
         Point3 phonePoint = new Point3(0, 0, 200);
         Point3 phoneAngle = new Point3(-90, 0, 0);
 
-        if ((allianceColor.equalsIgnoreCase("red")) && (allianceStartPosition.equalsIgnoreCase("left"))) {
+        if ((robotConfiguration.getAllianceColor().equalsIgnoreCase("red")) && (robotConfiguration.getAllianceStartPosition().equalsIgnoreCase("left"))) {
             targetPoint = Red1Coord;
             targetAngle = Red1Angle;
             phonePoint = Red1PhoneCoord;
             phoneAngle = Red1PhoneAngle;
-        } else if ((allianceColor.equalsIgnoreCase("red")) && (allianceStartPosition.equalsIgnoreCase("right"))) {
+        } else if ((robotConfiguration.getAllianceColor().equalsIgnoreCase("red")) && (robotConfiguration.getAllianceStartPosition().equalsIgnoreCase("right"))) {
             targetPoint = Red2Coord;
             targetAngle = Red2Angle;
             phonePoint = Red2PhoneCoord;
             phoneAngle = Red2PhoneAngle;
-        } else if ((allianceColor.equalsIgnoreCase("blue")) && (allianceStartPosition.equalsIgnoreCase("left"))) {
+        } else if ((robotConfiguration.getAllianceColor().equalsIgnoreCase("blue")) && (robotConfiguration.getAllianceStartPosition().equalsIgnoreCase("left"))) {
             targetPoint = Blue1Coord;
             targetAngle = Blue1Angle;
             phonePoint = Blue1PhoneCoord;
             phoneAngle = Blue1PhoneAngle;
-        } else if ((allianceColor.equalsIgnoreCase("blue")) && (allianceStartPosition.equalsIgnoreCase("right"))) {
+        } else if ((robotConfiguration.getAllianceColor().equalsIgnoreCase("blue")) && (robotConfiguration.getAllianceStartPosition().equalsIgnoreCase("right"))) {
             targetPoint = Blue2Coord;
             targetAngle = Blue2Angle;
             phonePoint = Blue2PhoneCoord;

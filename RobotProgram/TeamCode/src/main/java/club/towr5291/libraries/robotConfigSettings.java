@@ -13,7 +13,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 public class robotConfigSettings
 {
-
     public enum motors {
         leftMotor1 ("leftmotor1", 1),
         leftMotor2 ("leftmotor2", 2),

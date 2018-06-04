@@ -4,11 +4,16 @@ package club.towr5291.functions;
  * Created by LZTDD0 on 11/7/2016.
  */
 
+
 public abstract class Constants {
     //BEACON
-    public static final double BEACON_WIDTH = 21.8;     //entire beacon width
-    public static final double BEACON_HEIGHT = 14.5;    //entire beacon height
-    public static final double BEACON_WH_RATIO = BEACON_WIDTH / BEACON_HEIGHT; //entire beacon ratio
+    private static final double BEACON_WIDTH = 21.8;     //entire beacon width
+    private static final double BEACON_HEIGHT = 14.5;    //entire beacon height
+    private static final double BEACON_WH_RATIO = BEACON_WIDTH / BEACON_HEIGHT; //entire beacon ratio
+
+
+
+
 
     public enum stepState {
         STATE_INIT,
@@ -30,7 +35,6 @@ public abstract class Constants {
         LED_MAGENTA,  //red and blue on
         LED_YELLOW,  //green and red on
         LED_OFF
-
     }
 
     public enum LEDState {

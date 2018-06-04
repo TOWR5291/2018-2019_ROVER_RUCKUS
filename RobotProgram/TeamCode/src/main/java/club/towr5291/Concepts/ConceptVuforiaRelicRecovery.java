@@ -13,6 +13,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefau
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 
 import club.towr5291.libraries.LibraryVuforiaRelicRecovery;
+import club.towr5291.libraries.robotConfig;
 import club.towr5291.opmodes.OpModeMasterLinear;
 
 
@@ -23,13 +24,17 @@ import club.towr5291.opmodes.OpModeMasterLinear;
 public class ConceptVuforiaRelicRecovery  extends OpModeMasterLinear {
 
 
+    private robotConfig ourRobotConfig;
 
     @Override
     public void runOpMode() throws InterruptedException {
+        ourRobotConfig.setAllianceColor("Red");
+        ourRobotConfig.setTeamNumber("5291");
+        ourRobotConfig.setAllianceStartPosition("Left");
 
         LibraryVuforiaRelicRecovery test = new LibraryVuforiaRelicRecovery();
         VuforiaTrackables RelicRecovery;
-        RelicRecovery = test.LibraryVuforiaRelicRecovery(hardwareMap, "5291", "Red", "Left");
+        RelicRecovery = test.LibraryVuforiaRelicRecovery(hardwareMap, ourRobotConfig);
 
         //activate vuforia
         RelicRecovery.activate();

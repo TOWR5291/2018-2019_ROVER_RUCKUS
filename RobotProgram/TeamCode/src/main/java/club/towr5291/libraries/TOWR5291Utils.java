@@ -25,7 +25,7 @@ package club.towr5291.libraries;
  * Created by lztdd0 on 11/4/17.
  */
 
-public class towrUtils {
+public class TOWR5291Utils {
 
     /**
      * This method clips the given value to the range limited by the given low and high limits.
@@ -96,6 +96,26 @@ public class towrUtils {
         return lowDstRange + (value - lowSrcRange)*(highDstRange - lowDstRange)/(highSrcRange - lowSrcRange);
     }   //scaleRange
 
+    /**
+     * This method returns the change in direction required based on a desired heading and actual heading.
+     *
+     * @param currentHeading specifies current heading.
+     * @param desiredHeading specifies desired heading.
+     * @return the result of the scaled value.
+     */
+    public static int getNewHeading(int currentHeading, int desiredHeading) {
+        int intNewAngle;
 
+        if ((currentHeading + 180) < desiredHeading) {
+            intNewAngle = desiredHeading - currentHeading - 360;
+        } else {
+            intNewAngle = desiredHeading - currentHeading;
+        }
 
+        if (Math.abs(intNewAngle) > 180) {
+            return desiredHeading + 360 - currentHeading;
+        } else {
+            return intNewAngle;
+        }
+    }
 }

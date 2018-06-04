@@ -1,9 +1,8 @@
-package club.towr5291.libraries;
+package club.towr5291.sensors;
 
 import android.util.Log;
 
 import com.qualcomm.robotcore.exception.RobotCoreException;
-import com.qualcomm.robotcore.hardware.DeviceInterfaceModule;
 import com.qualcomm.robotcore.hardware.HardwareDevice;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.I2cAddr;
@@ -55,7 +54,7 @@ import java.util.concurrent.locks.Lock;
  *
  */
 
-public class LibraryAdafruitIMU implements HardwareDevice, I2cController.I2cPortReadyCallback{
+public class Adafruit_BNO055_Custom implements HardwareDevice, I2cController.I2cPortReadyCallback{
     public static final int BNO055_ADDRESS_A = 0x28;//From Adafruit_BNO055.h
     public static final int BNO055_ADDRESS_B = 0x29;
     public static final int BNO055_ID        = 0xA0;
@@ -280,9 +279,9 @@ public class LibraryAdafruitIMU implements HardwareDevice, I2cController.I2cPort
     */
 
     //The Constructor for the AdafruitIMU class
-    public LibraryAdafruitIMU(HardwareMap currentHWmap, String configuredIMUname,
-                              //String configuredInterfaceName, int configuredPort,
-                              byte baseAddress, byte operMode) throws RobotCoreException{
+    public Adafruit_BNO055_Custom(HardwareMap currentHWmap, String configuredIMUname,
+                                  //String configuredInterfaceName, int configuredPort,
+                                  byte baseAddress, byte operMode) throws RobotCoreException{
         boolean okSoFar = true;
         long calibrationStartTime = 0L;
         byte[] outboundBytes = new byte[i2cBufferSize];

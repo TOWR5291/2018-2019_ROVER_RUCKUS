@@ -1,6 +1,7 @@
 package club.towr5291.Concepts;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import android.content.SharedPreferences;
@@ -11,7 +12,7 @@ import android.util.Log;
  * Created by ianhaden on 30/10/2016.
  */
 @Autonomous(name="Concept: Autonomous Menu", group="5291Concept")
-//@Disabled
+@Disabled
 public class ConceptAutonomousOptions extends LinearOpMode{
 
     SharedPreferences sharedPreferences;

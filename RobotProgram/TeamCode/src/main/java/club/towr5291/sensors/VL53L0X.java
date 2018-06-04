@@ -1,4 +1,4 @@
-package club.towr5291.libraries;
+package club.towr5291.sensors;
 
 //import android.util.Log;
 
