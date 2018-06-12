@@ -83,7 +83,7 @@ import club.towr5291.functions.JewelAnalysisOCV;
 import club.towr5291.functions.ReadStepFileRoverRuckus;
 import club.towr5291.libraries.LibraryStateSegAutoRoverRuckus;
 import club.towr5291.libraries.robotConfig;
-import club.towr5291.libraries.LEDControl5291;
+import club.towr5291.libraries.TOWR5291LEDControl;
 import club.towr5291.libraries.LibraryVuforiaRelicRecovery;
 import club.towr5291.libraries.robotConfigSettings;
 import club.towr5291.libraries.TOWR5291Utils;
@@ -326,7 +326,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
     private final static double SERVORELICGRIP_HOME             = 90;   //Closed is position 90
 
     //LED Strips
-    private LEDControl5291 LEDs;
+    private TOWR5291LEDControl LEDs;
     private Constants.LEDState mint5291LEDStatus;                                                   // Flash the LED based on the status
 
     //Limit Switches
@@ -427,7 +427,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         dashboard.displayPrintf(1, "initRobot SharePreferences!");
 
         // Set up the LEDS
-        LEDs = new LEDControl5291(hardwareMap, "lg", "lr", "lb", "rg", "rr", "rb");
+        LEDs = new TOWR5291LEDControl(hardwareMap, "lg", "lr", "lb", "rg", "rr", "rb");
         LEDs.setLEDControlDemoMode(false);
         LEDs.setLEDColour(Constants.LEDColours.LED_MAGENTA);
 

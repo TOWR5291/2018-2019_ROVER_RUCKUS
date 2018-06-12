@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import club.towr5291.functions.Constants;
 import club.towr5291.functions.FileLogger;
-import club.towr5291.libraries.LEDControl5291;
+import club.towr5291.libraries.TOWR5291LEDControl;
 import club.towr5291.opmodes.OpModeMasterLinear;
 
 /**
@@ -21,7 +21,7 @@ public class ConceptLEDs extends OpModeMasterLinear {
     private FileLogger fileLogger;
     private int debug = 3;
     private int loop = 0;
-    private LEDControl5291 LEDs;
+    private TOWR5291LEDControl LEDs;
     private Constants.LEDState LEDStatus = Constants.LEDState.STATE_NULL;
 
 
@@ -31,7 +31,7 @@ public class ConceptLEDs extends OpModeMasterLinear {
         fileLogger.open();
         fileLogger.write("Time,SysMS,Thread,Event,Desc");
         fileLogger.writeEvent(1,TAG, "Log Started");
-        LEDs = new LEDControl5291(hardwareMap, "lg", "lr", "lb", "rg", "rr", "rb");
+        LEDs = new TOWR5291LEDControl(hardwareMap, "lg", "lr", "lb", "rg", "rr", "rb");
         //LEDs.setLEDControlDemoMode(true);
         //LEDs.setLEDControlObjectColour(Constants.ObjectColours.UNKNOWN);
         //LEDs.setLEDControlAlliance("Red");

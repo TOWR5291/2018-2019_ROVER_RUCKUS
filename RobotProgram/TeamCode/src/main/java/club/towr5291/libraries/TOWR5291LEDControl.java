@@ -12,7 +12,7 @@ import club.towr5291.functions.Constants;
  * Created by ianhaden on 26/5/18.
  */
 
-public class LEDControl5291 {
+public class TOWR5291LEDControl {
 
     private HardwareMap hardwareMap;
     private DigitalChannel greenLeftLedChannel;
@@ -56,7 +56,7 @@ public class LEDControl5291 {
 
     private ElapsedTime mStateTime = new ElapsedTime();     // Time into current state, used for the timeout
 
-    public LEDControl5291(HardwareMap hardwareMapIn, String LeftGreenTag, String LeftRedTag, String LeftBlueTag, String RightGreenTag, String RightRedTag, String RightBlueTag) {
+    public TOWR5291LEDControl(HardwareMap hardwareMapIn, String LeftGreenTag, String LeftRedTag, String LeftBlueTag, String RightGreenTag, String RightRedTag, String RightBlueTag) {
         this.hardwareMap = hardwareMapIn;
         this.greenLeftLedChannel = hardwareMap.get(DigitalChannel.class, LeftGreenTag);    //  Use generic form of device mapping
         this.redLeftLedChannel = hardwareMap.get(DigitalChannel.class, LeftRedTag);    //  Use generic form of device mapping
