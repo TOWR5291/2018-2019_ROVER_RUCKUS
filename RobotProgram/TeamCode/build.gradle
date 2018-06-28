@@ -12,7 +12,7 @@
 apply from: '../build.common.gradle'
 dependencies {
     compile project(':Ftc3543Lib')
-    compile project(':openCVLibrary330')
+    compile project(':openCVLibrary341')
 }
 android {
     buildToolsVersion '26.0.2'

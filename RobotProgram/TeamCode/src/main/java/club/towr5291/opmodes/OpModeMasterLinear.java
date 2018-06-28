@@ -60,7 +60,7 @@ public abstract class OpModeMasterLinear extends LinearOpMode {
         if (!OpenCVLoader.initDebug())
         {
             RobotLog.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
-            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_3_0, hardwareMap.appContext,  mLoaderCallback);
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION, hardwareMap.appContext,  mLoaderCallback);
             initialized = false;
         } else
         {
