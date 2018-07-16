@@ -14,6 +14,7 @@ Support is available by emailing support@modernroboticsinc.com.
 
 package club.towr5291.Concepts;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.I2cAddr;
@@ -25,6 +26,7 @@ import club.towr5291.functions.FileLogger;
 import club.towr5291.sensors.MRRangeSensor;
 
 @TeleOp(name = "Concept Range Sensor Custom", group = "5291Concept")
+@Disabled
 public class ConceptMRIRangeSensor5291Library extends OpMode {
     private MRRangeSensor rangeSensor1;
     private MRRangeSensor rangeSensor2;

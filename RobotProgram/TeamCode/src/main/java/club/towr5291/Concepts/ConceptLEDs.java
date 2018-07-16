@@ -1,5 +1,6 @@
 package club.towr5291.Concepts;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -13,6 +14,7 @@ import club.towr5291.opmodes.OpModeMasterLinear;
  */
 
 @TeleOp(name = "Concept LEDs", group = "5291Concept")
+//@Disabled
 public class ConceptLEDs extends OpModeMasterLinear {
 
     //set up the variables for the logger

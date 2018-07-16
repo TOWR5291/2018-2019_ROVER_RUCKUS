@@ -1,6 +1,7 @@
 package club.towr5291.Concepts;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -13,6 +14,7 @@ import club.towr5291.opmodes.OpModeMasterLinear;
  * Created by ianhaden on 1/6/18.
  */
 @Autonomous(name="Auton to Teleop", group="Concept")
+@Disabled
 public class ConceptAutonTOTeleop extends OpModeMasterLinear {
 
     private OpMode onStop = this;

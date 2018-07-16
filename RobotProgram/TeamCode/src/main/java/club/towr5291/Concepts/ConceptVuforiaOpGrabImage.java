@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.vuforia.CameraCalibration;
@@ -79,6 +80,7 @@ import static org.opencv.imgproc.Imgproc.contourArea;
  */
 
 @Autonomous(name="Concept Vuforia Grab Image", group="5291Test")
+@Disabled
 public class ConceptVuforiaOpGrabImage extends OpModeMasterLinear
 {
     //set up TAG for logging prefic, this info will appear first in every log statemend

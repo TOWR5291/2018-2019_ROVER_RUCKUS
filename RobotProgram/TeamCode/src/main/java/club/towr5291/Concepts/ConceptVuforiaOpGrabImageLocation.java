@@ -1,6 +1,7 @@
 package club.towr5291.Concepts;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.vuforia.HINT;
 import com.vuforia.Matrix34F;
@@ -33,6 +34,7 @@ import club.towr5291.R;
  */
 
 @Autonomous(name="Concept Vuforia Grab Image Location", group="5291Test")
+@Disabled
 public class ConceptVuforiaOpGrabImageLocation extends LinearOpMode{
     OpenGLMatrix lastLocation = null;
     private double robotX;

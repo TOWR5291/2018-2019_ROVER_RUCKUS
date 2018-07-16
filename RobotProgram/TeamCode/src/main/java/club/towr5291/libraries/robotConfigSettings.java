@@ -92,6 +92,7 @@ public class robotConfigSettings
         TileRunner2x40 ("TileRunner-2x40"),
         TileRunner2x60 ("TileRunner-2x60"),
         TileRunnerMecanum2x40 ("TileRunnerMecanum2x40"),
+        TileRunnerMecanum2x20 ("TileRunnerMecanum2x20"),
         TankTread2x40Custom ("5291 Tank Tread-2x40 Custom"),
         Custom_11231_2016 ("11231 2016 Custom");
 

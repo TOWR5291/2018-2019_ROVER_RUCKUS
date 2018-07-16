@@ -91,7 +91,8 @@ public class HalDashboard
         telemetry.setAutoClear(false);
         for (int i = 0; i < display.length; i++)
         {
-            display[i] = telemetry.addData(String.format(Locale.US, displayKeyFormat, i), "");
+            //display[i] = telemetry.addData(String.format(Locale.US, displayKeyFormat, i), "");
+            display[i] = telemetry.addData("","");
         }
         telemetry.update();
     }   //HalDashboard
@@ -136,6 +137,7 @@ public class HalDashboard
                 text = rightJustified? rightJustifiedText(fieldWidth, text): centeredText(fieldWidth, text);
             }
             display[lineNum].setValue(text);
+
             telemetry.update();
         }
     }   //displayText

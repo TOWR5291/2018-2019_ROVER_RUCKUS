@@ -2,6 +2,7 @@ package club.towr5291.Concepts;
 
 import android.util.Log;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -39,6 +40,7 @@ import club.towr5291.functions.ReadStepFile;
 ***/
 
 @TeleOp(name = "Concept Read Steps Relic Recovery", group = "5291Concept")
+@Disabled
 
 public class ConceptReadStepFileRelicRecovery extends LinearOpMode {
 

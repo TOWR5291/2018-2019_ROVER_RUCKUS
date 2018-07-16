@@ -1,6 +1,7 @@
 package club.towr5291.Concepts;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -44,7 +45,7 @@ import club.towr5291.libraries.LibraryStateSegAutoOld;
  */
 
 @Autonomous(name="Concept: A Star Path Finder", group="5291Concept")
-//@Disabled
+@Disabled
 public class ConceptAStarPathFinder extends OpMode {
 
 

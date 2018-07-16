@@ -58,7 +58,7 @@ import com.qualcomm.robotcore.hardware.DigitalChannelController;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
 */
 @TeleOp(name = "Sensor: Analog Inputs", group = "5291Concept")
-//@Disabled
+@Disabled
 public class ConceptSensorAnalogInput extends LinearOpMode {
 
   @Override

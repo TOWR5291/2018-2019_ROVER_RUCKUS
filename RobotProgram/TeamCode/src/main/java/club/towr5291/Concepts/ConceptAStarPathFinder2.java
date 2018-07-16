@@ -3,6 +3,7 @@ package club.towr5291.Concepts;
 import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -44,7 +45,7 @@ import club.towr5291.functions.FileLogger;
  */
 
 @Autonomous(name="Concept: A Star Path Finder 2", group="5291Concept")
-//@Disabled
+@Disabled
 public class ConceptAStarPathFinder2 extends OpMode {
 
 

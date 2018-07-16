@@ -1,4 +1,4 @@
-package club.towr5291.libraries;
+package club.towr5291.functions;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -22,6 +22,14 @@ public class TOWR5291PID {
         this.ProportionGain = pGain;
         this.IntergralGain = iGain;
         this.DerivativeGain = dGain;
+    }
+
+    public TOWR5291PID (){
+        this.PIDPreviousTime = 0;
+        this.PIDPreviousDifference = 0;
+        this.ProportionGain = 0;
+        this.IntergralGain = 0;
+        this.DerivativeGain = 0;
     }
 
     public double PIDCorrection (ElapsedTime PIDcurrentTime, double ActualValue, double DesiredValue) {

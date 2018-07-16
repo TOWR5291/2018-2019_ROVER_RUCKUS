@@ -54,7 +54,7 @@ import club.towr5291.robotconfig.HardwareDriveMotors;
  */
 
 @TeleOp(name = "Concept: Robot Tests", group = "Sensor")
-//@Disabled
+@Disabled
 public class ConceptRobotBasicTests extends LinearOpMode {
      /*
      * The REV Robotics Touch Sensor

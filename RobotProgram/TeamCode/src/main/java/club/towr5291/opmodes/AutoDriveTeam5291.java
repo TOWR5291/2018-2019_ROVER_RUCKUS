@@ -43,6 +43,7 @@ import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -141,6 +142,7 @@ Written by Ian Haden October 2016
 2017-03-19 - Ian Haden - Updated Beacon Viewing Area (Crop whole picture to just beacon)
 */
 @Autonomous(name="5291 Autonomous Drive", group="5291")
+@Disabled
 public class AutoDriveTeam5291 extends OpModeMasterLinear {
     final int LABEL_WIDTH = 200;
 

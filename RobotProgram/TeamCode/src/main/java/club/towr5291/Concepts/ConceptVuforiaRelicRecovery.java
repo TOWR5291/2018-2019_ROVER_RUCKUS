@@ -1,6 +1,7 @@
 package club.towr5291.Concepts;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
@@ -21,6 +22,7 @@ import club.towr5291.opmodes.OpModeMasterLinear;
  * Created by ianhaden on 1/6/18.
  */
 @Autonomous(name="Concept Vuforia Relic Recovery", group="Cocept")
+@Disabled
 public class ConceptVuforiaRelicRecovery  extends OpModeMasterLinear {
 
 

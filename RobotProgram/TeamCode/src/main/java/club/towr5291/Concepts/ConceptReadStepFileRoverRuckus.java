@@ -2,6 +2,7 @@ package club.towr5291.Concepts;
 
 import android.util.Log;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -39,7 +40,7 @@ import club.towr5291.libraries.LibraryStateSegAuto;
 ***/
 
 @TeleOp(name = "Concept Read Steps Rover Ruckus", group = "5291Concept")
-
+@Disabled
 public class ConceptReadStepFileRoverRuckus extends LinearOpMode {
 
     private String teamNumber;

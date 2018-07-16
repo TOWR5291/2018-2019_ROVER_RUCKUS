@@ -1,5 +1,6 @@
 package club.towr5291.Concepts;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -12,6 +13,7 @@ import club.towr5291.sensors.VL53L0X;
  */
 
 @TeleOp(name = "Concept VL5350X", group = "5291Concept")
+@Disabled
 public class ConceptVL5350X extends OpMode {
 
     //set up the variables for the logger

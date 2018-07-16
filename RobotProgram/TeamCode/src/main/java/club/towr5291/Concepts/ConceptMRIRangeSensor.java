@@ -23,6 +23,7 @@ import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynchImpl;
 
 @TeleOp(name = "Concept Range Sensor", group = "5291Concept")
+@Disabled
 public class ConceptMRIRangeSensor extends OpMode {
 
     byte[] range1Cache; //The read will return an array of bytes. They are stored in this variable

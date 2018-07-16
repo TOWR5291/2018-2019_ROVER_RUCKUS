@@ -17,6 +17,7 @@ package club.towr5291.Concepts;
 import android.content.Context;
 import android.os.AsyncTask;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.I2cAddr;
@@ -30,6 +31,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 // Based of the single MR Range Sensor Code
 
 @TeleOp(name = "Concept Range Sensor Dual Async", group = "5291Concept")
+@Disabled
 public class ConceptMRIRangeSensorDualAsync extends OpMode {
 
     //set up range sensor1

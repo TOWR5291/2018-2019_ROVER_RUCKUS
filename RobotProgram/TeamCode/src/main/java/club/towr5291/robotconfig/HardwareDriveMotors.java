@@ -1,6 +1,7 @@
 package club.towr5291.robotconfig;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -30,6 +31,7 @@ public class HardwareDriveMotors
     HardwareMap hwMap            = null;
     private ElapsedTime period   = new ElapsedTime();
 
+    private double mMotorMaxSpeed = 1;
     private boolean gyroAssistEnabled = false;
 
     //set up the variables for the logger
@@ -120,15 +122,27 @@ public class HardwareDriveMotors
             case TileRunner2x40:
             case TileRunner2x60:
                 if (baseMotor1 != null)
-                    baseMotor1.setDirection(DcMotor.Direction.FORWARD);
+                    baseMotor1.setDirection(DcMotor.Direction.REVERSE);
                 if (baseMotor2 != null)
                     baseMotor2.setDirection(DcMotor.Direction.REVERSE);
                 if (baseMotor3 != null)
                     baseMotor3.setDirection(DcMotor.Direction.FORWARD);
                 if (baseMotor4 != null)
-                    baseMotor4.setDirection(DcMotor.Direction.REVERSE);
+                    baseMotor4.setDirection(DcMotor.Direction.FORWARD);
                 break;
             case TileRunnerMecanum2x40:
+                //TOWR5291 Tilrunner has 2 motors running from belts to the wheel, 2 motors running on gears
+                if (baseMotor1 != null)
+                    baseMotor1.setDirection(DcMotor.Direction.FORWARD);
+                if (baseMotor2 != null)
+                    baseMotor2.setDirection(DcMotor.Direction.REVERSE);
+                if (baseMotor3 != null)
+                    baseMotor3.setDirection(DcMotor.Direction.REVERSE);
+                if (baseMotor4 != null)
+                    baseMotor4.setDirection(DcMotor.Direction.FORWARD);
+                break;
+            case TileRunnerMecanum2x20:
+                //TOWR5291 Tilrunner has 2 motors running from belts to the wheel, 2 motors running on gears
                 if (baseMotor1 != null)
                     baseMotor1.setDirection(DcMotor.Direction.FORWARD);
                 if (baseMotor2 != null)
@@ -142,7 +156,7 @@ public class HardwareDriveMotors
                 if (baseMotor1 != null)
                     baseMotor1.setDirection(DcMotor.Direction.FORWARD);
                 if (baseMotor2 != null)
-                    baseMotor2.setDirection(DcMotor.Direction.REVERSE);
+                    baseMotor2.setDirection(DcMotor.Direction.FORWARD);
                 if (baseMotor3 != null)
                     baseMotor3.setDirection(DcMotor.Direction.FORWARD);
                 if (baseMotor4 != null)
@@ -354,51 +368,23 @@ public class HardwareDriveMotors
 
     public void setHardwareDriveLeft1MotorPower (double power) {
         if (baseMotor1 != null)
-            baseMotor1.setPower(power);
+            baseMotor1.setPower(power * mMotorMaxSpeed);
     }
 
     public void setHardwareDriveLeft2MotorPower (double power) {
         if (baseMotor2 != null)
-            baseMotor2.setPower(power);
+            baseMotor2.setPower(power * mMotorMaxSpeed);
     }
 
     public void setHardwareDriveRight1MotorPower (double power) {
         if (baseMotor3 != null)
-            baseMotor3.setPower(power);
+            baseMotor3.setPower(power * mMotorMaxSpeed);
     }
 
     public void setHardwareDriveRight2MotorPower (double power) {
         if (baseMotor4 != null)
-            baseMotor4.setPower(power);
+            baseMotor4.setPower(power * mMotorMaxSpeed);
     }
-
-
-    /**
-     * This Method was taken from Triton Robotics Library
-     * This method normalizes the power to the four wheels for mecanum drive.
-     *
-     * @param wheelSpeeds specifies the wheel speed of all four wheels.
-     */
-    private void normalize(double[] wheelSpeeds)
-    {
-        double maxMagnitude = Math.abs(wheelSpeeds[0]);
-        for (int i = 1; i < wheelSpeeds.length; i++)
-        {
-            double magnitude = Math.abs(wheelSpeeds[i]);
-            if (magnitude > maxMagnitude)
-            {
-                maxMagnitude = magnitude;
-            }
-        }
-
-        if (maxMagnitude > 1.0)
-        {
-            for (int i = 0; i < wheelSpeeds.length; i++)
-            {
-                wheelSpeeds[i] /= maxMagnitude;
-            }
-        }
-    }   //normalize
 
     public class HardwareDriveTankMotorSpeeds {
         public double tankLeft;
@@ -432,5 +418,100 @@ public class HardwareDriveMotors
             return "{LeftPower= " + tankLeft + ", RightPower= " + tankRight + "}";
         }
     }
+
+    protected static double[] rotateVector(double x, double y, double angle) {
+        double cosA = Math.cos(angle * (Math.PI / 180.0));
+        double sinA = Math.sin(angle * (Math.PI / 180.0));
+        double[] out = new double[2];
+        out[0] = x * cosA - y * sinA;
+        out[1] = x * sinA + y * cosA;
+        return out;
+    }
+
+    /**
+     * FROM https://github.com/wpilibsuite/allwpilib/blob/master/wpilibj/src/main/java/edu/wpi/first/wpilibj/RobotDrive.java
+     * Normalize all wheel speeds if the magnitude of any wheel is greater than 1.0.
+     *
+     * @param wheelSpeeds specifies the wheel speed of all four wheels.
+     */
+    private void normalize(double[] wheelSpeeds)
+    {
+        double maxMagnitude = Math.abs(wheelSpeeds[0]);
+        for (int i = 1; i < wheelSpeeds.length; i++)
+        {
+            double magnitude = Math.abs(wheelSpeeds[i]);
+            if (magnitude > maxMagnitude)
+            {
+                maxMagnitude = magnitude;
+            }
+        }
+
+        if (maxMagnitude > 1.0)
+        {
+            for (int i = 0; i < wheelSpeeds.length; i++)
+            {
+                wheelSpeeds[i] /= maxMagnitude;
+            }
+        }
+    }   //normalize
+
+    /**
+    * FROM https://github.com/wpilibsuite/allwpilib/blob/master/wpilibj/src/main/java/edu/wpi/first/wpilibj/RobotDrive.java
+    * Drive method for Mecanum wheeled robots.
+    *
+    * <p>A method for driving with Mecanum wheeled robots. There are 4 wheels on the robot, arranged
+    * so that the front and back wheels are toed in 45 degrees. When looking at the wheels from the
+    * top, the roller axles should form an X across the robot.
+    *
+    * <p>This is designed to be directly driven by joystick axes.
+    *
+    * @param x         The speed that the robot should drive in the X direction. [-1.0..1.0]
+    * @param y         The speed that the robot should drive in the Y direction. This input is
+    *                  inverted to match the forward == -1.0 that joysticks produce. [-1.0..1.0]
+    * @param rotation  The rate of rotation for the robot that is completely independent of the
+    *                  translation. [-1.0..1.0]
+    * @param gyroAngle The current angle reading from the gyro. Use this to implement field-oriented
+    *                  controls.
+    */
+    public void mecanumDrive_Cartesian(double x, double y, double rotation, double gyroAngle) {
+
+        double xIn = x;
+        double yIn = y;
+        double[] wheelSpeeds = new double[4];
+
+        // Negate y for the joystick.
+        yIn = -yIn;
+        xIn = -xIn;
+
+        // Compensate for gyro angle.rotateVector
+        double[] rotated = rotateVector(xIn, yIn, -gyroAngle);
+        xIn = rotated[0];
+        yIn = rotated[1];
+
+
+        wheelSpeeds[0] = xIn + yIn + rotation;
+        wheelSpeeds[1] = -xIn + yIn - rotation;
+        wheelSpeeds[2] = -xIn + yIn + rotation;
+        wheelSpeeds[3] = xIn + yIn - rotation;
+
+        normalize(wheelSpeeds);
+        setHardwareDriveLeft1MotorPower(wheelSpeeds[0]);
+        setHardwareDriveLeft2MotorPower(wheelSpeeds[1]);
+        setHardwareDriveRight1MotorPower(wheelSpeeds[2]);
+        setHardwareDriveRight2MotorPower(wheelSpeeds[3]);
+
+    }
+
+    /**
+     * FROM https://github.com/wpilibsuite/allwpilib/blob/master/wpilibj/src/main/java/edu/wpi/first/wpilibj/RobotDrive.java
+     * Configure the scaling factor for using RobotDrive with motor controllers in a mode other than
+     * PercentVbus.
+     *
+     * @param maxOutput Multiplied with the output percentage computed by the drive functions.
+     */
+    public void setMaxOutput(double maxOutput) {
+         this.mMotorMaxSpeed = maxOutput;
+    }
+
 }
 
