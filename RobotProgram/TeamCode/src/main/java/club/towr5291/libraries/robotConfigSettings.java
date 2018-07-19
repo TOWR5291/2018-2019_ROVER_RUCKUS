@@ -87,7 +87,7 @@ public class robotConfigSettings
     }
 
     public enum robotConfigChoice
-    {
+    {   // Need to add the orbital motors
         TileRunner2x20 ("TileRunner-2x20"),
         TileRunner2x40 ("TileRunner-2x40"),
         TileRunner2x60 ("TileRunner-2x60"),

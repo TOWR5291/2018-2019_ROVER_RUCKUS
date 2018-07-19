@@ -203,6 +203,29 @@ public class HardwareDriveMotors
 
     }
 
+    public boolean[] isBusy(){
+        boolean MotorsBusy[] = new boolean[3];
+        if (baseMotor1 != null) MotorsBusy[0] = baseMotor1.isBusy();
+        if (baseMotor2 != null) MotorsBusy[1] = baseMotor2.isBusy();
+        if (baseMotor3 != null) MotorsBusy[2] = baseMotor3.isBusy();
+        if (baseMotor4 != null) MotorsBusy[3] = baseMotor4.isBusy();
+        return MotorsBusy;
+    }
+
+    public void allMotorsStop(){
+        baseMotor1.setPower(0);
+        baseMotor2.setPower(0);
+        baseMotor3.setPower(0);
+        baseMotor4.setPower(0);
+    }
+
+    public void setTarget(int moveCounts){
+        baseMotor1.setTargetPosition(baseMotor1.getCurrentPosition() + moveCounts);
+        baseMotor2.setTargetPosition(baseMotor2.getCurrentPosition() + moveCounts);
+        baseMotor3.setTargetPosition(baseMotor3.getCurrentPosition() + moveCounts);
+        baseMotor4.setTargetPosition(baseMotor4.getCurrentPosition() + moveCounts);
+    }
+
     public class motorEncoderPositions {
 
         private int motor1;      //is the current encoder position or motor 1
@@ -321,6 +344,14 @@ public class HardwareDriveMotors
     public void setHardwareDriveRunToPosition() {
         setHardwareDriveLeftRunToPosition();
         setHardwareDriveRightRunToPosition();
+    }
+
+    public void logEncoderCounts(FileLogger MasterFileLogger){
+        this.fileLogger = MasterFileLogger;
+        fileLogger.writeEvent(2,"baseMotor1 Encoder Counts" + String.valueOf(baseMotor1.getCurrentPosition()));
+        fileLogger.writeEvent(2,"baseMotor2 Encoder Counts" + String.valueOf(baseMotor2.getCurrentPosition()));
+        fileLogger.writeEvent(2,"baseMotor3 Encoder Counts" + String.valueOf(baseMotor3.getCurrentPosition()));
+        fileLogger.writeEvent(2,"baseMotor4 Encoder Counts" + String.valueOf(baseMotor4.getCurrentPosition()));
     }
 
     public void setHardwareDriveLeftRunToPosition() {
