@@ -3,33 +3,22 @@ package club.towr5291.Concepts;
 
 import android.widget.TextView;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 
 import club.towr5291.R;
 import club.towr5291.functions.FileLogger;
-import club.towr5291.functions.TOWR5291Toggle;
-import club.towr5291.functions.TOWR5291ToggleTick;
+import club.towr5291.functions.TOWR5291Tick;
 import club.towr5291.libraries.robotConfigSettings;
-import club.towr5291.opmodes.MecanumBaseDrive_2019;
 import club.towr5291.opmodes.OpModeMasterLinear;
 import club.towr5291.robotconfig.HardwareDriveMotors;
 import hallib.HalDashboard;
 
-
-/**
-
- */
-
 @TeleOp(name="Concept: Tick", group="Concept")
 //@Disabled
-public class ConceptTOWR5291ToggleTickTest extends OpModeMasterLinear
+public class ConceptTOWR5291TickTest extends OpModeMasterLinear
 {
     //set up the variables for the logger
     final String TAG = "Concept Logging";
@@ -74,23 +63,21 @@ public class ConceptTOWR5291ToggleTickTest extends OpModeMasterLinear
         dashboard.clearDisplay();
         dashboard.displayPrintf(0, LABEL_WIDTH, "Text: ", "*** Robot Data ***");
 
-        TOWR5291ToggleTick togglex = new TOWR5291ToggleTick(gamepad1.start);
-        togglex.setDebounceTimerTime(500);
+        TOWR5291Tick togglex = new TOWR5291Tick();
 
-        togglex.setIncrement(1);
+        togglex.setIncrement(.1);
 
-        togglex.setMaxTick(5);
-        togglex.setTOWR5291ToggleTickMin(1);
-
-        togglex.setTOWR5291ToggleTickReset(1);
+        togglex.setMaxTick(1);
+        togglex.setTOWR5291ToggleTickMin(0);
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
-            togglex.addTick(gamepad1.start);
+            togglex.incrementTick(gamepad1.start);
+            togglex.decrementTick(gamepad1.x);
             dashboard.displayPrintf(1, LABEL_WIDTH, "X: ", "" + togglex.getNumberTick());
-            dashboard.displayPrintf(2, LABEL_WIDTH, "Left Y ", "" + ((-gamepad1.left_stick_y * togglex.getNumberTick()) / togglex.getTOWR5291ToggleTickMax()));
+            dashboard.displayPrintf(2, LABEL_WIDTH, "Left Y ", "" + -gamepad1.left_stick_y * togglex.getNumberTick());
 
-//            robot.baseMotor1.setPower((-gamepad1.left_stick_y * togglex.getNumberTick()) / 10);
+            robot.baseMotor1.setPower((-gamepad1.left_stick_y * togglex.getNumberTick()) / 10);
 //            robot.baseMotor2.setPower((-gamepad1.left_stick_y * togglex.getNumberTick()) / 10);
 //            robot.baseMotor3.setPower((-gamepad1.right_stick_y * togglex.getNumberTick()) / 10);
 //            robot.baseMotor4.setPower((-gamepad1.right_stick_y * togglex.getNumberTick()) / 10);
@@ -103,4 +90,5 @@ public class ConceptTOWR5291ToggleTickTest extends OpModeMasterLinear
             fileLogger = null;
         }
     }
+
 }
