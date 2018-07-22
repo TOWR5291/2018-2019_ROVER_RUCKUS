@@ -5,7 +5,9 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import club.towr5291.functions.Constants;
 import club.towr5291.functions.FileLogger;
+import club.towr5291.functions.TOWR5291Utils;
 import club.towr5291.libraries.robotConfigSettings;
 
 /**
@@ -50,10 +52,10 @@ public class HardwareDriveMotors
         this.fileLogger = fileLoggerFromMaster;
 
         // Define and Initialize Motors
-        baseMotor1  = hwMap.dcMotor.get("leftMotor1");
-        baseMotor2  = hwMap.dcMotor.get("leftMotor2");
-        baseMotor3  = hwMap.dcMotor.get("rightMotor1");
-        baseMotor4  = hwMap.dcMotor.get("rightMotor2");
+        baseMotor1  = hwMap.dcMotor.get(Constants.motorConfig.leftMotor1.toString());
+        baseMotor2  = hwMap.dcMotor.get(Constants.motorConfig.leftMotor2.toString());
+        baseMotor3  = hwMap.dcMotor.get(Constants.motorConfig.rightMotor1.toString());
+        baseMotor4  = hwMap.dcMotor.get(Constants.motorConfig.rightMotor2.toString());
 
         setHardwareDriveDirections(baseConfig);
 
@@ -98,10 +100,10 @@ public class HardwareDriveMotors
         hwMap = ahwMap;
 
         // Define and Initialize Motors
-        baseMotor1  = hwMap.dcMotor.get("leftMotor1");
-        baseMotor2  = hwMap.dcMotor.get("leftMotor2");
-        baseMotor3  = hwMap.dcMotor.get("rightMotor1");
-        baseMotor4  = hwMap.dcMotor.get("rightMotor2");
+        baseMotor1  = hwMap.dcMotor.get(Constants.motorConfig.leftMotor1.toString());
+        baseMotor2  = hwMap.dcMotor.get(Constants.motorConfig.leftMotor2.toString());
+        baseMotor3  = hwMap.dcMotor.get(Constants.motorConfig.rightMotor1.toString());
+        baseMotor4  = hwMap.dcMotor.get(Constants.motorConfig.rightMotor2.toString());
 
         setHardwareDriveDirections(baseConfig);
 
@@ -111,7 +113,6 @@ public class HardwareDriveMotors
         // Set all motors to run without encoders.
         // May want to use RUN_USING_ENCODERS if encoders are installed.
         setHardwareDriveResetEncoders();
-
         setHardwareDriveRunUsingEncoders();
     }
 
@@ -233,7 +234,6 @@ public class HardwareDriveMotors
         private int motor3;      //is the current encoder position or motor 3
         private int motor4;      //is the current encoder position or motor 4
 
-
         // Constructor
         public motorEncoderPositions()
         {
@@ -243,9 +243,7 @@ public class HardwareDriveMotors
             this.motor4 = 0;
         }
 
-        public void setMotor1EncoderValue (int value) {
-            this.motor1 = value;
-        }
+        public void setMotor1EncoderValue (int value) { this.motor1 = value; }
 
         public void setMotor2EncoderValue (int value) {
             this.motor2 = value;
@@ -368,53 +366,105 @@ public class HardwareDriveMotors
             baseMotor4.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
+    /**
+     * Set the power of the motors on the robot
+     *
+     * @param leftFront set the power of right 1 motor.
+     * @param leftBack set the power of right 1 motor.
+     * @param rightFront set the power of right 1 motor.
+     * @param rightBack set the power of right 1 motor.
+     */
     public void setHardwareDrivePower (double leftFront, double leftBack, double rightFront, double rightBack) {
         if (baseMotor1 != null)
-            baseMotor1.setPower(leftFront);
+            baseMotor1.setPower(checkMotorMaxPower(leftFront));
         if (baseMotor2 != null)
-            baseMotor2.setPower(leftBack);
+            baseMotor2.setPower(checkMotorMaxPower(leftBack));
         if (baseMotor3 != null)
-            baseMotor3.setPower(rightFront);
+            baseMotor3.setPower(checkMotorMaxPower(rightFront));
         if (baseMotor4 != null)
-            baseMotor4.setPower(rightBack);
+            baseMotor4.setPower(checkMotorMaxPower(rightBack));
     }
 
-    //set the drive motors power, both left and right
+    /**
+     * Set the power of the motors for all 4 motors on the robot
+     *
+     * @param power set the power of all the motors on the base.
+     */
     public void setHardwareDrivePower (double power) {
         setHardwareDriveLeftMotorPower(power);
         setHardwareDriveRightMotorPower(power);
     }
 
-    //set the left motors drive power
+    /**
+     * Set the power of the motors on the left of the robot
+     *
+     * @param power set the power of left motors.
+     */
     public void setHardwareDriveLeftMotorPower (double power) {
         setHardwareDriveLeft1MotorPower(power);
         setHardwareDriveLeft2MotorPower(power);
     }
 
-    //set the right drive motors power
+    /**
+     * Set the power of the motors on the right of the robot
+     *
+     * @param power set the power of right motors.
+     */
     public void setHardwareDriveRightMotorPower (double power) {
         setHardwareDriveRight1MotorPower(power);
         setHardwareDriveRight2MotorPower(power);
     }
 
+    private double checkMotorMaxPower(double power) {
+        return TOWR5291Utils.scaleRange(power, -1 ,1, -this.mMotorMaxSpeed, this.mMotorMaxSpeed);
+        //if (Math.abs(power) <= this.mMotorMaxSpeed) {
+        //    return power;
+        //} else {
+        //    if (power < 0)
+        //        return -this.mMotorMaxSpeed;
+        //    else
+        //        return this.mMotorMaxSpeed;
+        //}
+    }
+
+    /**
+     * Set the power of the motors on the left 1 of the robot
+     *
+     * @param power set the power of left 1 motor.
+     */
     public void setHardwareDriveLeft1MotorPower (double power) {
         if (baseMotor1 != null)
-            baseMotor1.setPower(power * mMotorMaxSpeed);
+            baseMotor1.setPower(checkMotorMaxPower(power));
     }
 
+    /**
+     * Set the power of the motors on the left 2 of the robot
+     *
+     * @param power set the power of left 2 motor.
+     */
     public void setHardwareDriveLeft2MotorPower (double power) {
         if (baseMotor2 != null)
-            baseMotor2.setPower(power * mMotorMaxSpeed);
+            baseMotor2.setPower(checkMotorMaxPower(power));
     }
 
+    /**
+     * Set the power of the motors on the right 1 of the robot
+     *
+     * @param power set the power of right 1 motor.
+     */
     public void setHardwareDriveRight1MotorPower (double power) {
         if (baseMotor3 != null)
-            baseMotor3.setPower(power * mMotorMaxSpeed);
+            baseMotor3.setPower(checkMotorMaxPower(power));
     }
 
+    /**
+     * Set the power of the motors on the right 2 of the robot
+     *
+     * @param power set the power of right 2 motor.
+     */
     public void setHardwareDriveRight2MotorPower (double power) {
         if (baseMotor4 != null)
-            baseMotor4.setPower(power * mMotorMaxSpeed);
+            baseMotor4.setPower(checkMotorMaxPower(power));
     }
 
     public class HardwareDriveTankMotorSpeeds {
@@ -519,7 +569,6 @@ public class HardwareDriveMotors
         xIn = rotated[0];
         yIn = rotated[1];
 
-
         wheelSpeeds[0] = xIn + yIn + rotation;
         wheelSpeeds[1] = -xIn + yIn - rotation;
         wheelSpeeds[2] = -xIn + yIn + rotation;
@@ -530,7 +579,6 @@ public class HardwareDriveMotors
         setHardwareDriveLeft2MotorPower(wheelSpeeds[1]);
         setHardwareDriveRight1MotorPower(wheelSpeeds[2]);
         setHardwareDriveRight2MotorPower(wheelSpeeds[3]);
-
     }
 
     /**
@@ -544,5 +592,8 @@ public class HardwareDriveMotors
          this.mMotorMaxSpeed = maxOutput;
     }
 
+    public double getMaxOutput() {
+        return this.mMotorMaxSpeed;
+    }
 }
 

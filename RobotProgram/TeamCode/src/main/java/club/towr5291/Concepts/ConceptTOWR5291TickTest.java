@@ -1,6 +1,8 @@
 package club.towr5291.Concepts;
 
 
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.widget.TextView;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -11,12 +13,25 @@ import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity
 import club.towr5291.R;
 import club.towr5291.functions.FileLogger;
 import club.towr5291.functions.TOWR5291Tick;
+import club.towr5291.libraries.robotConfig;
 import club.towr5291.libraries.robotConfigSettings;
 import club.towr5291.opmodes.OpModeMasterLinear;
 import club.towr5291.robotconfig.HardwareDriveMotors;
 import hallib.HalDashboard;
 
-@TeleOp(name="Concept: Tick", group="Concept")
+
+/**
+ * Created by Wyatt Ashley TOWR5291 on 7/19/2018.
+ * This opmode tests the TICK Class
+ *
+ * Modification history
+ * Edited by:
+ * Wyatt Ashley 07/20/2018 ->  Initial creation
+ * Ian Haden 07/22/2018 -> Added comments and removed some unneeded steps, renamed some variables so they represent their respective functions
+ */
+
+
+@TeleOp(name="Concept: Tick", group="5291Concept")
 //@Disabled
 public class ConceptTOWR5291TickTest extends OpModeMasterLinear
 {
@@ -33,6 +48,10 @@ public class ConceptTOWR5291TickTest extends OpModeMasterLinear
     public static HalDashboard getDashboard() {
         return dashboard;
     }
+
+    //The autonomous menu settings from the sharepreferences
+    private SharedPreferences sharedPreferences;
+    private robotConfig ourRobotConfig;
 
     @Override
     public void runOpMode() {
@@ -51,7 +70,20 @@ public class ConceptTOWR5291TickTest extends OpModeMasterLinear
         fileLogger.setEventTag("runOpMode()");
         fileLogger.writeEvent("Log Started");
 
-        robot.init(fileLogger, hardwareMap, robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40, "LM1", "LM2", "RM1", "RM2");
+        //load menu settings and setup robot and debug level
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(hardwareMap.appContext);
+        ourRobotConfig = new robotConfig();
+        ourRobotConfig.setTeamNumber(sharedPreferences.getString("club.towr5291.Autonomous.TeamNumber", "0000"));
+        ourRobotConfig.setAllianceColor(sharedPreferences.getString("club.towr5291.Autonomous.Color", "Red"));
+        ourRobotConfig.setAllianceStartPosition(sharedPreferences.getString("club.towr5291.Autonomous.StartPosition", "Left"));
+        ourRobotConfig.setDelay(Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Delay", "0")));
+        ourRobotConfig.setRobotConfig(sharedPreferences.getString("club.towr5291.Autonomous.RobotConfig", "TileRunnerMecanum2x40"));
+        debug = Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Debug", "1"));
+
+        //now we have loaded the config from sharedpreferences we can setup the robot
+        ourRobotConfig.initConfig();
+
+        //robot.init(fileLogger, hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(ourRobotConfig.getRobotConfig()), "LM1", "LM2", "RM1", "RM2");
         //robot.setHardwareDriveDirections(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40);
 
         dashboard.displayPrintf(1, "initRobot");
@@ -63,21 +95,22 @@ public class ConceptTOWR5291TickTest extends OpModeMasterLinear
         dashboard.clearDisplay();
         dashboard.displayPrintf(0, LABEL_WIDTH, "Text: ", "*** Robot Data ***");
 
-        TOWR5291Tick togglex = new TOWR5291Tick();
+        TOWR5291Tick tickTest = new TOWR5291Tick();
 
-        togglex.setIncrement(.1);
-
-        togglex.setMaxTick(1);
-        togglex.setTOWR5291ToggleTickMin(0);
+        tickTest.setTickIncrement(.1);
+        tickTest.setTickMax(1);
+        tickTest.setTickMin(0.5);
+        tickTest.setRollOver(true);
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
-            togglex.incrementTick(gamepad1.start);
-            togglex.decrementTick(gamepad1.x);
-            dashboard.displayPrintf(1, LABEL_WIDTH, "X: ", "" + togglex.getNumberTick());
-            dashboard.displayPrintf(2, LABEL_WIDTH, "Left Y ", "" + -gamepad1.left_stick_y * togglex.getNumberTick());
+            tickTest.incrementTick(gamepad1.dpad_up);
+            tickTest.decrementTick(gamepad1.dpad_down);
+            dashboard.displayPrintf(1, LABEL_WIDTH, "Tick Value: ", "" + tickTest.getTickCurrValue());
+            dashboard.displayPrintf(2, LABEL_WIDTH, "Tick Max  : ", "" + tickTest.getTickMax());
+            dashboard.displayPrintf(3, LABEL_WIDTH, "Tick Min  : ", "" + tickTest.getTickMin());
 
-            robot.baseMotor1.setPower((-gamepad1.left_stick_y * togglex.getNumberTick()) / 10);
+//            robot.baseMotor1.setPower((-gamepad1.left_stick_y * togglex.getTickCurrValue()) / 10);
 //            robot.baseMotor2.setPower((-gamepad1.left_stick_y * togglex.getNumberTick()) / 10);
 //            robot.baseMotor3.setPower((-gamepad1.right_stick_y * togglex.getNumberTick()) / 10);
 //            robot.baseMotor4.setPower((-gamepad1.right_stick_y * togglex.getNumberTick()) / 10);

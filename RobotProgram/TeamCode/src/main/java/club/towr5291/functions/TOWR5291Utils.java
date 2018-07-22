@@ -21,6 +21,10 @@ package club.towr5291.functions;
  * SOFTWARE.
  * Thanks Titan Robotics
  */
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 /**
  * Created by lztdd0 on 11/4/17.
  */
@@ -40,6 +44,20 @@ public class TOWR5291Utils {
         return (value < lowLimit)? lowLimit: (value > highLimit)? highLimit: value;
     }   //clipRange
 
+
+    /**
+     * This method rounds the double
+     *
+     * @param value specifies the value to be clipped
+     * @param places specifies how many places the value should be rounded
+     */
+    public static double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        BigDecimal bd = new BigDecimal(value);
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
+    }
 
     /**
      * This method clips the given value to the range limited by the given low and high limits.

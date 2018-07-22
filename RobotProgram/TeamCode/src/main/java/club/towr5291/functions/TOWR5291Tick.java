@@ -3,6 +3,7 @@ package club.towr5291.functions;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import club.towr5291.functions.TOWR5291Utils;
 
 /**
  * Created by Wyatt Ashley TOWR5291 on 7/19/2018.
@@ -16,7 +17,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  */
 public class TOWR5291Tick {
 
-    private double TOWR5291ToggleTickNumber = 0.1;
+    private double TOWR5291ToggleTickNumber = 0;
     private double increment = 0.1;
     private double TOWR5291ToggleTickMax = 1;
     private double TOWR5291ToggleTickMin = 0;
@@ -84,7 +85,7 @@ public class TOWR5291Tick {
             debounceTimerDecrement.reset();
             if (input == true) {
                 this.TOWR5291ToggleTickNumber -= this.increment;
-                if (this.TOWR5291ToggleTickNumber <= TOWR5291ToggleTickMin) {
+                if (this.TOWR5291ToggleTickNumber < TOWR5291ToggleTickMin) {
                     if (rollover) {
                         this.TOWR5291ToggleTickNumber = TOWR5291ToggleTickMax;
                     } else {
@@ -95,7 +96,6 @@ public class TOWR5291Tick {
         }
     }
 
-
     /**
      * Set the value of the increment and decrement
      *
@@ -105,13 +105,19 @@ public class TOWR5291Tick {
         this.rollover = onoff;
     }
 
+    /**
+     * Set the value of the debounce time
+     *
+     * @param time set the debounce time
+     */
+    public void setDebounceTime (int time) {this.debounceTime = time;}
 
     /**
      * Set the value of the increment and decrement
      *
      * @param incrementAmount Value each time a change occurs
      */
-    public void setIncrement(double incrementAmount){
+    public void setTickIncrement(double incrementAmount){
         this.increment = incrementAmount;
     }
 
@@ -120,7 +126,7 @@ public class TOWR5291Tick {
      *
      * @param maximum Maximum Value before rolling over
      */
-    public void setMaxTick(double maximum){
+    public void setTickMax(double maximum){
         this.TOWR5291ToggleTickMax = maximum;
     }
 
@@ -129,15 +135,17 @@ public class TOWR5291Tick {
      *
      * @param minimum Minimum Value before rolling over
      */
-    public void setMinTick(double minimum){
+    public void setTickMin(double minimum){
         this.TOWR5291ToggleTickMin = minimum;
+        if (this.TOWR5291ToggleTickNumber < this.TOWR5291ToggleTickMin)
+            this.TOWR5291ToggleTickNumber = this.TOWR5291ToggleTickMin;
     }
 
     /**
      * Get the current value
      */
-    public double getNumberTick(){
-        return roundDown(this.TOWR5291ToggleTickNumber);
+    public double getTickCurrValue(){
+        return TOWR5291Utils.round(this.TOWR5291ToggleTickNumber,(int)(1/this.increment)/10);
     }
 
     /**
@@ -157,14 +165,10 @@ public class TOWR5291Tick {
     /**
      * Set or Over ride the current value
      */
-    public void setTickNumberValue(double value){
+    public void setTickValue(double value){
         if ((value <= TOWR5291ToggleTickMax) && (value >= TOWR5291ToggleTickMin)){
             this.TOWR5291ToggleTickNumber = value;
         }
-    }
-
-    private static double roundDown(double d) {
-        return (long) (d * 1e1) / 1e1;
     }
 
 }

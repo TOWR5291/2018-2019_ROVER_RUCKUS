@@ -1,8 +1,10 @@
 import java.util.regex.Pattern
+
 //
 // build.gradle in Ftc3543Lib
 //
 apply plugin: 'com.android.library'
+
 android {
 
     defaultConfig {
@@ -10,20 +12,22 @@ android {
         targetSdkVersion 21
     }
 
-    compileSdkVersion 23
-    buildToolsVersion '26.0.2'
+    compileSdkVersion 26
+    buildToolsVersion '27.0.3'
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
+
 repositories {
     flatDir {
         dirs '../libs'
     }
 }
+
 apply from: 'build.release.gradle'
 
 dependencies {
-    implementation project(':openCVLibrary341')
+    implementation project(path: ':openCVLibrary341')
 }

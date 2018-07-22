@@ -32,19 +32,14 @@ package trclib;
  */
 public abstract class TrcAnalogInput extends TrcSensor<TrcAnalogInput.DataType>
 {
-    private static final String moduleName = "TrcAnalogInput";
-    private static final boolean debugEnabled = false;
-    private static final boolean tracingEnabled = false;
-    private static final TrcDbgTrace.TraceLevel traceLevel = TrcDbgTrace.TraceLevel.API;
-    private static final TrcDbgTrace.MsgLevel msgLevel = TrcDbgTrace.MsgLevel.INFO;
-    private TrcDbgTrace dbgTrace = null;
-
     //
     // AnalogInput data type.
     //
     public enum DataType
     {
+        RAW_DATA,
         INPUT_DATA,
+        NORMALIZED_DATA,
         INTEGRATED_DATA,
         DOUBLE_INTEGRATED_DATA
     }   //enum DataType
@@ -81,12 +76,6 @@ public abstract class TrcAnalogInput extends TrcSensor<TrcAnalogInput.DataType>
     public TrcAnalogInput(final String instanceName, int numAxes, int options, TrcFilter[] filters)
     {
         super(instanceName, numAxes, filters);
-
-        if (debugEnabled)
-        {
-            dbgTrace = new TrcDbgTrace(moduleName + "." + instanceName, tracingEnabled, traceLevel, msgLevel);
-        }
-
         this.instanceName = instanceName;
 
         //
@@ -158,7 +147,7 @@ public abstract class TrcAnalogInput extends TrcSensor<TrcAnalogInput.DataType>
         //
         if (dataIntegrator != null)
         {
-            dataIntegrator.setEnabled(enabled);
+            dataIntegrator.setTaskEnabled(enabled);
         }
     }   //setEnabled
 
@@ -185,18 +174,29 @@ public abstract class TrcAnalogInput extends TrcSensor<TrcAnalogInput.DataType>
      * This method sets the scale factor on the sensor data.
      *
      * @param scale specifies the scale factor.
+     * @param offset specifies the offset to be subtracted from the scaled data.
      */
-    public void setScale(double scale)
+    public void setScale(double scale, double offset)
     {
         final String funcName = "setScale";
 
         if (debugEnabled)
         {
-            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "scale=%f", scale);
+            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "scale=%f,offset=%f", scale, offset);
             dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API);
         }
 
-        setScale(0, scale);
+        super.setScale(0, scale, offset);
+    }   //setScale
+
+    /**
+     * This method sets the scale factor on the sensor data.
+     *
+     * @param scale specifies the scale factor.
+     */
+    public void setScale(double scale)
+    {
+        setScale(scale, 0.0);
     }   //setScale
 
     /**
@@ -219,6 +219,27 @@ public abstract class TrcAnalogInput extends TrcSensor<TrcAnalogInput.DataType>
 
         return data;
     }   //getData
+
+    /**
+     * This method returns the processed and normalized sensor data of the specified index.
+     *
+     * @param index specifies the data index.
+     * @return processed normalized data.
+     */
+    public TrcSensor.SensorData<Double> getNormalizedData(int index)
+    {
+        final String funcName = "getNormalizedData";
+        TrcSensor.SensorData<Double> data = getProcessedData(index, DataType.NORMALIZED_DATA);;
+
+        if (debugEnabled)
+        {
+            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "index=%d", index);
+            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API,
+                    "=(timestamp=%.3f,value=%f)", data.timestamp, data.value);
+        }
+
+        return data;
+    }   //getNormalizedData
 
     /**
      * This method returns the integrated sensor data of the specified index.

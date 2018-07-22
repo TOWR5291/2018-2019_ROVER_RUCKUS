@@ -90,6 +90,67 @@ public abstract class Constants {
                     return "???";
             }
         }
+    }
+
+    public enum motorConfig {
+        leftMotor1,
+        leftMotor2,
+        rightMotor1,
+        rightMotor2,
+        liftMotor1,
+        liftMotor2,
+        UNKNOWN;
+
+        public String toString() {
+            switch (this) {
+                case leftMotor1:
+                    return "leftMotor1";
+                case leftMotor2:
+                    return "leftMotor2";
+                case rightMotor1:
+                    return "rightMotor1";
+                case rightMotor2:
+                    return "rightMotor2";
+                case liftMotor1:
+                    return "liftMotor1";
+                case liftMotor2:
+                    return "liftMotor2";
+                case UNKNOWN:
+                default:
+                    return "???";
+            }
+        }
+    }
+
+    public enum servoConfig {
+        leftMotor1,
+        leftMotor2,
+        rightMotor1,
+        rightMotor2,
+        liftMotor1,
+        liftMotor2,
+        UNKNOWN;
+
+        public String toString() {
+            switch (this) {
+                case leftMotor1:
+                    return "leftMotor1";
+                case leftMotor2:
+                    return "leftMotor2";
+                case rightMotor1:
+                    return "rightMotor1";
+                case rightMotor2:
+                    return "rightMotor2";
+                case liftMotor1:
+                    return "liftMotor1";
+                case liftMotor2:
+                    return "liftMotor2";
+                case UNKNOWN:
+                default:
+                    return "???";
+            }
+        }
 
     }
+
 }

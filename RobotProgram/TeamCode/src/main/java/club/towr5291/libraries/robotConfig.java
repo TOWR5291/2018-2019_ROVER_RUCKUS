@@ -183,7 +183,7 @@ public class robotConfig {
     }
 
     public String getRobotConfig() {
-        return robotConfig;
+        return this.robotConfig;
     }
 
     public void setRobotConfig(String robotConfig) {

@@ -33,12 +33,13 @@ import java.util.Locale;
  */
 public abstract class TrcSensor<D>
 {
-    private static final String moduleName = "TrcSensor";
-    private static final boolean debugEnabled = false;
-    private static final boolean tracingEnabled = false;
-    private static final TrcDbgTrace.TraceLevel traceLevel = TrcDbgTrace.TraceLevel.API;
-    private static final TrcDbgTrace.MsgLevel msgLevel = TrcDbgTrace.MsgLevel.INFO;
-    private TrcDbgTrace dbgTrace = null;
+    protected static final String moduleName = "TrcSensor";
+    protected static final boolean debugEnabled = false;
+    protected static final boolean tracingEnabled = false;
+    protected static final boolean useGlobalTracer = false;
+    protected static final TrcDbgTrace.TraceLevel traceLevel = TrcDbgTrace.TraceLevel.API;
+    protected static final TrcDbgTrace.MsgLevel msgLevel = TrcDbgTrace.MsgLevel.INFO;
+    protected TrcDbgTrace dbgTrace = null;
 
     /**
      * This class implements the SensorData object that consists of the sensor value as well as a timestamp when the
@@ -106,6 +107,7 @@ public abstract class TrcSensor<D>
     private TrcFilter[] filters;
     private int[] signs;
     private double[] scales;
+    private double[] offsets;
     private TrcSensorCalibrator<D> calibrator = null;
 
     /**
@@ -120,7 +122,9 @@ public abstract class TrcSensor<D>
     {
         if (debugEnabled)
         {
-            dbgTrace = new TrcDbgTrace(moduleName + "." + instanceName, tracingEnabled, traceLevel, msgLevel);
+            dbgTrace = useGlobalTracer?
+                TrcDbgTrace.getGlobalTracer():
+                new TrcDbgTrace(moduleName + "." + instanceName, tracingEnabled, traceLevel, msgLevel);
         }
         //
         // Make sure we have at least one axis.
@@ -151,10 +155,12 @@ public abstract class TrcSensor<D>
         this.filters = filters;
         signs = new int[numAxes];
         scales = new double[numAxes];
+        offsets = new double[numAxes];
         for (int i = 0; i < numAxes; i++)
         {
             signs[i] = 1;
             scales[i] = 1.0;
+            offsets[i] = 0.0;
         }
     }   //TrcSensor
 
@@ -223,8 +229,9 @@ public abstract class TrcSensor<D>
      *
      * @param index specifies the axis index.
      * @param scale specifies the scale factor for the axis.
+     * @param offset specifies the offset to be subtracted from the scaled data.
      */
-    public void setScale(int index, double scale)
+    public void setScale(int index, double scale, double offset)
     {
         final String funcName = "setScale";
 
@@ -235,6 +242,7 @@ public abstract class TrcSensor<D>
         }
 
         scales[index] = scale;
+        offsets[index] = offset;
     }   //setScale
 
     /**
@@ -298,27 +306,37 @@ public abstract class TrcSensor<D>
     public SensorData<Double> getProcessedData(int index, D dataType)
     {
         final String funcName = "getProcessedData";
+        @SuppressWarnings("unchecked")
         SensorData<Double> data = (SensorData<Double>)getRawData(index, dataType);
-        double value = (double)data.value;
 
-        if (filters[index] != null)
+        if (data != null)
         {
-            value = filters[index].filterData(value);
-        }
+            double value = (double)data.value;
 
-        if (calibrator != null)
-        {
-            value = calibrator.getCalibratedData(index, value);
-        }
+            if (debugEnabled) dbgTrace.traceInfo(funcName, "raw=%.3f", value);
+            if (filters[index] != null)
+            {
+                value = filters[index].filterData(value);
+                if (debugEnabled) dbgTrace.traceInfo(funcName, "filtered=%.3f", value);
+            }
 
-        value *= signs[index]*scales[index];
-        data.value = value;
+            if (calibrator != null)
+            {
+                value = calibrator.getCalibratedData(index, value);
+                if (debugEnabled) dbgTrace.traceInfo(funcName, "calibrated=%.3f", value);
+            }
 
-        if (debugEnabled)
-        {
-            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "index=%d", index);
-            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API,
-                               "=(timestamp=%0.3f,value=%f", data.timestamp, value);
+            value *= signs[index]*scales[index] + offsets[index];
+            if (debugEnabled) dbgTrace.traceInfo(
+                funcName, "scaled=%.3f (scale=%f,offset=%f)", value, scales[index], offsets[index]);
+            data.value = value;
+
+            if (debugEnabled)
+            {
+                dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "index=%d", index);
+                dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API,
+                                   "=(timestamp=%0.3f,value=%f", data.timestamp, value);
+            }
         }
 
         return data;

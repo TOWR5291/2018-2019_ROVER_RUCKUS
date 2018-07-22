@@ -22,6 +22,8 @@
 
 package trclib;
 
+import trclib.TrcTaskMgr.TaskType;
+
 /**
  * This class implements a PID controlled robot drive. A PID controlled robot drive consist of a robot drive base
  * and three PID controllers, one for the X direction, one for the Y direction and one for turn. If the robot drive
@@ -31,14 +33,35 @@ package trclib;
  * steady state error. When stall condition is detected, PID drive will be aborted so that the robot won't get stuck
  * waiting forever trying to reach target.
  */
-public class TrcPidDrive implements TrcTaskMgr.Task
+public class TrcPidDrive
 {
     private static final String moduleName = "TrcPidDrive";
     private static final boolean debugEnabled = false;
     private static final boolean tracingEnabled = false;
+    private static final boolean useGlobalTracer = false;
     private static final TrcDbgTrace.TraceLevel traceLevel = TrcDbgTrace.TraceLevel.API;
     private static final TrcDbgTrace.MsgLevel msgLevel = TrcDbgTrace.MsgLevel.INFO;
     private TrcDbgTrace dbgTrace = null;
+    private TrcDbgTrace msgTracer = null;
+    private TrcRobotBattery battery = null;
+    private boolean tracePidInfo = false;
+
+    /**
+     * This interface provides a stuck wheel notification handler. It is useful for detecting drive base motor
+     * malfunctions. A stuck wheel could happen if the motor is malfunctioning, the motor power wire is unplugged,
+     * the motor encoder is malfunctioning or the motor encoder wire is unplugged.
+     */
+    public interface StuckWheelHandler
+    {
+        /**
+         * This method is called when a stuck wheel is detected.
+         *
+         * @param pidDrive specifies this TrcPidDrive instance.
+         * @param motorType specifies which wheel in the DriveBase is stuck.
+         */
+        void stuckWheel(TrcPidDrive pidDrive, TrcDriveBase.MotorType motorType);
+
+    }   //interface StuckWheelHandler
 
     /**
      * Turn mode specifies how PID controlled drive is turning the robot.
@@ -46,7 +69,8 @@ public class TrcPidDrive implements TrcTaskMgr.Task
     public enum TurnMode
     {
         IN_PLACE,
-        PIVOT,
+        PIVOT_FORWARD,
+        PIVOT_BACKWARD,
         CURVE
     }   //enum TurnMode
 
@@ -54,10 +78,15 @@ public class TrcPidDrive implements TrcTaskMgr.Task
     private static final double DEF_BEEP_DURATION       = 0.2;          //in seconds
 
     private final String instanceName;
-    private TrcDriveBase driveBase;
-    private TrcPidController xPidCtrl;
-    private TrcPidController yPidCtrl;
-    private TrcPidController turnPidCtrl;
+    private final TrcDriveBase driveBase;
+    private final TrcPidController xPidCtrl;
+    private final TrcPidController yPidCtrl;
+    private final TrcPidController turnPidCtrl;
+    private final TrcTaskMgr.TaskObject stopTaskObj;
+    private final TrcTaskMgr.TaskObject postContinuousTaskObj;
+    private TrcWarpSpace warpSpace = null;
+    private StuckWheelHandler stuckWheelHandler = null;
+    private double stuckTimeout = 0.0;
     private TurnMode turnMode = TurnMode.IN_PLACE;
     private TrcTone beepDevice = null;
     private double beepFrequency = DEF_BEEP_FREQUENCY;
@@ -72,7 +101,6 @@ public class TrcPidDrive implements TrcTaskMgr.Task
     private boolean turnOnly = false;
     private boolean maintainHeading = false;
     private boolean canceled = false;
-    private boolean pidDriveStarted = false;
 
     /**
      * Constructor: Create an instance of the object.
@@ -84,12 +112,14 @@ public class TrcPidDrive implements TrcTaskMgr.Task
      * @param turnPidCtrl specifies the PID controller for turn.
      */
     public TrcPidDrive(
-            final String instanceName, TrcDriveBase driveBase,
-            TrcPidController xPidCtrl, TrcPidController yPidCtrl, TrcPidController turnPidCtrl)
+        final String instanceName, final TrcDriveBase driveBase,
+        final TrcPidController xPidCtrl, final TrcPidController yPidCtrl, final TrcPidController turnPidCtrl)
     {
         if (debugEnabled)
         {
-            dbgTrace = new TrcDbgTrace(moduleName + "." + instanceName, tracingEnabled, traceLevel, msgLevel);
+            dbgTrace = useGlobalTracer?
+                TrcDbgTrace.getGlobalTracer():
+                new TrcDbgTrace(moduleName + "." + instanceName, tracingEnabled, traceLevel, msgLevel);
         }
 
         this.instanceName = instanceName;
@@ -97,6 +127,14 @@ public class TrcPidDrive implements TrcTaskMgr.Task
         this.xPidCtrl = xPidCtrl;
         this.yPidCtrl = yPidCtrl;
         this.turnPidCtrl = turnPidCtrl;
+        TrcTaskMgr taskMgr = TrcTaskMgr.getInstance();
+        stopTaskObj = taskMgr.createTask(instanceName + ".stop", this::stopTask);
+        postContinuousTaskObj = taskMgr.createTask(instanceName + ".postContinuous", this::postContinuousTask);
+
+        if (turnPidCtrl != null && turnPidCtrl.hasAbsoluteSetPoint())
+        {
+            warpSpace = new TrcWarpSpace(instanceName, 0.0, 360.0);
+        }
     }   //TrcPidDrive
 
     /**
@@ -108,6 +146,119 @@ public class TrcPidDrive implements TrcTaskMgr.Task
     {
         return instanceName;
     }   //toString
+
+    /**
+     * This method sets the message tracer for logging trace messages.
+     *
+     * @param tracer specifies the tracer for logging messages.
+     * @param tracePidInfo specifies true to enable tracing of PID info, false otherwise.
+     * @param battery specifies the battery object to get battery info for the message.
+     */
+    public void setMsgTracer(TrcDbgTrace tracer, boolean tracePidInfo, TrcRobotBattery battery)
+    {
+        this.msgTracer = tracer;
+        this.tracePidInfo = tracePidInfo;
+        this.battery = battery;
+    }   //setMsgTracer
+
+    /**
+     * This method sets the message tracer for logging trace messages.
+     *
+     * @param tracer specifies the tracer for logging messages.
+     * @param tracePidInfo specifies true to enable tracing of PID info, false otherwise.
+     */
+    public void setMsgTracer(TrcDbgTrace tracer, boolean tracePidInfo)
+    {
+        setMsgTracer(tracer, tracePidInfo, null);
+    }   //setMsgTracer
+
+    /**
+     * This method sets the message tracer for logging trace messages.
+     *
+     * @param tracer specifies the tracer for logging messages.
+     */
+    public void setMsgTracer(TrcDbgTrace tracer)
+    {
+        setMsgTracer(tracer, false, null);
+    }   //setMsgTracer
+
+    /**
+     * This method returns the X PID controller if any.
+     *
+     * @return X PID controller.
+     */
+    public TrcPidController getXPidCtrl()
+    {
+        final String funcName = "getXPidCtrl";
+
+        if (debugEnabled)
+        {
+            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API);
+            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API, "=%s",
+                    xPidCtrl != null? xPidCtrl.toString(): "null");
+        }
+
+        return xPidCtrl;
+    }   //getXPidCtrl
+
+    /**
+     * This method returns the Y PID controller if any.
+     *
+     * @return Y PID controller.
+     */
+    public TrcPidController getYPidCtrl()
+    {
+        final String funcName = "getYPidCtrl";
+
+        if (debugEnabled)
+        {
+            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API);
+            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API, "=%s",
+                    yPidCtrl != null? yPidCtrl.toString(): "null");
+        }
+
+        return yPidCtrl;
+    }   //getYPidCtrl
+
+    /**
+     * This method returns the Turn PID controller if any.
+     *
+     * @return Turn PID controller.
+     */
+    public TrcPidController getTurnPidCtrl()
+    {
+        final String funcName = "getTurnPidCtrl";
+
+        if (debugEnabled)
+        {
+            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API);
+            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API, "=%s",
+                    turnPidCtrl != null? turnPidCtrl.toString(): "null");
+        }
+
+        return turnPidCtrl;
+    }   //getTurnPidCtrl
+
+    /**
+     * This method sets a stuck wheel handler to enable stuck wheel detection.
+     *
+     * @param stuckWheelHandler specifies the stuck wheel handler.
+     * @param stuckTimeout specifies the stuck timeout in seconds.
+     */
+    public void setStuckWheelHandler(StuckWheelHandler stuckWheelHandler, double stuckTimeout)
+    {
+        final String funcName = "setStuckWheelHandler";
+
+        if (debugEnabled)
+        {
+            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API,
+                    "stuckWheelHandler=%s,timeout=%f", stuckWheelHandler, stuckTimeout);
+            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API);
+        }
+
+        this.stuckWheelHandler = stuckWheelHandler;
+        this.stallTimeout = stuckTimeout;
+    }   //setStuckWheelHandler
 
     /**
      * This methods sets the turn mode. Supported modes are in-place (default), pivot and curve.
@@ -262,7 +413,7 @@ public class TrcPidDrive implements TrcTaskMgr.Task
 
         if (turnPidCtrl != null)
         {
-            turnPidCtrl.setTarget(turnTarget);
+            turnPidCtrl.setTarget(turnTarget, warpSpace);
         }
 
         if (event != null)
@@ -279,7 +430,7 @@ public class TrcPidDrive implements TrcTaskMgr.Task
 
         this.holdTarget = holdTarget;
         this.turnOnly = xTarget == 0.0 && yTarget == 0.0 && turnTarget != 0.0;
-        this.pidDriveStarted = false;
+        driveBase.resetStallTimer();
 
         setTaskEnabled(true);
 
@@ -484,19 +635,18 @@ public class TrcPidDrive implements TrcTaskMgr.Task
 
         if (debugEnabled)
         {
-            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.FUNC, "enabled=%s", Boolean.toString(enabled));
+            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.FUNC, "enabled=%b", enabled);
         }
 
-        TrcTaskMgr taskMgr = TrcTaskMgr.getInstance();
         if (enabled)
         {
-            taskMgr.registerTask(instanceName, this, TrcTaskMgr.TaskType.STOP_TASK);
-            taskMgr.registerTask(instanceName, this, TrcTaskMgr.TaskType.POSTCONTINUOUS_TASK);
+            stopTaskObj.registerTask(TaskType.STOP_TASK);
+            postContinuousTaskObj.registerTask(TaskType.POSTCONTINUOUS_TASK);
         }
         else
         {
-            taskMgr.unregisterTask(this, TrcTaskMgr.TaskType.STOP_TASK);
-            taskMgr.unregisterTask(this, TrcTaskMgr.TaskType.POSTCONTINUOUS_TASK);
+            stopTaskObj.unregisterTask(TaskType.STOP_TASK);
+            postContinuousTaskObj.unregisterTask(TaskType.POSTCONTINUOUS_TASK);
         }
         active = enabled;
 
@@ -510,24 +660,19 @@ public class TrcPidDrive implements TrcTaskMgr.Task
     // Implements TrcTaskMgr.Task
     //
 
-    @Override
-    public void startTask(TrcRobot.RunMode runMode)
-    {
-    }   //startTask
-
     /**
      * This method is called before the competition mode is about the end to stop the PID drive operation if any.
      *
+     * @param taskType specifies the type of task being run.
      * @param runMode specifies the competition mode that is about to end (e.g. Autonomous, TeleOp, Test).
      */
-    @Override
-    public void stopTask(TrcRobot.RunMode runMode)
+    public void stopTask(TrcTaskMgr.TaskType taskType, TrcRobot.RunMode runMode)
     {
         final String funcName = "stopTask";
 
         if (debugEnabled)
         {
-            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.TASK, "mode=%s", runMode.toString());
+            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.TASK, "taskType=%s,runMode=%s", taskType, runMode);
         }
 
         stop();
@@ -538,40 +683,19 @@ public class TrcPidDrive implements TrcTaskMgr.Task
         }
     }   //stopTask
 
-    @Override
-    public void prePeriodicTask(TrcRobot.RunMode runMode)
-    {
-    }   //prePeriodicTask
-
-    @Override
-    public void postPeriodicTask(TrcRobot.RunMode runMode)
-    {
-    }   //postPeriodicTask
-
-    @Override
-    public void preContinuousTask(TrcRobot.RunMode runMode)
-    {
-    }   //preContinuousTask
-
     /**
      * This method is called periodically to execute the PID drive operation.
      *
+     * @param taskType specifies the type of task being run.
      * @param runMode specifies the competition mode that is running. (e.g. Autonomous, TeleOp, Test).
      */
-    @Override
-    public void postContinuousTask(TrcRobot.RunMode runMode)
+    public void postContinuousTask(TrcTaskMgr.TaskType taskType, TrcRobot.RunMode runMode)
     {
         final String funcName = "postContinuousTask";
 
         if (debugEnabled)
         {
-            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.TASK, "mode=%s", runMode.toString());
-        }
-
-        if (!pidDriveStarted &&
-            (driveBase.getXSpeed() != 0.0 || driveBase.getYSpeed() != 0.0 || driveBase.getTurnSpeed() != 0))
-        {
-            pidDriveStarted = true;
+            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.TASK, "taskType=%s,runMode=%s", taskType, runMode);
         }
 
         double xPower = turnOnly || xPidCtrl == null? 0.0: xPidCtrl.getOutput();
@@ -579,14 +703,48 @@ public class TrcPidDrive implements TrcTaskMgr.Task
         double turnPower = turnPidCtrl == null? 0.0: turnPidCtrl.getOutput();
 
         boolean expired = expiredTime != 0.0 && TrcUtil.getCurrentTime() >= expiredTime;
-        boolean stalled = pidDriveStarted && stallTimeout != 0.0 && driveBase.isStalled(stallTimeout);
+        boolean stalled = stallTimeout != 0.0 && driveBase.isStalled(stallTimeout);
         boolean xOnTarget = xPidCtrl == null || xPidCtrl.isOnTarget();
         boolean yOnTarget = yPidCtrl == null || yPidCtrl.isOnTarget();
         boolean turnOnTarget = turnPidCtrl == null || turnPidCtrl.isOnTarget();
 
-        if ((stalled || expired) && beepDevice != null)
+        if (stuckWheelHandler != null)
         {
-            beepDevice.playTone(beepFrequency, beepDuration);
+            if (driveBase.getNumMotors() > 2)
+            {
+                if (driveBase.isStalled(TrcDriveBase.MotorType.LEFT_FRONT, stuckTimeout))
+                {
+                    stuckWheelHandler.stuckWheel(this, TrcDriveBase.MotorType.LEFT_FRONT);
+                }
+
+                if (driveBase.isStalled(TrcDriveBase.MotorType.RIGHT_FRONT, stuckTimeout))
+                {
+                    stuckWheelHandler.stuckWheel(this, TrcDriveBase.MotorType.RIGHT_FRONT);
+                }
+            }
+
+            if (driveBase.isStalled(TrcDriveBase.MotorType.LEFT_REAR, stuckTimeout))
+            {
+                stuckWheelHandler.stuckWheel(this, TrcDriveBase.MotorType.LEFT_REAR);
+            }
+
+            if (driveBase.isStalled(TrcDriveBase.MotorType.RIGHT_REAR, stuckTimeout))
+            {
+                stuckWheelHandler.stuckWheel(this, TrcDriveBase.MotorType.RIGHT_REAR);
+            }
+        }
+
+        if ((stalled || expired) && (beepDevice != null || msgTracer != null))
+        {
+            if (beepDevice != null)
+            {
+                beepDevice.playTone(beepFrequency, beepDuration);
+            }
+
+            if (msgTracer != null)
+            {
+                msgTracer.traceInfo(funcName, "%s: Stalled=%s, Expired=%s", instanceName, stalled, expired);
+            }
         }
 
         if (maintainHeading)
@@ -621,7 +779,7 @@ public class TrcPidDrive implements TrcTaskMgr.Task
                     driveBase.arcadeDrive(0.0, turnPower);
                     break;
 
-                case PIVOT:
+                case PIVOT_FORWARD:
                 case CURVE:
                     if (turnPower < 0.0)
                     {
@@ -630,6 +788,17 @@ public class TrcPidDrive implements TrcTaskMgr.Task
                     else
                     {
                         driveBase.tankDrive(turnPower, 0.0);
+                    }
+                    break;
+
+                case PIVOT_BACKWARD:
+                    if (turnPower < 0.0)
+                    {
+                        driveBase.tankDrive(turnPower, 0.0);
+                    }
+                    else
+                    {
+                        driveBase.tankDrive(0.0, -turnPower);
                     }
                     break;
             }
@@ -645,6 +814,14 @@ public class TrcPidDrive implements TrcTaskMgr.Task
         else
         {
            driveBase.drive(yPower, turnPower);
+        }
+
+        if (msgTracer != null && tracePidInfo)
+        {
+            double currTime = TrcUtil.getCurrentTime();
+            if (xPidCtrl != null) xPidCtrl.printPidInfo(msgTracer, currTime, battery);
+            if (yPidCtrl != null) yPidCtrl.printPidInfo(msgTracer, currTime, battery);
+            if (turnPidCtrl != null) turnPidCtrl.printPidInfo(msgTracer, currTime, battery);
         }
 
         if (debugEnabled)

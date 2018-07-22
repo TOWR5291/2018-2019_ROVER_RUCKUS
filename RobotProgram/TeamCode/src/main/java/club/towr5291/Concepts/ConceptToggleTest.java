@@ -23,7 +23,7 @@ import hallib.HalDashboard;
 
  */
 
-@TeleOp(name="Concept: Toggle", group="Concept")
+@TeleOp(name="Concept: Toggle", group="5291Concept")
 //@Disabled
 public class ConceptToggleTest extends OpModeMasterLinear
 {
