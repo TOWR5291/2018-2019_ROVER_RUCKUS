@@ -14,6 +14,7 @@ import club.towr5291.R;
 import club.towr5291.functions.Constants;
 import club.towr5291.functions.FileLogger;
 import club.towr5291.functions.TOWR5291Tick;
+import club.towr5291.functions.TOWR5291Utils;
 import club.towr5291.libraries.robotConfig;
 import club.towr5291.libraries.robotConfigSettings;
 import club.towr5291.opmodes.OpModeMasterLinear;
@@ -120,7 +121,8 @@ public class ConceptTickTestMaxPower extends OpModeMasterLinear
             dashboard.displayPrintf(4, LABEL_WIDTH, "Robot Max : ", "" + robot.getMaxOutput());
             dashboard.displayPrintf(5, LABEL_WIDTH, "L Stick   : ", "" + gamepad1.left_stick_y);
             dashboard.displayPrintf(6, LABEL_WIDTH, "R Stick   : ", "" + gamepad1.right_stick_y);
-            dashboard.displayPrintf(7, LABEL_WIDTH, "# Lines   : ", "" + dashboard.getNumTextLines());
+            dashboard.displayPrintf(7, LABEL_WIDTH, "Voltage   : ", "" + TOWR5291Utils.getBatteryVoltage(hardwareMap));
+            dashboard.displayPrintf(8, LABEL_WIDTH, "# Lines   : ", "" + dashboard.getNumTextLines());
 
             robot.setHardwareDriveLeftMotorPower(gamepad1.left_stick_y);
             robot.setHardwareDriveRightMotorPower(gamepad1.right_stick_y);

@@ -22,6 +22,9 @@ package club.towr5291.functions;
  * Thanks Titan Robotics
  */
 
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
@@ -82,6 +85,23 @@ public class TOWR5291Utils {
     {
         return clipRange(value, -1.0, 1.0);
     }   //clipRange
+
+    /**
+     * Computes the current battery voltage
+     *
+     * @param hardwareMap specifies the hardwareMap to get the sensor from.
+     * @return the result of the battery sensor.
+     */
+    public static double getBatteryVoltage(HardwareMap hardwareMap) {
+        double result = Double.POSITIVE_INFINITY;
+        for (VoltageSensor sensor : hardwareMap.voltageSensor) {
+            double voltage = sensor.getVoltage();
+            if (voltage > 0) {
+                result = Math.min(result, voltage);
+            }
+        }
+        return result;
+    }
 
     /**
      * This method scales the given value from the source range to the target range.
