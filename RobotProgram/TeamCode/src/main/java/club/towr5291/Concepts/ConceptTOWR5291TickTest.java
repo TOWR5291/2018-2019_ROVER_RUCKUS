@@ -77,7 +77,7 @@ public class ConceptTOWR5291TickTest extends OpModeMasterLinear
         ourRobotConfig.setAllianceColor(sharedPreferences.getString("club.towr5291.Autonomous.Color", "Red"));
         ourRobotConfig.setAllianceStartPosition(sharedPreferences.getString("club.towr5291.Autonomous.StartPosition", "Left"));
         ourRobotConfig.setDelay(Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Delay", "0")));
-        ourRobotConfig.setRobotConfig(sharedPreferences.getString("club.towr5291.Autonomous.RobotConfig", "TileRunnerMecanum2x40"));
+        ourRobotConfig.setRobotConfigBase(sharedPreferences.getString("club.towr5291.Autonomous.RobotConfig", "TileRunnerMecanum2x40"));
         debug = Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Debug", "1"));
 
         //now we have loaded the config from sharedpreferences we can setup the robot
@@ -89,18 +89,18 @@ public class ConceptTOWR5291TickTest extends OpModeMasterLinear
         dashboard.displayPrintf(1, "initRobot");
         fileLogger.writeEvent(3, "FileLogger Started");
 
-        // Wait for the game to start (driver presses PLAY)
-        waitForStart();
-        runtime.reset();
-        dashboard.clearDisplay();
-        dashboard.displayPrintf(0, LABEL_WIDTH, "Text: ", "*** Robot Data ***");
-
         TOWR5291Tick tickTest = new TOWR5291Tick();
 
         tickTest.setTickIncrement(.1);
         tickTest.setTickMax(1);
         tickTest.setTickMin(0.5);
         tickTest.setRollOver(true);
+
+        // Wait for the game to start (driver presses PLAY)
+        waitForStart();
+        runtime.reset();
+        dashboard.clearDisplay();
+        dashboard.displayPrintf(0, LABEL_WIDTH, "Text: ", "*** Robot Data ***");
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {

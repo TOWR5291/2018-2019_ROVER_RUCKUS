@@ -105,6 +105,7 @@ import club.towr5291.functions.FileLogger;
 import club.towr5291.functions.JewelAnalysisOCV;
 import club.towr5291.functions.ReadStepFile;
 import club.towr5291.libraries.robotConfigSettings;
+import club.towr5291.libraries.robotConfig;
 import club.towr5291.libraries.LibraryStateSegAuto;
 import club.towr5291.robotconfig.HardwareDriveMotors;
 import hallib.HalDashboard;
@@ -158,7 +159,7 @@ public class AutoDriveTeam5291 extends OpModeMasterLinear {
     private String allianceColor;
     private String allianceStartPosition;
     private int delay;
-    private String robotConfig;
+    private String robotConfigBase;
 
     private ElapsedTime runtime = new ElapsedTime();
 
@@ -493,7 +494,7 @@ public class AutoDriveTeam5291 extends OpModeMasterLinear {
         allianceColor = sharedPreferences.getString("club.towr5291.Autonomous.Color", "Red");
         allianceStartPosition = sharedPreferences.getString("club.towr5291.Autonomous.StartPosition", "Left");
         delay = Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Delay", "0"));
-        robotConfig = sharedPreferences.getString("club.towr5291.Autonomous.RobotConfig", "TileRunnerMecanum2x40");
+        robotConfigBase = sharedPreferences.getString("club.towr5291.Autonomous.RobotConfigBase", "TileRunnerMecanum2x40");
         debug = Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Debug", "1"));
 
         //adjust debug level
@@ -503,7 +504,7 @@ public class AutoDriveTeam5291 extends OpModeMasterLinear {
         dashboard.displayPrintf(4, "Alliance          " + allianceColor);
         dashboard.displayPrintf(5, "Start Pos         " + allianceStartPosition);
         dashboard.displayPrintf(6, "Start Del         " + delay);
-        dashboard.displayPrintf(7, "Robot             " + robotConfig);
+        dashboard.displayPrintf(7, "Robot             " + robotConfigBase);
         dashboard.displayPrintf(7, "Debug Level       " + debug);
 
         dashboard.displayPrintf(1, "initRobot SharePreferences!");
@@ -537,9 +538,9 @@ public class AutoDriveTeam5291 extends OpModeMasterLinear {
         dashboard.displayPrintf(1, "initRobot Limit Switch Initiated!");
 
         //to add more config options edit strings.xml and AutonomousConfiguration.java
-        switch (robotConfig) {
+        switch (robotConfigBase) {
             case "TileRunner-2x40":   //Velocity Vortex Competition Base
-                REVERSE_DIRECTION = 1;                                                       // Reverse the direction without significant code changes, (using motor FORWARD REVERSE will affect the driver station as we use same robotconfig file
+                REVERSE_DIRECTION = 1;                                                       // Reverse the direction without significant code changes, (using motor FORWARD REVERSE will affect the driver station as we use same robotconfigBase file
                 COUNTS_PER_MOTOR_REV = 1120;                                                    // eg: TETRIX = 1440 pulses, NeveRest 20 = 560 pulses, NeveRest 40 =  1120, NeveRest 60 = 1680 pulses
                 DRIVE_GEAR_REDUCTION = 0.7;                                                    // This is < 1.0 if geared UP, Tilerunner is geared up
                 WHEEL_DIAMETER_INCHES = 4.0;                                                     // For figuring circumference
@@ -564,7 +565,7 @@ public class AutoDriveTeam5291 extends OpModeMasterLinear {
                 loadPowerTableTankTread();                                                          //load the power table
                 break;
             case "TileRunnerMecanum2x40":
-                REVERSE_DIRECTION = 1;                                                        // Reverse the direction without significant code changes, (using motor FORWARD REVERSE will affect the driver station as we use same robotconfig file
+                REVERSE_DIRECTION = 1;                                                        // Reverse the direction without significant code changes, (using motor FORWARD REVERSE will affect the driver station as we use same robotconfigBase file
                 COUNTS_PER_MOTOR_REV = 1120;                                                    // eg: TETRIX = 1440 pulses, NeveRest 20 = 560 pulses, NeveRest 40 =  1120, NeveRest 60 = 1680 pulses
                 DRIVE_GEAR_REDUCTION = 1.0;                                                     // This is < 1.0 if geared UP, Tilerunner is geared up
                 WHEEL_DIAMETER_INCHES = 4.0;                                                     // For figuring circumference
@@ -607,13 +608,13 @@ public class AutoDriveTeam5291 extends OpModeMasterLinear {
                 break;
         }
 
-        dashboard.displayPrintf(1, "initRobot Robot Settings Loaded" + robotConfig);
+        dashboard.displayPrintf(1, "initRobot Robot Settings Loaded " + robotConfigBase);
 
         fileLogger.writeEvent(1, TAG, "robotConfigTeam #  " + teamNumber);
         fileLogger.writeEvent(1, TAG, "Alliance Colour    " + allianceColor);
         fileLogger.writeEvent(1, TAG, "Alliance Start Pos " + allianceStartPosition);
         fileLogger.writeEvent(1, TAG, "Alliance Delay     " + delay);
-        fileLogger.writeEvent(1, TAG, "Robot Config       " + robotConfig);
+        fileLogger.writeEvent(1, TAG, "Robot ConfigBase   " + robotConfigBase);
         fileLogger.writeEvent(3, TAG, "Configuring Robot Parameters - Finished");
         fileLogger.writeEvent(3, TAG, "Loading Autonomous Steps - Start");
 
@@ -743,8 +744,8 @@ public class AutoDriveTeam5291 extends OpModeMasterLinear {
 
         dashboard.displayPrintf(1, "initRobot BaseDrive Loading");
 
-        robotDrive.init(fileLogger, hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(robotConfig));
-        robotDrive.init(hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(robotConfig));
+        robotDrive.init(fileLogger, hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(robotConfigBase));
+        robotDrive.init(hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(robotConfigBase));
         robotDrive.setHardwareDriveResetEncoders();
         robotDrive.setHardwareDriveRunUsingEncoders();
 
@@ -753,7 +754,7 @@ public class AutoDriveTeam5291 extends OpModeMasterLinear {
         fileLogger.writeEvent(3, TAG, "Configuring Motors Base - Finish");
         fileLogger.writeEvent(3, TAG, "Configuring Motors Arms - Start");
 
-        armDrive.init(fileLogger, hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(robotConfig), "lifttop", "liftbot", null, null);
+        armDrive.init(fileLogger, hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(robotConfigBase), "lifttop", "liftbot", null, null);
         armDrive.setHardwareDriveResetEncoders();
         armDrive.setHardwareDriveRunUsingEncoders();
 
@@ -2108,7 +2109,7 @@ public class AutoDriveTeam5291 extends OpModeMasterLinear {
                 //if within error margin stop
                 //if (robotDrive.leftMotor1.isBusy() && robotDrive.rightMotor1.isBusy()) {
                 //get motor busy state bitmap is right2, right1, left2, left1
-                if (((robotDrive.getHardwareDriveIsBusy() & (robotConfigSettings.motors.leftMotor1.toInt() | robotConfigSettings.motors.rightMotor1.toInt())) == (robotConfigSettings.motors.leftMotor1.toInt() | robotConfigSettings.motors.rightMotor1.toInt()))) {
+                if (((robotDrive.getHardwareDriveIsBusy() & (robotConfig.motors.leftMotor1.toInt() | robotConfig.motors.rightMotor1.toInt())) == (robotConfig.motors.leftMotor1.toInt() | robotConfig.motors.rightMotor1.toInt()))) {
                     fileLogger.writeEvent(3, "runningDriveHeadingStep", "Encoder counts per inch = " + COUNTS_PER_INCH + " dblDistanceFromStart " + dblDistanceFromStart + " dblDistanceToEnd " + dblDistanceToEnd + " Power Level " + dblStepSpeedTemp + " Running to target  L1, L2, R1, R2  " + mintStepLeftTarget1 + ", " + mintStepLeftTarget2 + ", " + mintStepRightTarget1 + ",  " + mintStepRightTarget2 + ", " + " Running at position L1 " + intLeft1MotorEncoderPosition + " L2 " + intLeft2MotorEncoderPosition + " R1 " + intRight1MotorEncoderPosition + " R2 " + intRight2MotorEncoderPosition);
                     dashboard.displayPrintf(3, "Path1", "Running to %7d :%7d", mintStepLeftTarget1, mintStepRightTarget1);
                     dashboard.displayPrintf(4, "Path2", "Running at %7d :%7d", intLeft1MotorEncoderPosition, intRight1MotorEncoderPosition);
@@ -2300,7 +2301,7 @@ public class AutoDriveTeam5291 extends OpModeMasterLinear {
                     }
                     //if (!robotDrive.leftMotor1.isBusy()) {
                     //get motor busy state bitmap is right2, right1, left2, left1
-                    if (((robotDrive.getHardwareDriveIsBusy() & robotConfigSettings.motors.leftMotor1.toInt()) == robotConfigSettings.motors.leftMotor1.toInt())) {
+                    if (((robotDrive.getHardwareDriveIsBusy() & robotConfig.motors.leftMotor1.toInt()) == robotConfig.motors.leftMotor1.toInt())) {
                         fileLogger.writeEvent(1, "PivotTurnStep()", "Complete         ");
                         mblnDisableVisionProcessing = false;  //enable vision processing
                         mintCurrentStatePivotTurn = stepState.STATE_COMPLETE;
@@ -2322,7 +2323,7 @@ public class AutoDriveTeam5291 extends OpModeMasterLinear {
                     }
                     //if (!robotDrive.rightMotor1.isBusy()) {
                     //get motor busy state bitmap is right2, right1, left2, left1
-                    if (((robotDrive.getHardwareDriveIsBusy() & robotConfigSettings.motors.rightMotor1.toInt()) == robotConfigSettings.motors.rightMotor1.toInt())) {
+                    if (((robotDrive.getHardwareDriveIsBusy() & robotConfig.motors.rightMotor1.toInt()) == robotConfig.motors.rightMotor1.toInt())) {
                         fileLogger.writeEvent(1, "PivotTurnStep()", "Complete         ");
                         mblnDisableVisionProcessing = false;  //enable vision processing
                         mintCurrentStatePivotTurn = stepState.STATE_COMPLETE;

@@ -400,7 +400,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         ourRobotConfig.setAllianceColor(sharedPreferences.getString("club.towr5291.Autonomous.Color", "Red"));
         ourRobotConfig.setAllianceStartPosition(sharedPreferences.getString("club.towr5291.Autonomous.StartPosition", "Left"));
         ourRobotConfig.setDelay(Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Delay", "0")));
-        ourRobotConfig.setRobotConfig(sharedPreferences.getString("club.towr5291.Autonomous.RobotConfig", "TileRunnerMecanum2x40"));
+        ourRobotConfig.setRobotConfigBase(sharedPreferences.getString("club.towr5291.Autonomous.robotConfigBase", "TileRunnerMecanum2x40"));
         debug = Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Debug", "1"));
 
         //now we have loaded the config from sharedpreferences we can setup the robot
@@ -413,7 +413,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         fileLogger.writeEvent(1, "Alliance Colour    " + ourRobotConfig.getAllianceColor());
         fileLogger.writeEvent(1, "Alliance Start Pos " + ourRobotConfig.getAllianceStartPosition());
         fileLogger.writeEvent(1, "Alliance Delay     " + ourRobotConfig.getDelay());
-        fileLogger.writeEvent(1, "Robot Config       " + ourRobotConfig.getRobotConfig());
+        fileLogger.writeEvent(1, "Robot Config Base  " + ourRobotConfig.getRobotConfigBase());
         fileLogger.writeEvent(3, "Configuring Robot Parameters - Finished");
         fileLogger.writeEvent(3, "Loading Autonomous Steps - Start");
 
@@ -423,7 +423,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         dashboard.displayPrintf(4, "Alliance          " + ourRobotConfig.getAllianceColor());
         dashboard.displayPrintf(5, "Start Pos         " + ourRobotConfig.getAllianceStartPosition());
         dashboard.displayPrintf(6, "Start Del         " + ourRobotConfig.getDelay());
-        dashboard.displayPrintf(7, "Robot             " + ourRobotConfig.getRobotConfig());
+        dashboard.displayPrintf(7, "Robot Base        " + ourRobotConfig.getRobotConfigBase());
         dashboard.displayPrintf(7, "Debug Level       " + debug);
         dashboard.displayPrintf(1, "initRobot SharePreferences!");
 
@@ -480,7 +480,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
 
         dashboard.displayPrintf(1, "initRobot BaseDrive Loading");
 
-        robotDrive.init(fileLogger, hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(ourRobotConfig.getRobotConfig()));
+        robotDrive.init(fileLogger, hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(ourRobotConfig.getRobotConfigBase()));
         robotDrive.setHardwareDriveResetEncoders();
         robotDrive.setHardwareDriveRunUsingEncoders();
 
@@ -489,7 +489,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         fileLogger.writeEvent(3,"Configuring Motors Base - Finish");
         fileLogger.writeEvent(3,"Configuring Motors Arms - Start");
 
-        armDrive.init(fileLogger, hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(ourRobotConfig.getRobotConfig()), "lifttop", "liftbot", null, null);
+        armDrive.init(fileLogger, hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(ourRobotConfig.getRobotConfigBase()), "lifttop", "liftbot", null, null);
         armDrive.setHardwareDriveResetEncoders();
         armDrive.setHardwareDriveRunUsingEncoders();
 
@@ -1120,7 +1120,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 //if within error margin stop
                 //if (robotDrive.leftMotor1.isBusy() && robotDrive.rightMotor1.isBusy()) {
                 //get motor busy state bitmap is right2, right1, left2, left1
-                if (((robotDrive.getHardwareDriveIsBusy() & (robotConfigSettings.motors.leftMotor1.toInt() | robotConfigSettings.motors.rightMotor1.toInt())) == (robotConfigSettings.motors.leftMotor1.toInt() | robotConfigSettings.motors.rightMotor1.toInt()))) {
+                if (((robotDrive.getHardwareDriveIsBusy() & (robotConfig.motors.leftMotor1.toInt() | robotConfig.motors.rightMotor1.toInt())) == (robotConfig.motors.leftMotor1.toInt() | robotConfig.motors.rightMotor1.toInt()))) {
                     fileLogger.writeEvent(3,"Encoder counts per inch = " + ourRobotConfig.getCOUNTS_PER_INCH() + " dblDistanceFromStart " + dblDistanceFromStart + " dblDistanceToEnd " + dblDistanceToEnd + " Power Level Left " + dblStepSpeedTempLeft + " Power Level Right " + dblStepSpeedTempRight + " Running to target  L1, L2, R1, R2  " + mintStepLeftTarget1 + ", " + mintStepLeftTarget2 + ", " + mintStepRightTarget1 + ",  " + mintStepRightTarget2 + ", " + " Running at position L1 " + intLeft1MotorEncoderPosition + " L2 " + intLeft2MotorEncoderPosition + " R1 " + intRight1MotorEncoderPosition + " R2 " + intRight2MotorEncoderPosition);
                     dashboard.displayPrintf(3, "Path1", "Running to %7d :%7d", mintStepLeftTarget1, mintStepRightTarget1);
                     dashboard.displayPrintf(4, "Path2", "Running at %7d :%7d", intLeft1MotorEncoderPosition, intRight1MotorEncoderPosition);
@@ -1314,7 +1314,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                     }
                     //if (!robotDrive.leftMotor1.isBusy()) {
                     //get motor busy state bitmap is right2, right1, left2, left1
-                    if (((robotDrive.getHardwareDriveIsBusy() & robotConfigSettings.motors.leftMotor1.toInt()) == robotConfigSettings.motors.leftMotor1.toInt())) {
+                    if (((robotDrive.getHardwareDriveIsBusy() & robotConfig.motors.leftMotor1.toInt()) == robotConfig.motors.leftMotor1.toInt())) {
                         fileLogger.writeEvent(1,"Complete........");
                         mblnDisableVisionProcessing = false;  //enable vision processing
                         mintCurrentStatePivotTurn = Constants.stepState.STATE_COMPLETE;
@@ -1336,7 +1336,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                     }
                     //if (!robotDrive.rightMotor1.isBusy()) {
                     //get motor busy state bitmap is right2, right1, left2, left1
-                    if (((robotDrive.getHardwareDriveIsBusy() & robotConfigSettings.motors.rightMotor1.toInt()) == robotConfigSettings.motors.rightMotor1.toInt())) {
+                    if (((robotDrive.getHardwareDriveIsBusy() & robotConfig.motors.rightMotor1.toInt()) == robotConfig.motors.rightMotor1.toInt())) {
                         fileLogger.writeEvent(1,"Complete.......");
                         mblnDisableVisionProcessing = false;  //enable vision processing
                         mintCurrentStatePivotTurn = Constants.stepState.STATE_COMPLETE;
@@ -2458,6 +2458,5 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         mintCurrentStateTankTurnGyroHeading = Constants.stepState.STATE_COMPLETE;
         mintCurrentStateMecanumStrafe       = Constants.stepState.STATE_COMPLETE;
         mintCurrentStateGyroTurnEncoder5291 = Constants.stepState.STATE_COMPLETE;
-
     }
 }

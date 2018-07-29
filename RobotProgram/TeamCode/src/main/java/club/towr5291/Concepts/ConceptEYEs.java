@@ -1,19 +1,24 @@
 package club.towr5291.Concepts;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import android.widget.TextView;
+
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
+
+import club.towr5291.R;
 import club.towr5291.functions.Constants;
 import club.towr5291.functions.FileLogger;
-import club.towr5291.libraries.TOWR5291LEDControl;
+import club.towr5291.libraries.TOWR5291EYEControl;
 import club.towr5291.opmodes.OpModeMasterLinear;
+import hallib.HalDashboard;
 
 
 /**
- * Created by Ian Haden TOWR5291 on 6/27/2018.
- * This OpMode is to demonstrate how to use the LED Class
- *
+ * Created by Ian Haden TOWR5291 on 7/27/2018.
+ * This OpMode is to demonstrate how to use the EYE Class
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,49 +41,62 @@ import club.towr5291.opmodes.OpModeMasterLinear;
  *
  * Modification history
  * Edited by:
- * Ian Haden 06/27/2018 -> Initial creation
- * Ian Haden 07/27/2018 -> Added comments and updated config settings
+ * Ian Haden 07/27/2018 -> Initial creation
  */
 
-@TeleOp(name = "Concept LEDs", group = "5291Concept")
+@TeleOp(name = "Concept EYEs", group = "5291Concept")
 //@Disabled
-public class ConceptLEDs extends OpModeMasterLinear {
+public class ConceptEYEs extends OpModeMasterLinear {
 
     //set up the variables for the logger
-    final String TAG = "Concept LEDs Demo";
+    final String TAG = "Concept EYEs Demo";
     private ElapsedTime runtime = new ElapsedTime();
     private FileLogger fileLogger;
     private int debug = 3;
     private int loop = 0;
-    private TOWR5291LEDControl LEDs;
-    private Constants.LEDState LEDStatus = Constants.LEDState.STATE_NULL;
+    private TOWR5291EYEControl EYEs;
+    private Constants.EYEState EYEStatus = Constants.EYEState.STATE_BLINK;
 
+    private static HalDashboard dashboard = null;
+    public static HalDashboard getDashboard()
+    {
+        return dashboard;
+    }
 
     @Override
     public void runOpMode() throws InterruptedException {
+
+        dashboard = HalDashboard.createInstance(telemetry);
+        dashboard = HalDashboard.getInstance();
+
         fileLogger = new FileLogger(runtime, debug, true);
         fileLogger.open();
         fileLogger.write("Time,SysMS,Thread,Event,Desc");
         fileLogger.writeEvent(1,TAG, "Log Started");
-        //LEDs = new TOWR5291LEDControl(hardwareMap, "lg", "lr", "lb", "rg", "rr", "rb");
-        LEDs = new TOWR5291LEDControl(hardwareMap);
-        //LEDs.setLEDControlDemoMode(true);
-        //LEDs.setLEDControlObjectColour(Constants.ObjectColours.UNKNOWN);
-        //LEDs.setLEDControlAlliance("Red");
-        LEDs.setLEDControlDemoMode(false);
-        LEDs.setLEDColour(Constants.LEDColours.LED_MAGENTA);
-        LEDStatus = Constants.LEDState.STATE_FLASHC_COLOUR;
+        EYEs = new TOWR5291EYEControl(hardwareMap);
+        //EYEs.setEYEControlDemoMode(true);
+        //EYEs.setEYEControlAlliance("Red");
+        EYEs.setEYEControlDemoMode(true);
+
+        FtcRobotControllerActivity activity = (FtcRobotControllerActivity) hardwareMap.appContext;
+
+        dashboard.setTextView((TextView) activity.findViewById(R.id.textOpMode));
+        dashboard.displayPrintf(0, 200, "Text: ", "*** Robot Data ***");
+        dashboard.displayPrintf(1, "Waiting For Start!");
+        EYEStatus = Constants.EYEState.STATE_BLINK;
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
+        dashboard.displayPrintf(1, "Running!");
+
         //the main loop.  this is where the action happens
         while (opModeIsActive()) {
-            LEDStatus = LEDs.LEDControlUpdate(LEDStatus);
+            EYEStatus = EYEs.EYEControlUpdate(EYEStatus);
             //this will log only when debug is at level 3 or above
-            fileLogger.writeEvent(3, TAG, "Runtime " + runtime + " - LEDStatus " + LEDStatus);
-            telemetry.addLine("runtime " + runtime + " - LEDStatus " + LEDStatus);
-            telemetry.update();
+            fileLogger.writeEvent(3, TAG, "Runtime " + runtime + " - EYEStatus " + EYEStatus.toString());
+            dashboard.displayPrintf(2, "Status = " + EYEStatus.toString());
         }
+        dashboard.displayPrintf(1, "Stopped!");
         //stop the log
         if (fileLogger != null) {
             fileLogger.writeEvent(1, TAG, "Stopped");

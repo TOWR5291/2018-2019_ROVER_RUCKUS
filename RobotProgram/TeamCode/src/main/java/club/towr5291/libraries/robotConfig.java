@@ -5,7 +5,30 @@ import java.util.HashMap;
 import club.towr5291.functions.ReadStepFileRoverRuckus;
 
 /**
- * Created by ianhaden on 2/6/18.
+ * Created by Ian Haden on 02/06/2018.
+ *
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * Modification history
+ * Edited by:
+ * Ian Haden 02/06/2018 -> Initial creation
  */
 
 public class robotConfig {
@@ -14,7 +37,7 @@ public class robotConfig {
     private String allianceColor;
     private String allianceStartPosition;
     private int delay;
-    private String robotConfig;
+    private String robotConfigBase;
 
     private ReadStepFileRoverRuckus autonomousStepsFile = new ReadStepFileRoverRuckus();
 
@@ -27,9 +50,9 @@ public class robotConfig {
     private double ROBOT_TRACK;                                                 //  distance between centerline of rear wheels robot will pivot on rear wheel of omni on front, 16.5 track is 103.67 inches full circle
     private double COUNTS_PER_DEGREE;
     private double WHEEL_TURN_FUDGE;
-    private double REVERSE_DIRECTION;                                           // determines which directin the robot runs when FW is positive or negative when commanded to move a direction
-    private int    LIFTMAIN_COUNTS_PER_INCH;                                    //number of encoder counts oer inch
-    private int    LIFTTOP_COUNTS_PER_INCH;                                     //number of encoder counts oer inch
+    private double REVERSE_DIRECTION;                                           // determines which direction the robot runs when FW is positive or negative when commanded to move a direction
+    private int    LIFTMAIN_COUNTS_PER_INCH;                                    // number of encoder counts oer inch
+    private int    LIFTTOP_COUNTS_PER_INCH;                                     // number of encoder counts oer inch
     private double COUNTS_PER_INCH_STRAFE;
     private double COUNTS_PER_INCH_STRAFE_FRONT_OFFSET;
     private double COUNTS_PER_INCH_STRAFE_REAR_OFFSET;
@@ -37,6 +60,85 @@ public class robotConfig {
     private double COUNTS_PER_INCH_STRAFE_RIGHT_OFFSET;
     private double MECANUM_TURN_OFFSET;
 
+    public enum eyeServos {
+        rightEYE ("rightEYE", 80, 120, 81),
+        leftEYE ("leftEYE", 80, 120, 83);
+
+        private final String name;
+        private final double min;
+        private final double max;
+        private final double home;
+
+        eyeServos (String name, double min, double max, double home) {
+            this.name = name;
+            this.min = min;
+            this.max = max;
+            this.home = home;
+        }
+
+        public String toString() {
+            return name;
+        }
+
+        public double minPos() {
+            return this.min;
+        }
+        public double maxPos() {
+            return this.max;
+        }
+        public double homePos() {
+            return this.home;
+        }
+
+    }
+
+    public enum motors {
+        leftMotor1 ("leftmotor1", 1),
+        leftMotor2 ("leftmotor2", 2),
+        rightMotor1 ("rightmotor1", 4),
+        rightMotor2 ("rightmotor2", 8);
+
+        private final String name;
+        private final int value;
+
+        motors (String name, int value) {
+            this.name = name;
+            this.value = value;
+        }
+
+        public String toString() {
+            return name;
+        }
+
+        public int toInt() {
+            return value;
+        }
+    }
+
+    public enum LEDnames {
+        leftGreen ("green1", 1),
+        leftRed ("red1", 2),
+        leftBlue ("blue1", 4),
+        rightGreen ("green2", 8),
+        rightRed ("red2", 16),
+        rightBlue ("blue2", 32);
+
+        private final String name;
+        private final int value;
+
+        LEDnames (String name, int value) {
+            this.name = name;
+            this.value = value;
+        }
+
+        public String toString() {
+            return name;
+        }
+
+        public int toInt() {
+            return value;
+        }
+    }
 
     public double getCOUNTS_PER_INCH() {
         return COUNTS_PER_INCH;
@@ -69,13 +171,13 @@ public class robotConfig {
         this.allianceColor = "";
         this.allianceStartPosition = "";
         this.delay = 0;
-        this.robotConfig = "";
+        this.robotConfigBase = "";
     }
 
     public boolean initConfig() {
         boolean configLoaded = false;
 
-        switch (robotConfig) {
+        switch (robotConfigBase) {
             case "TileRunner-2x40":   //Velocity Vortex Competition Base
                 REVERSE_DIRECTION = 1;                                                       // Reverse the direction without significant code changes, (using motor FORWARD REVERSE will affect the driver station as we use same robotconfig file
                 COUNTS_PER_MOTOR_REV = 1120;                                                    // eg: TETRIX = 1440 pulses, NeveRest 20 = 560 pulses, NeveRest 40 =  1120, NeveRest 60 = 1680 pulses
@@ -182,14 +284,12 @@ public class robotConfig {
         this.delay = delay;
     }
 
-    public String getRobotConfig() {
-        return this.robotConfig;
+    public String getRobotConfigBase() {
+        return this.robotConfigBase;
     }
 
-    public void setRobotConfig(String robotConfig) {
-        this.robotConfig = robotConfig;
+    public void setRobotConfigBase(String robotConfig) {
+        this.robotConfigBase = robotConfig;
     }
-
-
 
 }

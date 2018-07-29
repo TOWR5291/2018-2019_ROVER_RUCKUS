@@ -1,6 +1,19 @@
 package club.towr5291.functions;
-/*
- * Copyright (c) 2015 Titan Robotics Club (http://www.titanrobotics.com)
+
+import android.util.Log;
+
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
+/**
+ * Created by Ian Haden on 11/04/2017.
+ * This class is a collection of utilities that are useful to reuse
+ *
+ * Some were taken from Titan Robotics Titan Robotics Club (http://www.titanrobotics.com)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,23 +32,19 @@ package club.towr5291.functions;
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- * Thanks Titan Robotics
+ *
+ * Modification history
+ * Edited by:
+ * Wyatt Ashley 07/20/2018 ->  Initial creation
+ * Ian Haden 07/22/2018 -> Added comments and removed soem unneed steps, renamed some variables so they represent their respective functions
  */
 
-import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.VoltageSensor;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-
-/**
- * Created by lztdd0 on 11/4/17.
- */
 
 public class TOWR5291Utils {
 
     /**
      * This method clips the given value to the range limited by the given low and high limits.
+     * Copyright (c) 2015 Titan Robotics Club (http://www.titanrobotics.com)
      *
      * @param value specifies the value to be clipped
      * @param lowLimit specifies the low limit of the range.
@@ -47,6 +56,32 @@ public class TOWR5291Utils {
         return (value < lowLimit)? lowLimit: (value > highLimit)? highLimit: value;
     }   //clipRange
 
+
+    /**
+     * This method clips the given value to the range limited by the given low and high limits.
+     * Copyright (c) 2015 Titan Robotics Club (http://www.titanrobotics.com)
+     *
+     * @param value specifies the value to be clipped
+     * @param lowLimit specifies the low limit of the range.
+     * @param highLimit specifies the high limit of the range.
+     * @return the result of the clipped value.
+     */
+    public static double clipRange(double value, double lowLimit, double highLimit)
+    {
+        return (value < lowLimit)? lowLimit: (value > highLimit)? highLimit: value;
+    }   //clipRange
+
+    /**
+     * This method clips the given value to the range between -1.0 and 1.0.
+     * Copyright (c) 2015 Titan Robotics Club (http://www.titanrobotics.com)
+     *
+     * @param value specifies the value to be clipped
+     * @return the result of the clipped value.
+     */
+    public static double clipRange(double value)
+    {
+        return clipRange(value, -1.0, 1.0);
+    }   //clipRange
 
     /**
      * This method rounds the double
@@ -61,30 +96,6 @@ public class TOWR5291Utils {
         bd = bd.setScale(places, RoundingMode.HALF_UP);
         return bd.doubleValue();
     }
-
-    /**
-     * This method clips the given value to the range limited by the given low and high limits.
-     *
-     * @param value specifies the value to be clipped
-     * @param lowLimit specifies the low limit of the range.
-     * @param highLimit specifies the high limit of the range.
-     * @return the result of the clipped value.
-     */
-    public static double clipRange(double value, double lowLimit, double highLimit)
-    {
-        return (value < lowLimit)? lowLimit: (value > highLimit)? highLimit: value;
-    }   //clipRange
-
-    /**
-     * This method clips the given value to the range between -1.0 and 1.0.
-     *
-     * @param value specifies the value to be clipped
-     * @return the result of the clipped value.
-     */
-    public static double clipRange(double value)
-    {
-        return clipRange(value, -1.0, 1.0);
-    }   //clipRange
 
     /**
      * Computes the current battery voltage
@@ -157,6 +168,62 @@ public class TOWR5291Utils {
         }
     }
 
+    /**
+     * This method moves the servo to the desired position in degrees.
+     *
+     * @param servo specifies servo to move.
+     * @param Position specifies the position to move to.
+     * @param RangeMin specifies the minimum position the servo can move.
+     * @param RangeMax specifies the maximum position the servo can move.
+     */
+    public static boolean moveServo (Servo servo, double Position, double RangeMin, double RangeMax ) {
+        //set right position
+        if ((scaleRange(Position, 0, 180, 0, 1) < RangeMin ) ||
+                (scaleRange(Position, 0, 180, 0, 1) > RangeMax )) {
+            return false;
+        }
+        servo.setPosition(scaleRange(Position, 0, 180, 0, 1));
+        return true;
+    }
+    /**
+     * This method moves the servo to the desired position in degrees.
+     *
+     * @param servoIn specifies TOWR5291 servo to move.
+     * @param Position specifies the position to move to in degrees.
+     */
+    public static boolean moveServo (Constants.TOWR5291Servo servoIn, double Position) {
+        //set right position
+        if ((Position < servoIn.minimumPosition ) || (Position > servoIn.maximumPosition )) {
+            return false;
+        }
+        servoIn.servo.setPosition(scaleRange(Position, 0, 180, 0, 1));
 
+        return true;
+    }
+    /**
+     * This method moves the servo to the home position in degrees.
+     * @param servoIn specifies TOWR5291 servo to move.
+     */
+    public static boolean moveServo (Constants.TOWR5291Servo servoIn) {
+        return moveServo(servoIn, servoIn.homePosition);
+    }
+
+    /**
+     * This method moves the servo an offset from the current position.
+     *
+     * @param servoIn specifies TOWR5291 servo to move.
+     * @param offset specifies the offset to move in degrees.
+     */
+    public static boolean moveServoOffset (Constants.TOWR5291Servo servoIn, double offset) {
+        double currentPosition = scaleRange(servoIn.servo.getPosition(), 0, 1, 0, 180);
+        Log.d("Here1", "currentPosition: " + currentPosition);
+        if (((offset + currentPosition) < servoIn.minimumPosition ) || ((offset + currentPosition) > servoIn.maximumPosition )) {
+            Log.d("Here2", "desiredPosition: " + (offset + currentPosition));
+            return false;
+        }
+        Log.d("Here3", "desiredPosition: " + (offset + currentPosition));
+        servoIn.servo.setPosition(scaleRange(offset + currentPosition, 0, 180, 0, 1));
+        return true;
+    }
 
 }

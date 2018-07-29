@@ -9,7 +9,14 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import club.towr5291.functions.Constants;
 
 /**
- * Created by ianhaden on 26/5/18.
+ * Created by Ian Haden TOWR5291 on 5/26/2018.
+ * This class was created as a demonstration on how to create and use a class especially when code is re used
+ *
+ *
+ * Modification history
+ * Edited by:
+ * Ian Haden 05/26/2018 -> Initial creation
+ * Ian Haden 07/18/2018 -> Added comments, renamed some variables so they represent their respective functions
  */
 
 public class TOWR5291LEDControl {
@@ -56,6 +63,18 @@ public class TOWR5291LEDControl {
 
     private ElapsedTime mStateTime = new ElapsedTime();     // Time into current state, used for the timeout
 
+    /**
+     * Constructor
+     * This method scales the given value from the source range to the target range.
+     *
+     * @param hardwareMapIn Hardware Map of the robot.
+     * @param LeftGreenTag specifies the tag programmed into the module.
+     * @param LeftRedTag specifies the tag programmed into the module.
+     * @param LeftBlueTag specifies the tag programmed into the module.
+     * @param RightGreenTag specifies the tag programmed into the module.
+     * @param RightRedTag specifies the tag programmed into the module.
+     * @param RightBlueTag specifies the tag programmed into the module.
+     */
     public TOWR5291LEDControl(HardwareMap hardwareMapIn, String LeftGreenTag, String LeftRedTag, String LeftBlueTag, String RightGreenTag, String RightRedTag, String RightBlueTag) {
         this.hardwareMap = hardwareMapIn;
         this.greenLeftLedChannel = hardwareMap.get(DigitalChannel.class, LeftGreenTag);    //  Use generic form of device mapping
@@ -64,6 +83,30 @@ public class TOWR5291LEDControl {
         this.greenRightLedChannel = hardwareMap.get(DigitalChannel.class, RightGreenTag);    //  Use generic form of device mapping
         this.redRightLedChannel = hardwareMap.get(DigitalChannel.class, RightRedTag);    //  Use generic form of device mapping
         this.blueRightLedChannel = hardwareMap.get(DigitalChannel.class, RightBlueTag);    //  Use generic form of device mapping
+        initCoreVariables();
+    }
+
+    /**
+     * Constructor
+     * This method scales the given value from the source range to the target range.
+     *
+     * @param hardwareMapIn Hardware Map of the robot.
+     */
+    public TOWR5291LEDControl(HardwareMap hardwareMapIn) {
+        this.hardwareMap = hardwareMapIn;
+        this.greenLeftLedChannel = hardwareMap.get(DigitalChannel.class, robotConfig.LEDnames.leftGreen.toString());    //  Use generic form of device mapping
+        this.redLeftLedChannel = hardwareMap.get(DigitalChannel.class, robotConfig.LEDnames.leftRed.toString());    //  Use generic form of device mapping
+        this.blueLeftLedChannel = hardwareMap.get(DigitalChannel.class, robotConfig.LEDnames.leftBlue.toString());    //  Use generic form of device mapping
+        this.greenRightLedChannel = hardwareMap.get(DigitalChannel.class, robotConfig.LEDnames.rightGreen.toString());    //  Use generic form of device mapping
+        this.redRightLedChannel = hardwareMap.get(DigitalChannel.class, robotConfig.LEDnames.rightRed.toString());    //  Use generic form of device mapping
+        this.blueRightLedChannel = hardwareMap.get(DigitalChannel.class, robotConfig.LEDnames.rightBlue.toString());    //  Use generic form of device mapping
+        initCoreVariables();
+    }
+
+    /**
+     * init the core variables needed when the class is constructed for all constructors
+     */
+    private void initCoreVariables() {
         this.greenLeftLedChannel.setMode(DigitalChannel.Mode.OUTPUT);
         this.redLeftLedChannel.setMode(DigitalChannel.Mode.OUTPUT);
         this.blueLeftLedChannel.setMode(DigitalChannel.Mode.OUTPUT);
@@ -85,6 +128,9 @@ public class TOWR5291LEDControl {
         this.side = Constants.RobotSide.BOTH;
     }
 
+    /**
+     * Set the LED control DEMO Mode on or off with an optional timer
+     */
     public void setLEDControlDemoMode(boolean demo) {
         setLEDControlDemoMode(demo, this.demotimer);
     }
@@ -93,34 +139,57 @@ public class TOWR5291LEDControl {
         if (timer > 200)
             this.demotimer = timer;
         this.demo = demo;
-
     }
+
+    /**
+     * Get whether the LED control is in DEMO mode or in control mode
+     */
     public boolean getLEDControlDemoMode() {
         return this.demo;
     }
+
+    /**
+     * Get the value of the demo timer
+     */
     public int getLEDControlDemoTimer() {
         return this.demotimer;
     }
 
+    /**
+     * Set the LED Left Colour
+     */
     public void setLEDLeftColour(Constants.LEDColours colour) {
         this.mLEDLeftColour = colour;
         this.side = Constants.RobotSide.LEFT;  //Left Side Only
     }
 
+    /**
+     * Set the LED Right Colour
+     */
     public void setLEDRightColour(Constants.LEDColours colour) {
         this.mLEDRightColour = colour;
         this.side = Constants.RobotSide.RIGHT;  //Right Side Only
     }
+
+    /**
+     * Set the LED Colour for ALL LEDS
+     */
     public void setLEDColour(Constants.LEDColours colour) {
         setLEDLeftColour(colour);
         setLEDRightColour(colour);
         this.side = Constants.RobotSide.BOTH;  //Both Side
     }
 
+    /**
+     * Set the LED Colour to the Alliance Colour
+     */
     public void setLEDControlAlliance(String allianceColour) {
         this.mAllianceColour = allianceColour;
     }
 
+    /**
+     * Set the LED Colour to the Vision Detected Colour
+     */
     public void setLEDControlObjectColour(Constants.ObjectColours objectColour) {
         this.mObjectColour = objectColour;
     }

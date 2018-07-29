@@ -1,7 +1,33 @@
 package club.towr5291.functions;
 
+import com.qualcomm.robotcore.hardware.Servo;
+
 /**
- * Created by LZTDD0 on 11/7/2016.
+ * Created by Ian Haden on 11/7/2016.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ *  *
+ * Modification history
+ * Edited by:
+ * Ian Haden 11/07/2016 -> Initial creation
+ * Ian Haden 27/07/2018 -> Added Comments
  */
 
 
@@ -11,146 +37,145 @@ public abstract class Constants {
     private static final double BEACON_HEIGHT = 14.5;    //entire beacon height
     private static final double BEACON_WH_RATIO = BEACON_WIDTH / BEACON_HEIGHT; //entire beacon ratio
 
+    public static class TOWR5291Servo {
+        public Servo servo;
+        public double minimumPosition;
+        public double maximumPosition;
+        public double homePosition;
 
-
-
+        public TOWR5291Servo(Servo servoName, double minPos, double maxPos, double homePos) {
+            this.servo = servoName;
+            this.minimumPosition = minPos;
+            this.maximumPosition = maxPos;
+            this.homePosition = homePos;
+        }
+    }
 
     public enum stepState {
-        STATE_INIT,
-        STATE_START,
-        STATE_RUNNING,
-        STATE_PAUSE,
-        STATE_COMPLETE,
-        STATE_TIMEOUT,
-        STATE_ERROR,
-        STATE_FINISHED
+        STATE_INIT ("STATE_INIT"),
+        STATE_START ("STATE_START"),
+        STATE_RUNNING ("STATE_RUNNING"),
+        STATE_PAUSE ("STATE_PAUSE"),
+        STATE_COMPLETE ("STATE_COMPLETE"),
+        STATE_TIMEOUT ("STATE_TIMEOUT"),
+        STATE_ERROR ("STATE_ERROR"),
+        STATE_FINISHED ("STATE_FINISHED");
+
+        private final String name;
+
+        stepState (String name) {
+            this.name = name;
+        }
+
+        public String toString() {
+            return name;
+        }
     }
 
     public enum LEDColours {
-        LED_WHITE,  //all on
-        LED_RED, //red on
-        LED_BLUE, //blue on
-        LED_CYAN, //blue and green on
-        LED_GREEN,  //green on
-        LED_MAGENTA,  //red and blue on
-        LED_YELLOW,  //green and red on
-        LED_OFF
+        LED_WHITE ("LED_WHITE"),        //all on
+        LED_RED ("LED_RED"),            //red on
+        LED_BLUE ("LED_BLUE"),          //blue on
+        LED_CYAN ("LED_CYAN"),          //blue and green on
+        LED_GREEN ("LED_GREEN"),        //green on
+        LED_MAGENTA ("LED_MAGENTA"),    //red and blue on
+        LED_YELLOW ("LED_YELLOW"),      //green and red on
+        LED_OFF ("LED_OFF");
+
+        private final String name;
+
+        LEDColours (String name) {
+            this.name = name;
+        }
+
+        public String toString() {
+            return name;
+        }
     }
 
     public enum LEDState {
-        STATE_NULL,
-        STATE_ERROR,
-        STATE_TEAM,
-        STATE_MOVING,
-        STATE_OBJECT,
-        STATE_SUCCESS,
-        STATE_COLOUR,
-        STATE_FLASHC_COLOUR,
-        STATE_FLASHV_COLOUR,
-        STATE_FINISHED
+        STATE_NULL ("STATE_NULL"),
+        STATE_ERROR ("STATE_ERROR"),
+        STATE_TEAM ("STATE_TEAM"),
+        STATE_MOVING ("STATE_MOVING"),
+        STATE_OBJECT ("STATE_OBJECT"),
+        STATE_SUCCESS ("STATE_SUCCESS"),
+        STATE_COLOUR ("STATE_COLOUR"),
+        STATE_FLASHC_COLOUR ("STATE_FLASHC_COLOUR"),
+        STATE_FLASHV_COLOUR ("STATE_FLASHV_COLOUR"),
+        STATE_FINISHED ("STATE_FINISHED");
+
+        private final String name;
+
+        LEDState (String name) {
+            this.name = name;
+        }
+
+        public String toString() {
+            return name;
+        }
+    }
+
+    public enum EYEState {
+        STATE_ERROR ("STATE_ERROR"),
+        STATE_MOVING ("STATE_MOVING"),
+        STATE_OBJECT ("STATE_OBJECT"),
+        STATE_SUCCESS ("STATE_SUCCESS"),
+        STATE_WINKLEFT ("STATE_WINKLEFT"),
+        STATE_WINKRIGHT ("STATE_WINKRIGHT"),
+        STATE_BLINK ("STATE_BLINK"),
+        STATE_OPEN ("STATE_OPEN"),
+        STATE_ANGRY ("STATE_ANGRY"),
+        STATE_CLOSED ("STATE_CLOSED"),
+        STATE_FINISHED ("STATE_FINISHED");
+
+        private final String name;
+
+        EYEState (String name) {
+            this.name = name;
+        }
+
+        public String toString() {
+            return name;
+        }
     }
 
     public enum RobotSide {
-        LEFT,
-        RIGHT,
-        BOTH
+        LEFT ("LEFT"),
+        RIGHT ("RIGHT"),
+        BOTH ("BOTH");
+
+        private final String name;
+
+        RobotSide (String name) {
+            this.name = name;
+        }
+
+        public String toString() {
+            return name;
+        }
     }
 
     public enum ObjectColours {
-        OBJECT_RED,
-        OBJECT_BLUE,
-        OBJECT_RED_BLUE,
-        OBJECT_BLUE_RED,
-        OBJECT_RED_LEFT,
-        OBJECT_RED_RIGHT,
-        OBJECT_BLUE_LEFT,
-        OBJECT_BLUE_RIGHT,
-        UNKNOWN;
+        OBJECT_RED ("OBJECT_RED"),
+        OBJECT_BLUE ("OBJECT_BLUE"),
+        OBJECT_RED_BLUE ("OBJECT_RED_BLUE"),
+        OBJECT_BLUE_RED ("OBJECT_BLUE_RED"),
+        OBJECT_RED_LEFT ("OBJECT_RED_LEFT"),
+        OBJECT_RED_RIGHT ("OBJECT_RED_RIGHT"),
+        OBJECT_BLUE_LEFT ("OBJECT_BLUE_LEFT"),
+        OBJECT_BLUE_RIGHT ("OBJECT_BLUE_RIGHT"),
+        UNKNOWN ("OBJECT_?????");
 
-        public String toString() {
-            switch (this) {
-                case OBJECT_RED:
-                    return "RED";
-                case OBJECT_BLUE:
-                    return "BLUE";
-                case OBJECT_RED_BLUE:
-                    return "RED_BLUE";
-                case OBJECT_RED_LEFT:
-                    return "RED_LEFT";
-                case OBJECT_RED_RIGHT:
-                    return "RED_RIGHT";
-                case OBJECT_BLUE_RED:
-                    return "BLUE_RED";
-                case OBJECT_BLUE_LEFT:
-                    return "BLUE_LEFT";
-                case OBJECT_BLUE_RIGHT:
-                    return "BLUE_RIGHT";
-                case UNKNOWN:
-                default:
-                    return "???";
-            }
-        }
-    }
+        private final String name;
 
-    public enum motorConfig {
-        leftMotor1,
-        leftMotor2,
-        rightMotor1,
-        rightMotor2,
-        liftMotor1,
-        liftMotor2,
-        UNKNOWN;
-
-        public String toString() {
-            switch (this) {
-                case leftMotor1:
-                    return "leftMotor1";
-                case leftMotor2:
-                    return "leftMotor2";
-                case rightMotor1:
-                    return "rightMotor1";
-                case rightMotor2:
-                    return "rightMotor2";
-                case liftMotor1:
-                    return "liftMotor1";
-                case liftMotor2:
-                    return "liftMotor2";
-                case UNKNOWN:
-                default:
-                    return "???";
-            }
-        }
-    }
-
-    public enum servoConfig {
-        leftMotor1,
-        leftMotor2,
-        rightMotor1,
-        rightMotor2,
-        liftMotor1,
-        liftMotor2,
-        UNKNOWN;
-
-        public String toString() {
-            switch (this) {
-                case leftMotor1:
-                    return "leftMotor1";
-                case leftMotor2:
-                    return "leftMotor2";
-                case rightMotor1:
-                    return "rightMotor1";
-                case rightMotor2:
-                    return "rightMotor2";
-                case liftMotor1:
-                    return "liftMotor1";
-                case liftMotor2:
-                    return "liftMotor2";
-                case UNKNOWN:
-                default:
-                    return "???";
-            }
+        ObjectColours (String name) {
+            this.name = name;
         }
 
+        public String toString() {
+            return name;
+        }
     }
 
 }

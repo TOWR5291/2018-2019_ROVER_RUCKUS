@@ -78,17 +78,13 @@ public class ConceptTickTestMaxPower extends OpModeMasterLinear
         ourRobotConfig.setAllianceColor(sharedPreferences.getString("club.towr5291.Autonomous.Color", "Red"));
         ourRobotConfig.setAllianceStartPosition(sharedPreferences.getString("club.towr5291.Autonomous.StartPosition", "Left"));
         ourRobotConfig.setDelay(Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Delay", "0")));
-        ourRobotConfig.setRobotConfig(sharedPreferences.getString("club.towr5291.Autonomous.RobotConfig", "TileRunnerMecanum2x40"));
+        ourRobotConfig.setRobotConfigBase(sharedPreferences.getString("club.towr5291.Autonomous.RobotConfig", "TileRunnerMecanum2x40"));
         debug = Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Debug", "1"));
 
         //now we have loaded the config from sharedpreferences we can setup the robot
         ourRobotConfig.initConfig();
 
-        robot.init(fileLogger, hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(ourRobotConfig.getRobotConfig()),
-                Constants.motorConfig.leftMotor1.toString(),
-                Constants.motorConfig.leftMotor2.toString(),
-                Constants.motorConfig.rightMotor1.toString(),
-                Constants.motorConfig.rightMotor2.toString());
+        robot.init(fileLogger, hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(ourRobotConfig.getRobotConfigBase()));
         //robot.setHardwareDriveDirections(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40);
 
         dashboard.displayPrintf(1, "initRobot");

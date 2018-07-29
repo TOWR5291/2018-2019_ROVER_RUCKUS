@@ -8,17 +8,42 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import club.towr5291.functions.Constants;
 import club.towr5291.functions.FileLogger;
 import club.towr5291.functions.TOWR5291Utils;
+import club.towr5291.libraries.robotConfig;
 import club.towr5291.libraries.robotConfigSettings;
 
 /**
  * This is NOT an opmode.
  *
  * This class can be used to define all the hardware for a drive base.
- * In this case that robot is a Pushbot.
- * See PushbotTeleopTank_Iterative and others classes starting with "Pushbot" for usage examples.
+ *
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  *
  * This hardware class assumes the following device names have been configured on the robot:
  * Note:  All names are lower case and some have single spaces between words.
+ *
+ *
+ * Modification history
+ * Edited by:
+ * Ian Haden 07/15/2017 -> Initial creation
+ * Ian Haden 07/27/2018 -> Initial creation
+ *
  *
  */
 public class HardwareDriveMotors
@@ -37,41 +62,19 @@ public class HardwareDriveMotors
     private boolean gyroAssistEnabled = false;
 
     //set up the variables for the logger
-    private FileLogger fileLogger;
+    private FileLogger fileLogger = null;
     private static final String TAG = "HardwareDriveMotors";
+
     /* Constructor */
     public HardwareDriveMotors(){
 
     }
 
-    /* Initialize standard Hardware interfaces */
-    public void init(FileLogger fileLoggerFromMaster, HardwareMap ahwMap, robotConfigSettings.robotConfigChoice baseConfig) {
-        // Save reference to Hardware map
-        hwMap = ahwMap;
-
-        this.fileLogger = fileLoggerFromMaster;
-
-        // Define and Initialize Motors
-        baseMotor1  = hwMap.dcMotor.get(Constants.motorConfig.leftMotor1.toString());
-        baseMotor2  = hwMap.dcMotor.get(Constants.motorConfig.leftMotor2.toString());
-        baseMotor3  = hwMap.dcMotor.get(Constants.motorConfig.rightMotor1.toString());
-        baseMotor4  = hwMap.dcMotor.get(Constants.motorConfig.rightMotor2.toString());
-
-        setHardwareDriveDirections(baseConfig);
-
-        // Set all motors to zero power
-        setHardwareDrivePower(0);
-
-        // Set all motors to run without encoders.
-        // May want to use RUN_USING_ENCODERS if encoders are installed.
-        setHardwareDriveResetEncoders();
-
-        setHardwareDriveRunUsingEncoders();
-    }
-
     public void init(FileLogger fileloggerhandle, HardwareMap ahwMap, robotConfigSettings.robotConfigChoice baseConfig, String motor1, String motor2, String motor3, String motor4) {
         // Save reference to Hardware map
         hwMap = ahwMap;
+
+        this.fileLogger = fileloggerhandle;
 
         // Define and Initialize Motors
         if (motor1 != null)
@@ -95,25 +98,42 @@ public class HardwareDriveMotors
         setHardwareDriveRunUsingEncoders();
     }
 
+    /* Initialize standard Hardware interfaces */
+    public void init(FileLogger fileloggerhandle, HardwareMap ahwMap, robotConfigSettings.robotConfigChoice baseConfig) {
+        // Save reference to Hardware map
+        hwMap = ahwMap;
+
+        this.fileLogger = fileloggerhandle;
+
+        initMotorDefaults();
+
+        setHardwareDriveDirections(baseConfig);
+    }
+
+    /* Initialize standard Hardware interfaces */
     public void init(HardwareMap ahwMap, robotConfigSettings.robotConfigChoice baseConfig) {
         // Save reference to Hardware map
         hwMap = ahwMap;
 
-        // Define and Initialize Motors
-        baseMotor1  = hwMap.dcMotor.get(Constants.motorConfig.leftMotor1.toString());
-        baseMotor2  = hwMap.dcMotor.get(Constants.motorConfig.leftMotor2.toString());
-        baseMotor3  = hwMap.dcMotor.get(Constants.motorConfig.rightMotor1.toString());
-        baseMotor4  = hwMap.dcMotor.get(Constants.motorConfig.rightMotor2.toString());
+        initMotorDefaults();
 
         setHardwareDriveDirections(baseConfig);
+    }
 
+    private void initMotorDefaults () {
+
+        // Define and Initialize Motors
+        baseMotor1  = hwMap.dcMotor.get(robotConfig.motors.leftMotor1.toString());
+        baseMotor2  = hwMap.dcMotor.get(robotConfig.motors.leftMotor2.toString());
+        baseMotor3  = hwMap.dcMotor.get(robotConfig.motors.rightMotor1.toString());
+        baseMotor4  = hwMap.dcMotor.get(robotConfig.motors.rightMotor2.toString());
         // Set all motors to zero power
         setHardwareDrivePower(0);
-
         // Set all motors to run without encoders.
         // May want to use RUN_USING_ENCODERS if encoders are installed.
         setHardwareDriveResetEncoders();
         setHardwareDriveRunUsingEncoders();
+
     }
 
     public void setHardwareDriveDirections(robotConfigSettings.robotConfigChoice baseConfig){
@@ -346,10 +366,19 @@ public class HardwareDriveMotors
 
     public void logEncoderCounts(FileLogger MasterFileLogger){
         this.fileLogger = MasterFileLogger;
-        fileLogger.writeEvent(2,"baseMotor1 Encoder Counts" + String.valueOf(baseMotor1.getCurrentPosition()));
-        fileLogger.writeEvent(2,"baseMotor2 Encoder Counts" + String.valueOf(baseMotor2.getCurrentPosition()));
-        fileLogger.writeEvent(2,"baseMotor3 Encoder Counts" + String.valueOf(baseMotor3.getCurrentPosition()));
-        fileLogger.writeEvent(2,"baseMotor4 Encoder Counts" + String.valueOf(baseMotor4.getCurrentPosition()));
+        fileLogger.writeEvent(3,"baseMotor1 Encoder Counts" + String.valueOf(baseMotor1.getCurrentPosition()));
+        fileLogger.writeEvent(3,"baseMotor2 Encoder Counts" + String.valueOf(baseMotor2.getCurrentPosition()));
+        fileLogger.writeEvent(3,"baseMotor3 Encoder Counts" + String.valueOf(baseMotor3.getCurrentPosition()));
+        fileLogger.writeEvent(3,"baseMotor4 Encoder Counts" + String.valueOf(baseMotor4.getCurrentPosition()));
+    }
+
+    public void logEncoderCounts(){
+        if (this.fileLogger != null) {
+            fileLogger.writeEvent(3, "baseMotor1 Encoder Counts" + String.valueOf(baseMotor1.getCurrentPosition()));
+            fileLogger.writeEvent(3, "baseMotor2 Encoder Counts" + String.valueOf(baseMotor2.getCurrentPosition()));
+            fileLogger.writeEvent(3, "baseMotor3 Encoder Counts" + String.valueOf(baseMotor3.getCurrentPosition()));
+            fileLogger.writeEvent(3, "baseMotor4 Encoder Counts" + String.valueOf(baseMotor4.getCurrentPosition()));
+        }
     }
 
     public void setHardwareDriveLeftRunToPosition() {
