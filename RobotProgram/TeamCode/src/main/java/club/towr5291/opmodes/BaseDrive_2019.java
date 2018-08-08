@@ -56,7 +56,7 @@ public class BaseDrive_2019 extends OpMode{
     private String robotConfig;
     private int debug;
     double correction = 0;
-    double lastposition = getAdafruitHeading();
+    double lastposition;
 
     private FileLogger fileLogger;
     final String TAG = "Concept Logging";
@@ -190,13 +190,14 @@ public class BaseDrive_2019 extends OpMode{
         fileLogger.writeEvent("Build Model", Build.MODEL);
         fileLogger.writeEvent("Build Display", Build.DISPLAY);
         fileLogger.writeEvent("Build User", Build.USER);
-        fileLogger.writeEvent("Build SDK", Build.VERSION.SDK);
+        fileLogger.writeEvent("Build id", Build.ID);
     }
 
     @Override
     public void start(){
         fileLogger.writeEvent("Starting Loop");
         imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
+        lastposition = getAdafruitHeading();
     }
 
     @Override
