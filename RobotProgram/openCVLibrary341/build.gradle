@@ -16,3 +16,9 @@ android {
         }
     }
 }
+
+allprojects {
+    repositories {
+        google()
+    }
+}

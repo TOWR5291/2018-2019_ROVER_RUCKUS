@@ -23,7 +23,7 @@ import trclib.TrcUtil;
  * Created by ianhaden on 8/02/2017.
  */
 
-public abstract class OpModeMasterLinear extends LinearOpMode {
+public abstract class OpModeMasterLinear extends LinearOpMode{
 
     boolean initialized = false;
     private static OpModeMasterLinear instance = null;
