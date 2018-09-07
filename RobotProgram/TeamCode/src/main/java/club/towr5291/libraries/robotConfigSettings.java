@@ -87,11 +87,15 @@ public class robotConfigSettings
         }
     }
 
-    public enum robotConfigChoice
-    {   // Need to add the orbital motors
+    public enum robotConfigChoice {
         TileRunner2x20 ("TileRunner2x20"),
         TileRunner2x40 ("TileRunner2x40"),
         TileRunner2x60 ("TileRunner2x60"),
+        TileRunnerOrbital2x20 ("TileRunnerOrbital2x20"),
+        TileRunnerOrbital2x40 ("TileRunnerOrbital2x40"),
+        TileRunnerOrbital2x60 ("TileRunnerOrbital2x60"),
+        TileRunnerMecanumOrbital2x20 ("TileRunnerMecanumOrbital2x20"),
+        TileRunnerMecanum2x60 ("TileRunnerMecanum2x60"),
         TileRunnerMecanum2x40 ("TileRunnerMecanum2x40"),
         TileRunnerMecanum2x20 ("TileRunnerMecanum2x20"),
         TankTread2x40Custom ("5291 Tank Tread-2x40 Custom"),
