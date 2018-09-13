@@ -11,15 +11,15 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
-
 import club.towr5291.functions.FileLogger;
-
 import club.towr5291.libraries.robotConfigSettings;
+
 import club.towr5291.R;
-import ftclib.FtcChoiceMenu;
-import ftclib.FtcMenu;
-import ftclib.FtcValueMenu;
-import hallib.HalDashboard;
+
+import club.towr5291.libraries.FTCChoiceMenu;
+import club.towr5291.libraries.FTCMenu;
+import club.towr5291.libraries.FTCValueMenu;
+import club.towr5291.libraries.TOWRDashBoard;
 
 /**
  * Created by Ian Haden on 11/7/2016.
@@ -27,7 +27,7 @@ import hallib.HalDashboard;
 
 @TeleOp(name = "**Configure Robot**", group = "0")
 //@Disabled
-public class AutoSetupMenu extends OpModeMasterLinear implements FtcMenu.MenuButtons {
+public class AutoSetupMenu extends OpModeMasterLinear implements FTCMenu.MenuButtons {
 
     //set up the variables for the logger
     final String TAG = "Auton Menu";
@@ -37,9 +37,9 @@ public class AutoSetupMenu extends OpModeMasterLinear implements FtcMenu.MenuBut
 
     private int loop = 0;
 
-    private static HalDashboard dashboard = null;
+    private static TOWRDashBoard dashboard = null;
 
-    public static HalDashboard getDashboard()
+    public static TOWRDashBoard getDashboard()
     {
         return dashboard;
     }
@@ -104,12 +104,12 @@ public class AutoSetupMenu extends OpModeMasterLinear implements FtcMenu.MenuBut
         //
         // Create the menus.
         //
-        FtcChoiceMenu teamMenu           = new FtcChoiceMenu("robotConfigTeam:", null, this);
-        FtcChoiceMenu allianceMenu       = new FtcChoiceMenu("Alliance:", teamMenu, this);
-        FtcChoiceMenu startPosMenu       = new FtcChoiceMenu("Start:", allianceMenu, this);
-        FtcValueMenu delayMenu           = new FtcValueMenu("Delay:", startPosMenu, this, 0.0, 20.0, 1.0, delay, "%1f");
-        FtcChoiceMenu robotConfigMenu    = new FtcChoiceMenu("Robot:", delayMenu, this);
-        FtcChoiceMenu debugConfigMenu    = new FtcChoiceMenu("Debug:", robotConfigMenu, this);
+        FTCChoiceMenu teamMenu           = new FTCChoiceMenu("robotConfigTeam:", null, this);
+        FTCChoiceMenu allianceMenu       = new FTCChoiceMenu("Alliance:", teamMenu, this);
+        FTCChoiceMenu startPosMenu       = new FTCChoiceMenu("Start:", allianceMenu, this);
+        FTCValueMenu delayMenu           = new FTCValueMenu("Delay:", startPosMenu, this, 0.0, 20.0, 1.0, delay, "%1f");
+        FTCChoiceMenu robotConfigMenu    = new FTCChoiceMenu("Robot:", delayMenu, this);
+        FTCChoiceMenu debugConfigMenu    = new FTCChoiceMenu("Debug:", robotConfigMenu, this);
 
         //
         // remember last saved settings and reorder the menu with last run settings as the defaults
@@ -156,6 +156,8 @@ public class AutoSetupMenu extends OpModeMasterLinear implements FtcMenu.MenuBut
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60, true, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x60, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x40, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40, false, debugConfigMenu);
@@ -168,6 +170,8 @@ public class AutoSetupMenu extends OpModeMasterLinear implements FtcMenu.MenuBut
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40, true, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x60, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x40, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40, false, debugConfigMenu);
@@ -181,6 +185,8 @@ public class AutoSetupMenu extends OpModeMasterLinear implements FtcMenu.MenuBut
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x40, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x60, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60, false, debugConfigMenu);
@@ -194,6 +200,8 @@ public class AutoSetupMenu extends OpModeMasterLinear implements FtcMenu.MenuBut
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x40, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x60, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60, false, debugConfigMenu);
@@ -206,6 +214,8 @@ public class AutoSetupMenu extends OpModeMasterLinear implements FtcMenu.MenuBut
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x40, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x60, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60, false, debugConfigMenu);
@@ -221,6 +231,8 @@ public class AutoSetupMenu extends OpModeMasterLinear implements FtcMenu.MenuBut
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x40, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x60, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.Custom_11231_2016.toString(), robotConfigSettings.robotConfigChoice.Custom_11231_2016, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TankTread2x40Custom.toString(), robotConfigSettings.robotConfigChoice.TankTread2x40Custom, false, debugConfigMenu);
 
@@ -233,6 +245,8 @@ public class AutoSetupMenu extends OpModeMasterLinear implements FtcMenu.MenuBut
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x40, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x60, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.Custom_11231_2016.toString(), robotConfigSettings.robotConfigChoice.Custom_11231_2016, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TankTread2x40Custom.toString(), robotConfigSettings.robotConfigChoice.TankTread2x40Custom, false, debugConfigMenu);
 
@@ -245,11 +259,15 @@ public class AutoSetupMenu extends OpModeMasterLinear implements FtcMenu.MenuBut
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x40, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x60, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.Custom_11231_2016.toString(), robotConfigSettings.robotConfigChoice.Custom_11231_2016, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TankTread2x40Custom.toString(), robotConfigSettings.robotConfigChoice.TankTread2x40Custom, false, debugConfigMenu);
 
         } else if (robotConfig.equals(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20.toString())) {
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20, true, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x40, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x60, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60, false, debugConfigMenu);
@@ -260,12 +278,42 @@ public class AutoSetupMenu extends OpModeMasterLinear implements FtcMenu.MenuBut
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.Custom_11231_2016.toString(), robotConfigSettings.robotConfigChoice.Custom_11231_2016, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TankTread2x40Custom.toString(), robotConfigSettings.robotConfigChoice.TankTread2x40Custom, false, debugConfigMenu);
 
+        } else if (robotConfig.equals(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x40.toString())) {
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x40, true, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x60, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.Custom_11231_2016.toString(), robotConfigSettings.robotConfigChoice.Custom_11231_2016, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TankTread2x40Custom.toString(), robotConfigSettings.robotConfigChoice.TankTread2x40Custom, false, debugConfigMenu);
+
+        } else if (robotConfig.equals(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x60.toString())) {
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x60, true, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x40, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.Custom_11231_2016.toString(), robotConfigSettings.robotConfigChoice.Custom_11231_2016, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TankTread2x40Custom.toString(), robotConfigSettings.robotConfigChoice.TankTread2x40Custom, false, debugConfigMenu);
+
         } else if (robotConfig.equals(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20.toString())) {
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20, true, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x40, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x60, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60, false, debugConfigMenu);
@@ -276,6 +324,8 @@ public class AutoSetupMenu extends OpModeMasterLinear implements FtcMenu.MenuBut
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60, true, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x60, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x40, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40, false, debugConfigMenu);
@@ -424,7 +474,7 @@ public class AutoSetupMenu extends OpModeMasterLinear implements FtcMenu.MenuBut
         // Walk the menu tree starting with the strategy menu as the root
         // menu and get user choices.
         //
-        FtcMenu.walkMenuTree(teamMenu, this);
+        FTCMenu.walkMenuTree(teamMenu, this);
 
         //
         // Set choices variables.
@@ -484,7 +534,7 @@ public class AutoSetupMenu extends OpModeMasterLinear implements FtcMenu.MenuBut
 
         initRobot();
 
-        dashboard = HalDashboard.createInstance(telemetry);
+        dashboard = TOWRDashBoard.createInstance(telemetry);
 
         FtcRobotControllerActivity act = (FtcRobotControllerActivity)(hardwareMap.appContext);
 

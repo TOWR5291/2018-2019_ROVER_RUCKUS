@@ -28,10 +28,10 @@ import club.towr5291.functions.FileLogger;
 import club.towr5291.functions.TOWR5291PID;
 import club.towr5291.functions.TOWR5291Tick;
 import club.towr5291.functions.TOWR5291Toggle;
+import club.towr5291.libraries.TOWRDashBoard;
 import club.towr5291.libraries.robotConfig;
 import club.towr5291.libraries.robotConfigSettings;
 import club.towr5291.robotconfig.HardwareDriveMotors;
-import hallib.HalDashboard;
 
 /*
     made by Wyatt Ashley on 8/2/2018
@@ -83,16 +83,16 @@ public class BaseDrive_2019 extends OpMode{
     private TOWR5291PID driftRotateAngle;
     private BNO055IMU imu;
 
-    private static HalDashboard dashboard = null;
+    private static TOWRDashBoard dashboard = null;
 
-    public static HalDashboard getDashboard()
+    public static TOWRDashBoard getDashboard()
     {
         return dashboard;
     }
 
     @Override
     public void init() {
-        dashboard = HalDashboard.createInstance(telemetry);
+        dashboard = TOWRDashBoard.createInstance(telemetry);
 
         FtcRobotControllerActivity act = (FtcRobotControllerActivity)(hardwareMap.appContext);
 
@@ -269,6 +269,8 @@ public class BaseDrive_2019 extends OpMode{
             case TileRunner2x40: switchRobotController.setTickMax(2); break;
             case TileRunner2x60: switchRobotController.setTickMax(2); break;
             case TileRunnerOrbital2x20: switchRobotController.setTickMax(2); break;
+            case TileRunnerOrbital2x40: switchRobotController.setTickMax(2); break;
+            case TileRunnerOrbital2x60: switchRobotController.setTickMax(2); break;
             case TileRunnerMecanumOrbital2x20: switchRobotController.setTickMax(3); break;
             case TankTread2x40Custom: switchRobotController.setTickMax(2); break;
             case TileRunnerMecanum2x20: switchRobotController.setTickMax(3); break;
@@ -284,6 +286,8 @@ public class BaseDrive_2019 extends OpMode{
             case TileRunner2x40: return false;
             case TileRunner2x60: return false;
             case TileRunnerOrbital2x20: return false;
+            case TileRunnerOrbital2x40: return false;
+            case TileRunnerOrbital2x60: return false;
             case TileRunnerMecanumOrbital2x20: return true;
             case TileRunnerMecanum2x20: return true;
             case TileRunnerMecanum2x40: return true;

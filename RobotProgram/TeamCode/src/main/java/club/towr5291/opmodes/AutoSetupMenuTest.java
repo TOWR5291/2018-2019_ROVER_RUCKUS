@@ -16,11 +16,11 @@ import org.firstinspires.ftc.robotcore.internal.opmode.RegisteredOpModes;
 
 import club.towr5291.R;
 import club.towr5291.functions.FileLogger;
+import club.towr5291.libraries.FTCChoiceMenu;
+import club.towr5291.libraries.FTCMenu;
+import club.towr5291.libraries.FTCValueMenu;
+import club.towr5291.libraries.TOWRDashBoard;
 import club.towr5291.libraries.robotConfigSettings;
-import ftclib.FtcChoiceMenu;
-import ftclib.FtcMenu;
-import ftclib.FtcValueMenu;
-import hallib.HalDashboard;
 
 /**
  * Created by Ian Haden on 11/7/2016.
@@ -28,7 +28,7 @@ import hallib.HalDashboard;
 
 @TeleOp(name = "**Configure Robot 2**", group = "0")
 //@Disabled
-public class AutoSetupMenuTest extends OpModeMasterLinear implements FtcMenu.MenuButtons {
+public class AutoSetupMenuTest extends OpModeMasterLinear implements FTCMenu.MenuButtons {
 
     //set up the variables for the logger
     final String TAG = "Auton Menu";
@@ -38,9 +38,9 @@ public class AutoSetupMenuTest extends OpModeMasterLinear implements FtcMenu.Men
 
     private int loop = 0;
 
-    private static HalDashboard dashboard = null;
+    private static TOWRDashBoard dashboard = null;
 
-    public static HalDashboard getDashboard()
+    public static TOWRDashBoard getDashboard()
     {
         return dashboard;
     }
@@ -114,14 +114,14 @@ public class AutoSetupMenuTest extends OpModeMasterLinear implements FtcMenu.Men
         //
         // Create the menus.
         //
-        FtcChoiceMenu teamMenu           = new FtcChoiceMenu("robotConfigTeam:", null, this);
-        FtcChoiceMenu allianceMenu       = new FtcChoiceMenu("Alliance:", teamMenu, this);
-        FtcChoiceMenu startPosMenu       = new FtcChoiceMenu("Start:", allianceMenu, this);
-        FtcValueMenu delayMenu           = new FtcValueMenu("Delay:", startPosMenu, this, 0.0, 20.0, 1.0, delay, "%1f");
-        FtcChoiceMenu robotConfigMenu    = new FtcChoiceMenu("Robot:", delayMenu, this);
-        FtcChoiceMenu AutonOpModeMenu    = new FtcChoiceMenu("AutoOpMode:", robotConfigMenu, this);
-        FtcChoiceMenu TeleOpModeMenu     = new FtcChoiceMenu("TeleOpMode:", AutonOpModeMenu, this);
-        FtcChoiceMenu debugConfigMenu    = new FtcChoiceMenu("Debug:", TeleOpModeMenu, this);
+        FTCChoiceMenu teamMenu           = new FTCChoiceMenu("robotConfigTeam:", null, this);
+        FTCChoiceMenu allianceMenu       = new FTCChoiceMenu("Alliance:", teamMenu, this);
+        FTCChoiceMenu startPosMenu       = new FTCChoiceMenu("Start:", allianceMenu, this);
+        FTCValueMenu delayMenu           = new FTCValueMenu("Delay:", startPosMenu, this, 0.0, 20.0, 1.0, delay, "%1f");
+        FTCChoiceMenu robotConfigMenu    = new FTCChoiceMenu("Robot:", delayMenu, this);
+        FTCChoiceMenu AutonOpModeMenu    = new FTCChoiceMenu("AutoOpMode:", robotConfigMenu, this);
+        FTCChoiceMenu TeleOpModeMenu     = new FTCChoiceMenu("TeleOpMode:", AutonOpModeMenu, this);
+        FTCChoiceMenu debugConfigMenu    = new FTCChoiceMenu("Debug:", TeleOpModeMenu, this);
 
         //
         // remember last saved settings and reorder the menu with last run settings as the defaults
@@ -198,7 +198,7 @@ public class AutoSetupMenuTest extends OpModeMasterLinear implements FtcMenu.Men
         // Walk the menu tree starting with the strategy menu as the root
         // menu and get user choices.
         //
-        FtcMenu.walkMenuTree(teamMenu, this);
+        FTCMenu.walkMenuTree(teamMenu, this);
 
         //
         // Set choices variables
@@ -267,7 +267,7 @@ public class AutoSetupMenuTest extends OpModeMasterLinear implements FtcMenu.Men
 
         initRobot();
 
-        dashboard = HalDashboard.createInstance(telemetry);
+        dashboard = TOWRDashBoard.createInstance(telemetry);
 
         FtcRobotControllerActivity act = (FtcRobotControllerActivity)(hardwareMap.appContext);
 

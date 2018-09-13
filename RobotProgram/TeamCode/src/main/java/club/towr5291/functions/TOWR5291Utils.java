@@ -226,4 +226,30 @@ public class TOWR5291Utils {
         return true;
     }
 
+
+    /**
+     * This method puts the current thread to sleep for the given time in msec. It handles InterruptException where
+     * it recalculates the remaining time and calls sleep again repeatedly until the specified sleep time has past.
+     *
+     * @param milliTime specifies sleep time in msec.
+     */
+    public static void sleep(long milliTime)
+    {
+        long wakeupTime = System.currentTimeMillis() + milliTime;
+
+        while (milliTime > 0)
+        {
+            try
+            {
+                Thread.sleep(milliTime);
+                break;
+            }
+            catch (InterruptedException e)
+            {
+                milliTime = wakeupTime - System.currentTimeMillis();
+            }
+        }
+    }   //sleep
+
+
 }

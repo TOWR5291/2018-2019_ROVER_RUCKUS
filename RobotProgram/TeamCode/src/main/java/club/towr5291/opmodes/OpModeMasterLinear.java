@@ -7,17 +7,6 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 
-import org.opencv.android.CameraBridgeViewBase;
-import org.opencv.android.JavaCameraView;
-import org.opencv.core.Core;
-import org.opencv.core.Mat;
-
-import ftclib.FtcOpMode;
-import hallib.HalDashboard;
-import trclib.TrcDbgTrace;
-import trclib.TrcRobot;
-import trclib.TrcTaskMgr;
-import trclib.TrcUtil;
 
 /**
  * Created by ianhaden on 8/02/2017.

@@ -12,9 +12,8 @@ import club.towr5291.R;
 import club.towr5291.functions.Constants;
 import club.towr5291.functions.FileLogger;
 import club.towr5291.libraries.TOWR5291EYEControl;
+import club.towr5291.libraries.TOWRDashBoard;
 import club.towr5291.opmodes.OpModeMasterLinear;
-import hallib.HalDashboard;
-
 
 /**
  * Created by Ian Haden TOWR5291 on 7/27/2018.
@@ -57,8 +56,8 @@ public class ConceptEYEs extends OpModeMasterLinear {
     private TOWR5291EYEControl EYEs;
     private Constants.EYEState EYEStatus = Constants.EYEState.STATE_BLINK;
 
-    private static HalDashboard dashboard = null;
-    public static HalDashboard getDashboard()
+    private static TOWRDashBoard dashboard = null;
+    public static TOWRDashBoard getDashboard()
     {
         return dashboard;
     }
@@ -66,8 +65,8 @@ public class ConceptEYEs extends OpModeMasterLinear {
     @Override
     public void runOpMode() throws InterruptedException {
 
-        dashboard = HalDashboard.createInstance(telemetry);
-        dashboard = HalDashboard.getInstance();
+        dashboard = TOWRDashBoard.createInstance(telemetry);
+        dashboard = TOWRDashBoard.getInstance();
 
         fileLogger = new FileLogger(runtime, debug, true);
         fileLogger.open();

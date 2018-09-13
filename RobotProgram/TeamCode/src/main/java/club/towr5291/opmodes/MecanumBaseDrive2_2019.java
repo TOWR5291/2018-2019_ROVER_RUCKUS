@@ -29,10 +29,10 @@ import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 import club.towr5291.R;
 import club.towr5291.functions.FileLogger;
 import club.towr5291.functions.TOWR5291PID;
+import club.towr5291.libraries.TOWRDashBoard;
 import club.towr5291.libraries.robotConfigSettings;
 import club.towr5291.robotconfig.HardwareDriveMotors;
 import club.towr5291.sensors.VL53L0XMultiPlex;
-import hallib.HalDashboard;
 
 //import club.towr5291.robotconfig.HardwareArmMotorsRR;
 
@@ -99,9 +99,9 @@ public class MecanumBaseDrive2_2019 extends OpModeMasterLinear
     private FileLogger fileLogger;
     private int debug = 3;
 
-    private static HalDashboard dashboard = null;
+    private static TOWRDashBoard dashboard = null;
 
-    public static HalDashboard getDashboard()
+    public static TOWRDashBoard getDashboard()
     {
         return dashboard;
     }
@@ -154,7 +154,7 @@ public class MecanumBaseDrive2_2019 extends OpModeMasterLinear
     @Override
     public void runOpMode() throws InterruptedException
     {
-        dashboard = HalDashboard.createInstance(telemetry);
+        dashboard = TOWRDashBoard.createInstance(telemetry);
 
         FtcRobotControllerActivity act = (FtcRobotControllerActivity)(hardwareMap.appContext);
 

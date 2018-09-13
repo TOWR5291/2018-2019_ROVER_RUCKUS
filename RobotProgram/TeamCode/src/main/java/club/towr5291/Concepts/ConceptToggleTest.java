@@ -15,9 +15,8 @@ import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity
 import club.towr5291.R;
 import club.towr5291.functions.FileLogger;
 import club.towr5291.functions.TOWR5291Toggle;
+import club.towr5291.libraries.TOWRDashBoard;
 import club.towr5291.opmodes.OpModeMasterLinear;
-import hallib.HalDashboard;
-
 
 /**
 
@@ -35,9 +34,9 @@ public class ConceptToggleTest extends OpModeMasterLinear
 
     final int LABEL_WIDTH = 200;
 
-    private static HalDashboard dashboard = null;
+    private static TOWRDashBoard dashboard = null;
 
-    public static HalDashboard getDashboard() {
+    public static TOWRDashBoard getDashboard() {
         return dashboard;
     }
 
@@ -45,8 +44,8 @@ public class ConceptToggleTest extends OpModeMasterLinear
     public void runOpMode() {
         FtcRobotControllerActivity activity = (FtcRobotControllerActivity) hardwareMap.appContext;
 
-        dashboard = HalDashboard.createInstance(telemetry);
-        dashboard = HalDashboard.getInstance();
+        dashboard = TOWRDashBoard.createInstance(telemetry);
+        dashboard = TOWRDashBoard.getInstance();
 
         dashboard.setTextView((TextView) activity.findViewById(R.id.textOpMode));
         dashboard.displayPrintf(0, LABEL_WIDTH, "Text: ", "*** Robot Data ***");

@@ -68,9 +68,8 @@ import club.towr5291.functions.BeaconAnalysisOCVAnalyse;
 import club.towr5291.functions.FileLogger;
 import club.towr5291.R;
 import club.towr5291.functions.JewelAnalysisOCV;
+import club.towr5291.libraries.TOWRDashBoard;
 import club.towr5291.opmodes.OpModeMasterLinear;
-import hallib.HalDashboard;
-
 
 import static org.opencv.imgproc.Imgproc.contourArea;
 
@@ -112,8 +111,8 @@ public class ConceptVuforiaOpGrabImage extends OpModeMasterLinear
     private static final int TARGET_HEIGHT = 184;
 
 
-    private static HalDashboard dashboard = null;
-    public static HalDashboard getDashboard()
+    private static TOWRDashBoard dashboard = null;
+    public static TOWRDashBoard getDashboard()
     {
         return dashboard;
     }
@@ -122,7 +121,7 @@ public class ConceptVuforiaOpGrabImage extends OpModeMasterLinear
     @Override
     public void runOpMode() throws InterruptedException {
 
-        dashboard = HalDashboard.createInstance(telemetry);
+        dashboard = TOWRDashBoard.createInstance(telemetry);
 
         FtcRobotControllerActivity act = (FtcRobotControllerActivity)(hardwareMap.appContext);
 

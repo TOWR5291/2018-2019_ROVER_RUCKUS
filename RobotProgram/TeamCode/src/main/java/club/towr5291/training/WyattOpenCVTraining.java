@@ -15,7 +15,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import org.opencv.core.Scalar;
 
-import ftclib.FtcVuforia;
 
 @TeleOp(name = "WyattOpenCVTraining")
 @Disabled

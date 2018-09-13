@@ -82,13 +82,14 @@ import club.towr5291.functions.FileLogger;
 import club.towr5291.functions.JewelAnalysisOCV;
 import club.towr5291.functions.ReadStepFileRoverRuckus;
 import club.towr5291.libraries.LibraryStateSegAutoRoverRuckus;
+import club.towr5291.libraries.TOWRDashBoard;
 import club.towr5291.libraries.robotConfig;
 import club.towr5291.libraries.TOWR5291LEDControl;
 import club.towr5291.libraries.LibraryVuforiaRelicRecovery;
 import club.towr5291.libraries.robotConfigSettings;
 import club.towr5291.functions.TOWR5291Utils;
 import club.towr5291.robotconfig.HardwareDriveMotors;
-import hallib.HalDashboard;
+
 
 
 /*
@@ -334,9 +335,9 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
     DigitalChannel limitswitch1;  // Hardware Device Object
     DigitalChannel limitswitch2;  // Hardware Device Object
 
-    private static HalDashboard dashboard = null;
+    private static TOWRDashBoard dashboard = null;
 
-    public static HalDashboard getDashboard() {
+    public static TOWRDashBoard getDashboard() {
         return dashboard;
     }
 
@@ -370,8 +371,8 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
     @Override
     public void runOpMode() throws InterruptedException {
 
-        dashboard = HalDashboard.createInstance(telemetry);
-        dashboard = HalDashboard.getInstance();
+        dashboard = TOWRDashBoard.createInstance(telemetry);
+        dashboard = TOWRDashBoard.getInstance();
 
         FtcRobotControllerActivity activity = (FtcRobotControllerActivity) hardwareMap.appContext;
 

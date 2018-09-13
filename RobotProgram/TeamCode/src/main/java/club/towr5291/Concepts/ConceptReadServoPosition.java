@@ -12,10 +12,9 @@ import club.towr5291.R;
 import club.towr5291.functions.FileLogger;
 import club.towr5291.functions.TOWR5291Tick;
 import club.towr5291.functions.TOWR5291Utils;
+import club.towr5291.libraries.TOWRDashBoard;
 import club.towr5291.libraries.robotConfig;
 import club.towr5291.opmodes.OpModeMasterLinear;
-import hallib.HalDashboard;
-
 
 /**
  * Created by Ian Haden TOWR5291 on 7/27/2018.
@@ -59,17 +58,17 @@ public class ConceptReadServoPosition extends OpModeMasterLinear {
     private Servo leftEYEServo;
     private Servo rightEYEServo;
 
-    private static HalDashboard dashboard = null;
+    private static TOWRDashBoard dashboard = null;
 
-    public static HalDashboard getDashboard()
+    public static TOWRDashBoard getDashboard()
     {
         return dashboard;
     }
 
     @Override
     public void runOpMode() throws InterruptedException {
-        dashboard = HalDashboard.createInstance(telemetry);
-        dashboard = HalDashboard.getInstance();
+        dashboard = TOWRDashBoard.createInstance(telemetry);
+        dashboard = TOWRDashBoard.getInstance();
 
         fileLogger = new FileLogger(runtime, debug, true);
         fileLogger.open();

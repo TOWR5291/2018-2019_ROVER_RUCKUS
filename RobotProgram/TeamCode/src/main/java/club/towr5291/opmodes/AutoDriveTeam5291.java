@@ -104,11 +104,11 @@ import club.towr5291.functions.Constants;
 import club.towr5291.functions.FileLogger;
 import club.towr5291.functions.JewelAnalysisOCV;
 import club.towr5291.functions.ReadStepFile;
+import club.towr5291.libraries.TOWRDashBoard;
 import club.towr5291.libraries.robotConfigSettings;
 import club.towr5291.libraries.robotConfig;
 import club.towr5291.libraries.LibraryStateSegAuto;
 import club.towr5291.robotconfig.HardwareDriveMotors;
-import hallib.HalDashboard;
 
 import static org.opencv.core.Core.flip;
 
@@ -403,9 +403,9 @@ public class AutoDriveTeam5291 extends OpModeMasterLinear {
     String fieldOutput;
     HashMap<String, LibraryStateSegAuto> autonomousStepsAStar = new HashMap<>();
 
-    private static HalDashboard dashboard = null;
+    private static TOWRDashBoard dashboard = null;
 
-    public static HalDashboard getDashboard() {
+    public static TOWRDashBoard getDashboard() {
         return dashboard;
     }
 
@@ -463,8 +463,8 @@ public class AutoDriveTeam5291 extends OpModeMasterLinear {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        dashboard = HalDashboard.createInstance(telemetry);
-        dashboard = HalDashboard.getInstance();
+        dashboard = TOWRDashBoard.createInstance(telemetry);
+        dashboard = TOWRDashBoard.getInstance();
 
         FtcRobotControllerActivity activity = (FtcRobotControllerActivity) hardwareMap.appContext;
 

@@ -13,12 +13,11 @@ import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity
 import club.towr5291.R;
 import club.towr5291.functions.FileLogger;
 import club.towr5291.functions.TOWR5291Tick;
+import club.towr5291.libraries.TOWRDashBoard;
 import club.towr5291.libraries.robotConfig;
 import club.towr5291.libraries.robotConfigSettings;
 import club.towr5291.opmodes.OpModeMasterLinear;
 import club.towr5291.robotconfig.HardwareDriveMotors;
-import hallib.HalDashboard;
-
 
 /**
  * Created by Wyatt Ashley TOWR5291 on 7/19/2018.
@@ -43,9 +42,9 @@ public class ConceptTOWR5291TickTest extends OpModeMasterLinear
     HardwareDriveMotors robot = new HardwareDriveMotors();
     final int LABEL_WIDTH = 200;
 
-    private static HalDashboard dashboard = null;
+    private static TOWRDashBoard dashboard = null;
 
-    public static HalDashboard getDashboard() {
+    public static TOWRDashBoard getDashboard() {
         return dashboard;
     }
 
@@ -57,8 +56,8 @@ public class ConceptTOWR5291TickTest extends OpModeMasterLinear
     public void runOpMode() {
         FtcRobotControllerActivity activity = (FtcRobotControllerActivity) hardwareMap.appContext;
 
-        dashboard = HalDashboard.createInstance(telemetry);
-        dashboard = HalDashboard.getInstance();
+        dashboard = TOWRDashBoard.createInstance(telemetry);
+        dashboard = TOWRDashBoard.getInstance();
 
         dashboard.setTextView((TextView) activity.findViewById(R.id.textOpMode));
         dashboard.displayPrintf(0, LABEL_WIDTH, "Text: ", "*** Robot Data ***");
