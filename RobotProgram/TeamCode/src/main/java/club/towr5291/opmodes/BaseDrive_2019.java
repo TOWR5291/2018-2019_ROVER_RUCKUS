@@ -269,8 +269,6 @@ public class BaseDrive_2019 extends OpMode{
             case TileRunner2x40: switchRobotController.setTickMax(2); break;
             case TileRunner2x60: switchRobotController.setTickMax(2); break;
             case TileRunnerOrbital2x20: switchRobotController.setTickMax(2); break;
-            case TileRunnerOrbital2x40: switchRobotController.setTickMax(2); break;
-            case TileRunnerOrbital2x60: switchRobotController.setTickMax(2); break;
             case TileRunnerMecanumOrbital2x20: switchRobotController.setTickMax(3); break;
             case TankTread2x40Custom: switchRobotController.setTickMax(2); break;
             case TileRunnerMecanum2x20: switchRobotController.setTickMax(3); break;
@@ -286,8 +284,6 @@ public class BaseDrive_2019 extends OpMode{
             case TileRunner2x40: return false;
             case TileRunner2x60: return false;
             case TileRunnerOrbital2x20: return false;
-            case TileRunnerOrbital2x40: return false;
-            case TileRunnerOrbital2x60: return false;
             case TileRunnerMecanumOrbital2x20: return true;
             case TileRunnerMecanum2x20: return true;
             case TileRunnerMecanum2x40: return true;
