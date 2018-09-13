@@ -92,8 +92,6 @@ public class robotConfigSettings
         TileRunner2x40 ("TileRunner2x40"),
         TileRunner2x60 ("TileRunner2x60"),
         TileRunnerOrbital2x20 ("TileRunnerOrbital2x20"),
-        TileRunnerOrbital2x40 ("TileRunnerOrbital2x40"),
-        TileRunnerOrbital2x60 ("TileRunnerOrbital2x60"),
         TileRunnerMecanumOrbital2x20 ("TileRunnerMecanumOrbital2x20"),
         TileRunnerMecanum2x60 ("TileRunnerMecanum2x60"),
         TileRunnerMecanum2x40 ("TileRunnerMecanum2x40"),
