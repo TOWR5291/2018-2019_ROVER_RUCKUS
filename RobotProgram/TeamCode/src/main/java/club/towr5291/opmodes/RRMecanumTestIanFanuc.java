@@ -22,9 +22,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 import club.towr5291.R;
 import club.towr5291.functions.FileLogger;
+import club.towr5291.libraries.TOWRDashBoard;
 import club.towr5291.libraries.robotConfigSettings;
 import club.towr5291.robotconfig.HardwareDriveMotors;
-import hallib.HalDashboard;
 
 //import club.towr5291.robotconfig.HardwareArmMotorsRR;
 
@@ -139,9 +139,9 @@ public class RRMecanumTestIanFanuc extends OpModeMasterLinear
     private final boolean LedOn = false;
     private boolean LedOff = true;
 
-    private static HalDashboard dashboard = null;
+    private static TOWRDashBoard dashboard = null;
 
-    public static HalDashboard getDashboard()
+    public static TOWRDashBoard getDashboard()
     {
         return dashboard;
     }
@@ -166,7 +166,7 @@ public class RRMecanumTestIanFanuc extends OpModeMasterLinear
     public void runOpMode() throws InterruptedException
     {
 
-        dashboard = HalDashboard.createInstance(telemetry);
+        dashboard = TOWRDashBoard.createInstance(telemetry);
 
         FtcRobotControllerActivity act = (FtcRobotControllerActivity)(hardwareMap.appContext);
 
