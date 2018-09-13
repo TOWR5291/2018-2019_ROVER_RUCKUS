@@ -25,8 +25,6 @@ public class MRRangeSensor extends I2cDeviceSynchDeviceWithParameters<I2cDeviceS
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // User Methods
     ////////////////////////////////////////////////////////////////////////////////////////////////
-
-
     /**
      * Converts a reading of the optical sensor into centimeters. This computation
      * could be adjusted by altering the numeric parameters, or by providing an alternate
@@ -83,7 +81,6 @@ public class MRRangeSensor extends I2cDeviceSynchDeviceWithParameters<I2cDeviceS
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Read and Write Methods
     ////////////////////////////////////////////////////////////////////////////////////////////////
-
     protected short readShort(Register reg)
     {
         return TypeConversion.byteArrayToShort(deviceClient.read(reg.bVal, 2));

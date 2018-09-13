@@ -93,10 +93,10 @@ public class robotConfig {
     }
 
     public enum motors {
-        leftMotor1 ("leftmotor1", 1),
-        leftMotor2 ("leftmotor2", 2),
-        rightMotor1 ("rightmotor1", 4),
-        rightMotor2 ("rightmotor2", 8);
+        leftMotor1 ("leftMotor1", 1),
+        leftMotor2 ("leftMotor2", 2),
+        rightMotor1 ("rightMotor1", 4),
+        rightMotor2 ("rightMotor2", 8);
 
         private final String name;
         private final int value;
@@ -112,6 +112,21 @@ public class robotConfig {
 
         public int toInt() {
             return value;
+        }
+    }
+
+    public enum SensorNames {
+        BNO0055 ("imu"),
+        MRGYRO ("gyro");
+
+        private final String name;
+
+        SensorNames (String name) {
+            this.name = name;
+        }
+
+        public String toString() {
+            return name;
         }
     }
 
