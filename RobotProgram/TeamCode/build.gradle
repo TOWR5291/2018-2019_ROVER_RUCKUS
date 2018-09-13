@@ -16,6 +16,4 @@ apply from: '../build.common.gradle'
 dependencies {
     implementation project(path: ':openCVLibrary341')
 }
-android {
-    buildToolsVersion '27.0.3'
-}
+

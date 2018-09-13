@@ -5,7 +5,9 @@ package club.towr5291.Concepts;
  */
 
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.exception.RobotCoreException;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -17,6 +19,8 @@ import club.towr5291.robotconfig.HardwareDriveMotorsBaseConfig;
 /**
  * Created by Owner on 8/31/2015.
  */
+@TeleOp(name = "Concept Adafruit IMU Andrew Test", group = "5291Concept")
+@Disabled
 public class ConceptAdafruitIMUAndrewTest extends OpMode {
 
     private ElapsedTime runtime = new ElapsedTime();
