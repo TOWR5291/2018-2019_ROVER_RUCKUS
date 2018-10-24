@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 import club.towr5291.functions.Constants;
 import club.towr5291.functions.FileLogger;
@@ -225,7 +226,7 @@ public class HardwareDriveMotors
     }
 
     public boolean[] isBusy(){
-        boolean MotorsBusy[] = new boolean[3];
+        boolean MotorsBusy[] = new boolean[4];
         if (baseMotor1 != null) MotorsBusy[0] = baseMotor1.isBusy();
         if (baseMotor2 != null) MotorsBusy[1] = baseMotor2.isBusy();
         if (baseMotor3 != null) MotorsBusy[2] = baseMotor3.isBusy();
@@ -609,7 +610,32 @@ public class HardwareDriveMotors
         setHardwareDriveRight1MotorPower(wheelSpeeds[2]);
         setHardwareDriveRight2MotorPower(wheelSpeeds[3]);
     }
+    public void mecanumDrive_Cartesian(double x, double y, double rotation, double gyroAngle, double speedToMultplayBy) {
 
+        double xIn = x;
+        double yIn = y;
+        double[] wheelSpeeds = new double[4];
+
+        // Negate y for the joystick.
+        yIn = -yIn;
+        xIn = -xIn;
+
+        // Compensate for gyro angle.rotateVector
+        double[] rotated = rotateVector(xIn, yIn, -gyroAngle);
+        xIn = rotated[0];
+        yIn = rotated[1];
+
+        wheelSpeeds[0] = xIn + yIn + rotation;
+        wheelSpeeds[1] = -xIn + yIn - rotation;
+        wheelSpeeds[2] = -xIn + yIn + rotation;
+        wheelSpeeds[3] = xIn + yIn - rotation;
+
+        normalize(wheelSpeeds);
+        setHardwareDriveLeft1MotorPower(wheelSpeeds[0] * Range.clip(speedToMultplayBy, -1.0, 1.0));
+        setHardwareDriveLeft2MotorPower(wheelSpeeds[1] * Range.clip(speedToMultplayBy, -1.0, 1.0));
+        setHardwareDriveRight1MotorPower(wheelSpeeds[2] * Range.clip(speedToMultplayBy, -1.0, 1.0));
+        setHardwareDriveRight2MotorPower(wheelSpeeds[3] * Range.clip(speedToMultplayBy, -1.0, 1.0));
+    }
     /**
      * FROM https://github.com/wpilibsuite/allwpilib/blob/master/wpilibj/src/main/java/edu/wpi/first/wpilibj/RobotDrive.java
      * Configure the scaling factor for using RobotDrive with motor controllers in a mode other than
