@@ -1,10 +1,12 @@
 package club.towr5291.robotconfig;
 
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DeviceInterfaceModule;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.function.Function;
@@ -28,8 +30,10 @@ public class HardwareArmMotorsRoverRuckus
 {
     /* Public OpMode members. */
     public DcMotor  liftMotor       = null;
-    public DcMotor  liftMotor2       = null;
+    public DcMotor  liftMotor2      = null;
     public DcMotor  angleMotor1     = null;
+    public Servo teamMarkerServo    = null;
+    public Servo intakeServo        = null;
 
     /* local OpMode members. */
     HardwareMap hwMap               =  null;
@@ -47,9 +51,11 @@ public class HardwareArmMotorsRoverRuckus
         this.hwMap = ahwMap;
 
         // Define and Initialize Motors
-        this.liftMotor    = hwMap.dcMotor.get("liftMotor1");
-        this.liftMotor2    = hwMap.dcMotor.get("liftMotor2");
-        this.angleMotor1  = hwMap.dcMotor.get("angleMotor1");
+        this.liftMotor          = hwMap.dcMotor.get("liftMotor1");
+        this.liftMotor2         = hwMap.dcMotor.get("liftMotor2");
+        this.angleMotor1        = hwMap.dcMotor.get("angleMotor1");
+        this.teamMarkerServo    = hwMap.servo.get("teamMarkerServo");
+        this.intakeServo        = hwMap.servo.get("intakeServo");
         setHardwareArmDirections();
 
         liftMotor.setPower(0);
@@ -61,7 +67,7 @@ public class HardwareArmMotorsRoverRuckus
 
     public void setHardwareArmDirections(){
         liftMotor.setDirection(DcMotor.Direction.REVERSE);
-        liftMotor2.setDirection(DcMotor.Direction.FORWARD);
+        liftMotor2.setDirection(DcMotor.Direction.REVERSE);
         angleMotor1.setDirection(DcMotor.Direction.FORWARD);
     }
 

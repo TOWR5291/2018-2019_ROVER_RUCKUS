@@ -2189,25 +2189,37 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         mintCurrentStateGyroTurnEncoder5291 = Constants.stepState.STATE_COMPLETE;
     }
 
-    public boolean moveLiftUpOrDown(){
+    private void moveLiftUpOrDown(){
+        while(mintCurrentMoveLift != Constants.stepState.STATE_COMPLETE || mintCurrentMoveLift != Constants.stepState.STATE_ERROR){
+            moveLiftUpOrDownFallThrough();
+        }
+    }
+    private void moveLiftUpOrDownFallThrough(){
         switch (mintCurrentMoveLift){
             case STATE_INIT:
+                armDrive.setHardwareArmDirections();
                 armDrive.liftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 armDrive.liftMotor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 mintCurrentMoveLift = Constants.stepState.STATE_START;
                 break;
-        }
+            case STATE_START:
+                mintCurrentMoveLift = Constants.stepState.STATE_RUNNING;
+                break;
+            case STATE_RUNNING:
+                armDrive.liftMotor.setPower(.5);
+                armDrive.liftMotor2.setPower(.5);
 
-        if (sensor.getLimit2State()) {
-            if (armDrive.liftMotor.getCurrentPosition() < mdblRobotParm1 + 5 && armDrive.liftMotor.getCurrentPosition() > mdblRobotParm1 - 5) {
-                armDrive.liftMotor.setTargetPosition((int) mdblRobotParm1);
-                armDrive.liftMotor2.setTargetPosition((int) mdblRobotParm1);
-            }
+                if (armDrive.liftMotor.getCurrentPosition() >= mdblRobotParm1 - 5 && armDrive.liftMotor2.getCurrentPosition() >= mdblRobotParm1 - 5){
+                    mintCurrentMoveLift = Constants.stepState.STATE_COMPLETE;
+                    armDrive.liftMotor.setPower(0);
+                    armDrive.liftMotor2.setPower(0);
+                }
+                break;
+            case STATE_COMPLETE:
+                armDrive.liftMotor.setPower(0);
+                armDrive.liftMotor2.setPower(0);
+                break;
         }
-        return false;
-    }
-
-    public void moveAngleLiftReset(){
 
     }
 }

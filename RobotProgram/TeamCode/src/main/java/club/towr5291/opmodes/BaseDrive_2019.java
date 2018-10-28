@@ -1,6 +1,5 @@
 package club.towr5291.opmodes;
 
-import android.bluetooth.BluetoothA2dp;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.widget.TextView;
@@ -9,11 +8,6 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorController;
-import com.qualcomm.robotcore.hardware.DeviceInterfaceModule;
-import com.qualcomm.robotcore.hardware.DigitalChannel;
-import com.qualcomm.robotcore.hardware.DigitalChannelController;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
@@ -30,7 +24,7 @@ import club.towr5291.R;
 import club.towr5291.functions.FileLogger;
 import club.towr5291.functions.TOWR5291PID;
 import club.towr5291.functions.TOWR5291Tick;
-import club.towr5291.functions.TOWR5291Toggle;
+import club.towr5291.libraries.TOWR5291LEDControl;
 import club.towr5291.libraries.TOWRDashBoard;
 import club.towr5291.libraries.robotConfig;
 import club.towr5291.libraries.robotConfigSettings;
@@ -44,26 +38,32 @@ import club.towr5291.robotconfig.HardwareSensorsRoverRuckus;
 @TeleOp(name = "Base Drive 2019", group = "Base drive")
 public class BaseDrive_2019 extends OpMode {
 
-    private HardwareDriveMotors Robot = new HardwareDriveMotors();
-    private HardwareArmMotorsRoverRuckus Arms = new HardwareArmMotorsRoverRuckus();
-    private HardwareSensorsRoverRuckus Sensors = new HardwareSensorsRoverRuckus();
+    /* Hardware Set Up */
+    private HardwareDriveMotors Robot               = new HardwareDriveMotors();
+    private HardwareArmMotorsRoverRuckus Arms       = new HardwareArmMotorsRoverRuckus();
+    private HardwareSensorsRoverRuckus Sensors      = new HardwareSensorsRoverRuckus();
+    private TOWR5291LEDControl LEDs;
 
     //Settings from the sharepreferences
     private SharedPreferences sharedPreferences;
     double correction = 0;
     double lastposition;
+    boolean DisplayEncoderVaule = false;
+    int StartCorrectionVar = 0;
 
     private FileLogger fileLogger;
     final String TAG = "Concept Logging";
     private ElapsedTime runtime = new ElapsedTime();
     private club.towr5291.libraries.robotConfig ourRobotConfig;
-    private TOWR5291Tick robotTick = new TOWR5291Tick();
-    private TOWR5291Tick controllerA = new TOWR5291Tick();
-    private TOWR5291Tick controllerB = new TOWR5291Tick();
+
+    /* TOWR TICK FUNCTION */
+    private TOWR5291Tick robotTick                  = new TOWR5291Tick();
+    private TOWR5291Tick controllerA                = new TOWR5291Tick();
+    private TOWR5291Tick controllerB                = new TOWR5291Tick();
+    private TOWR5291Tick teamMarkerServoPosition    = new TOWR5291Tick();
 
     private Gamepad game2 = gamepad2;
     private Gamepad game1 = gamepad1;
-    final boolean LedOn = false;
 
     private TOWR5291PID driftRotateAngle;
     private BNO055IMU imu;
@@ -83,12 +83,12 @@ public class BaseDrive_2019 extends OpMode {
         dashboard.setTextView((TextView)act.findViewById(R.id.textOpMode));
         dashboard.displayPrintf(0, "Starting Menu System");
 
-        BNO055IMU.Parameters parametersAdafruitImu = new BNO055IMU.Parameters();
-        parametersAdafruitImu.angleUnit = BNO055IMU.AngleUnit.DEGREES;
-        parametersAdafruitImu.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parametersAdafruitImu.calibrationDataFile = "AdafruitIMUCalibration.json"; // see the calibration sample opmode
-        parametersAdafruitImu.loggingEnabled = true;
-        parametersAdafruitImu.loggingTag = "IMU";
+        BNO055IMU.Parameters parametersAdafruitImu  = new BNO055IMU.Parameters();
+        parametersAdafruitImu.angleUnit             = BNO055IMU.AngleUnit.DEGREES;
+        parametersAdafruitImu.accelUnit             = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parametersAdafruitImu.calibrationDataFile   = "AdafruitIMUCalibration.json"; // see the calibration sample opmode
+        parametersAdafruitImu.loggingEnabled        = true;
+        parametersAdafruitImu.loggingTag            = "IMU";
         parametersAdafruitImu.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
 
         imu = hardwareMap.get(BNO055IMU.class, "imu");
@@ -107,16 +107,23 @@ public class BaseDrive_2019 extends OpMode {
         fileLogger.open();// Opening FileLogger
         fileLogger.writeEvent(TAG, "Log Started");// First Line Add To Log
 
-        Sensors.LedState(LedOn, LedOn, LedOn, LedOn, LedOn, LedOn);// Setting Leds To Wight
-
         Robot.init(fileLogger, hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(ourRobotConfig.getRobotConfigBase()));// Starting robot Hardware map
-
         Robot.logEncoderCounts(fileLogger);// Logging The Encoder Counts
         Robot.allMotorsStop();
 
         Arms.init(hardwareMap, dashboard);
         Sensors.init(fileLogger, hardwareMap);
-        
+        LEDs = new TOWR5291LEDControl(hardwareMap);
+        LEDs.setLEDControlDemoMode(true);
+
+        switch (ourRobotConfig.getAllianceStartPosition()){
+            case "Left":
+                StartCorrectionVar = -45;
+                break;
+            default:
+                StartCorrectionVar = 45;
+                break;
+        }
         robotTick.setRollOver(true);
         robotTick.setTickMax(1);
         robotTick.setTickMin(0.1);
@@ -130,6 +137,12 @@ public class BaseDrive_2019 extends OpMode {
         controllerB.setTickMin(1);
         controllerB.setTickMax(1);
         controllerB.setTickIncrement(1);
+
+        teamMarkerServoPosition.setRollOver(true);
+        teamMarkerServoPosition.setTickMax(1);
+        teamMarkerServoPosition.setTickMin(0);
+        teamMarkerServoPosition.setTickIncrement(.25);
+        teamMarkerServoPosition.setDebounceTime(1000);
 
         if (isMecanum(robotConfigSettings.robotConfigChoice.valueOf(ourRobotConfig.getRobotConfigBase()))){
             controllerA.setTickValue(3);
@@ -152,11 +165,16 @@ public class BaseDrive_2019 extends OpMode {
         fileLogger.writeEvent("Starting Loop");
         imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
         lastposition = getAdafruitHeading();
+
+        game2 = gamepad2;
+        game1 = gamepad1;
     }
 
 
     @Override
     public void loop() {
+        Robot.setHardwareDriveDirections(robotConfigSettings.robotConfigChoice.valueOf(ourRobotConfig.getRobotConfigBase()));
+
         setControllerMaxTick(robotConfigSettings.robotConfigChoice.valueOf(ourRobotConfig.getRobotConfigBase()));
 
         robotTick.incrementTick(game1.dpad_up);
@@ -164,6 +182,7 @@ public class BaseDrive_2019 extends OpMode {
 
         controllerA.incrementTick(game1.start);
         controllerB.incrementTick(game2.start);
+        teamMarkerServoPosition.incrementTick(game2.a);
 
         dashboard.displayPrintf(0, "Current Tick" + robotTick.getTickCurrValue());
 
@@ -173,8 +192,8 @@ public class BaseDrive_2019 extends OpMode {
                 fileLogger.writeEvent(1,"Controller B Mode", "Standard");
 
                 Arms.angleMotor1.setPower(-game2.left_stick_y);
-                Arms.liftMotor.setPower(-game2.right_stick_y);
-                Arms.liftMotor2.setPower(-game2.right_stick_y);
+                Arms.liftMotor.setPower(game2.right_stick_y);
+                Arms.liftMotor2.setPower(game2.right_stick_y);
                 if (game2.left_trigger > 0){ 
                     Arms.AdvancedOptionsForArms(game2, 5);
                     if (game2.b){
@@ -184,11 +203,24 @@ public class BaseDrive_2019 extends OpMode {
                             game2 = gamepad2;
                         }
                     }
-                }else{
+                    if (game2.x){
+                        DisplayEncoderVaule = !DisplayEncoderVaule;
+                        if (!DisplayEncoderVaule) {
+                            dashboard.clearDisplay();
+                        }
+                    }
+                } else{
                     dashboard.displayPrintf(5, "");
                     dashboard.displayPrintf(6, "");
                     dashboard.displayPrintf(7, "");
                 }
+
+                if (game2.left_bumper){
+                    Arms.intakeServo.setPosition(.1);
+                } else if (game2.right_bumper) {
+                    Arms.intakeServo.setPosition(.5);
+                }
+                Arms.teamMarkerServo.setPosition(teamMarkerServoPosition.getTickCurrValue());
                 break;
         }
 
@@ -233,8 +265,18 @@ public class BaseDrive_2019 extends OpMode {
                     lastposition = Math.sin(getAdafruitHeading() * (Math.PI / 180.0));
                 }
 
-                Robot.mecanumDrive_Cartesian(game1.left_stick_x, game1.left_stick_y, game1.right_stick_x - correction, getAdafruitHeading(), robotTick.getTickCurrValue());
+                Robot.mecanumDrive_Cartesian(game1.left_stick_x, game1.left_stick_y, game1.right_stick_x - correction, getAdafruitHeading() + StartCorrectionVar, robotTick.getTickCurrValue());
                 break;
+        }
+
+        if (DisplayEncoderVaule){
+            dashboard.displayPrintf(8, "baseMotor1" + Robot.baseMotor1.getCurrentPosition());
+            dashboard.displayPrintf(9, "baseMotor2" + Robot.baseMotor2.getCurrentPosition());
+            dashboard.displayPrintf(10, "baseMotor3" + Robot.baseMotor3.getCurrentPosition());
+            dashboard.displayPrintf(11, "baseMotor4" + Robot.baseMotor4.getCurrentPosition());
+            dashboard.displayPrintf(12, "LiftMotor1" + Arms.liftMotor.getCurrentPosition());
+            dashboard.displayPrintf(13, "LiftMotor2" + Arms.liftMotor2.getCurrentPosition());
+            dashboard.displayPrintf(14, "AngleMotor1" + Arms.angleMotor1.getCurrentPosition());
         }
     }
 

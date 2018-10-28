@@ -163,6 +163,7 @@ public class HardwareDriveMotors
                 if (baseMotor4 != null)
                     baseMotor4.setDirection(DcMotor.Direction.FORWARD);
                 break;
+            case TileRunnerMecanumOrbital2x20:
             case TileRunnerMecanum2x20:
                 //TOWR5291 Tilrunner has 2 motors running from belts to the wheel, 2 motors running on gears
                 if (baseMotor1 != null)

@@ -16,7 +16,6 @@ import club.towr5291.libraries.robotConfigSettings;
 public class HardwareSensorsRoverRuckus {
 
     public DigitalChannel limitSwitch1AngleMotor;
-    public DigitalChannel limitSwitchMinForLift;
     public DigitalChannel Green1, Green2;
     public DigitalChannel Blue1, Blue2;
     public DigitalChannel Red1, Red2;
@@ -55,12 +54,9 @@ public class HardwareSensorsRoverRuckus {
         limitSwitch1AngleMotor = hwMap.get(DigitalChannel.class, "limitSwitch1");
         limitSwitch1AngleMotor.setMode(DigitalChannel.Mode.INPUT);
 
-        limitSwitchMinForLift = hwMap.get(DigitalChannel.class, "limitSwitch2");
-        limitSwitchMinForLift.setMode(DigitalChannel.Mode.INPUT);
     }
 
     public boolean getLimit1State(){return limitSwitch1AngleMotor.getState();}
-    public boolean getLimit2State(){return limitSwitchMinForLift.getState();}
 
     public void LedState (boolean greenLED1, boolean redLED1, boolean blueLED1, boolean greenLED2, boolean redLED2, boolean blueLED2) {
         Red1.setState(redLED1);//R
