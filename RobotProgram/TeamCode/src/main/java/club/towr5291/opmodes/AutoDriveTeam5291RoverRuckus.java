@@ -640,7 +640,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
             case "VTE":  // Turn the Robot using information from Vuforia and Pythag
                 VuforiaTurn();
                 break;
-            case "LFTG":    // Moves the lift up and down for the 2018-19 game
+            case "LDP":    // Moves the lift up and down for the 2018-19 game
                 moveLiftUpOrDown();
                 break;
         }
@@ -666,50 +666,52 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
 
         switch (mstrRobotCommand.substring(0, 3)) {
             case "DELAY":
-                mintCurrentStepDelay = Constants.stepState.STATE_INIT;
+                mintCurrentStepDelay                = Constants.stepState.STATE_INIT;
                 break;
             case "GTH":
                 mintCurrentStateTankTurnGyroHeading = Constants.stepState.STATE_INIT;
                 break;
             case "MST":
-                mintCurrentStateMecanumStrafe = Constants.stepState.STATE_INIT;
+                mintCurrentStateMecanumStrafe       = Constants.stepState.STATE_INIT;
                 break;
             case "LTE":
-                mintCurrentStateTankTurn = Constants.stepState.STATE_INIT;
+                mintCurrentStateTankTurn            = Constants.stepState.STATE_INIT;
                 break;
             case "RTE":
-                mintCurrentStateTankTurn = Constants.stepState.STATE_INIT;
+                mintCurrentStateTankTurn            = Constants.stepState.STATE_INIT;
                 break;
             case "LPE":
-                mintCurrentStatePivotTurn = Constants.stepState.STATE_INIT;
+                mintCurrentStatePivotTurn           = Constants.stepState.STATE_INIT;
                 break;
             case "RPE":
-                mintCurrentStatePivotTurn = Constants.stepState.STATE_INIT;
+                mintCurrentStatePivotTurn           = Constants.stepState.STATE_INIT;
                 break;
             case "LRE":  // Left turn with a Radius in Parm 1
-                mintCurrentStateRadiusTurn = Constants.stepState.STATE_INIT;
+                mintCurrentStateRadiusTurn          = Constants.stepState.STATE_INIT;
                 break;
             case "RRE":  // Right turn with a Radius in Parm 1
-                mintCurrentStateRadiusTurn = Constants.stepState.STATE_INIT;
+                mintCurrentStateRadiusTurn          = Constants.stepState.STATE_INIT;
                 break;
             case "FWE":  // Drive forward a distance in inches and power setting
-                mintCurrentStateDriveHeading = Constants.stepState.STATE_INIT;
+                mintCurrentStateDriveHeading        = Constants.stepState.STATE_INIT;
                 break;
             case "VFL":  // Position the robot using vuforia parameters ready fro AStar  RObot should postion pointing to Red wall and Blue wall where targets are located
                 mintCurrentStateVuforiaLocalise5291 = Constants.stepState.STATE_INIT;
                 break;
             case "VME":  // Move the robot using localisation from the targets
-                mintCurStVuforiaMove5291 = Constants.stepState.STATE_INIT;
+                mintCurStVuforiaMove5291            = Constants.stepState.STATE_INIT;
                 break;
             case "VTE":  // Turn the Robot using information from Vuforia and Pythag
-                mintCurStVuforiaTurn5291 = Constants.stepState.STATE_INIT;
+                mintCurStVuforiaTurn5291            = Constants.stepState.STATE_INIT;
                 break;
             case "GTE":  // Special Function, 5291 Move forward until line is found
                 mintCurrentStateGyroTurnEncoder5291 = Constants.stepState.STATE_INIT;
                 break;
             case "EYE":  // Special Function, 5291 Move forward until line is found
-                mintCurrentStateEyes5291 = Constants.stepState.STATE_INIT;
+                mintCurrentStateEyes5291            = Constants.stepState.STATE_INIT;
                 break;
+            case "LDP":
+                mintCurrentMoveLift                 = Constants.stepState.STATE_INIT;
             case "FNC":  //  Run a special Function with Parms
 
                 break;

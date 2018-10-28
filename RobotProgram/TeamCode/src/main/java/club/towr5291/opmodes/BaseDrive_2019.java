@@ -60,6 +60,7 @@ public class BaseDrive_2019 extends OpMode {
     private TOWR5291Tick robotTick                  = new TOWR5291Tick();
     private TOWR5291Tick controllerA                = new TOWR5291Tick();
     private TOWR5291Tick controllerB                = new TOWR5291Tick();
+    private TOWR5291Tick IntakeDirection            = new TOWR5291Tick();
     private TOWR5291Tick teamMarkerServoPosition    = new TOWR5291Tick();
 
     private Gamepad game2 = gamepad2;
@@ -126,8 +127,9 @@ public class BaseDrive_2019 extends OpMode {
         }
         robotTick.setRollOver(true);
         robotTick.setTickMax(1);
-        robotTick.setTickMin(0.1);
-        robotTick.setTickIncrement(0.1);
+        robotTick.setTickMin(0.2);
+        robotTick.setTickIncrement(0.4);
+        robotTick.setTickValue(.5);
 
         controllerA.setRollOver(true);
         controllerA.setTickMin(1);
@@ -144,9 +146,11 @@ public class BaseDrive_2019 extends OpMode {
         teamMarkerServoPosition.setTickIncrement(.25);
         teamMarkerServoPosition.setDebounceTime(1000);
 
-        if (isMecanum(robotConfigSettings.robotConfigChoice.valueOf(ourRobotConfig.getRobotConfigBase()))){
-            controllerA.setTickValue(3);
-        }
+        IntakeDirection.setRollOver(true);
+        IntakeDirection.setTickMax(3);
+        IntakeDirection.setTickMin(1);
+        IntakeDirection.setTickIncrement(1);
+        IntakeDirection.setTickValue(2);
 
         driftRotateAngle = new TOWR5291PID(runtime,0,0,4.5,0,0);
 
@@ -179,6 +183,8 @@ public class BaseDrive_2019 extends OpMode {
 
         robotTick.incrementTick(game1.dpad_up);
         robotTick.decrementTick(game1.dpad_down);
+
+        IntakeDirection.incrementTick(game2.left_bumper);
 
         controllerA.incrementTick(game1.start);
         controllerB.incrementTick(game2.start);
@@ -215,11 +221,18 @@ public class BaseDrive_2019 extends OpMode {
                     dashboard.displayPrintf(7, "");
                 }
 
-                if (game2.left_bumper){
-                    Arms.intakeServo.setPosition(.1);
-                } else if (game2.right_bumper) {
-                    Arms.intakeServo.setPosition(.5);
+                switch ((int) IntakeDirection.getTickCurrValue()){
+                    case 1:
+                        Arms.intakeServo.setPosition(.1);
+                        break;
+                    case 2:
+                        Arms.intakeServo.setPosition(.5);
+                        break;
+                    case 3:
+                        Arms.intakeServo.setPosition(.9);
+                        break;
                 }
+
                 Arms.teamMarkerServo.setPosition(teamMarkerServoPosition.getTickCurrValue());
                 break;
         }
@@ -267,6 +280,16 @@ public class BaseDrive_2019 extends OpMode {
 
                 Robot.mecanumDrive_Cartesian(game1.left_stick_x, game1.left_stick_y, game1.right_stick_x - correction, getAdafruitHeading() + StartCorrectionVar, robotTick.getTickCurrValue());
                 break;
+
+            case 4:
+                dashboard.displayPrintf(1, "Controller Mecanum Drive New 2018-19");
+                fileLogger.writeEvent("Controller Mode", "Mecanum Drive New 2018-19");
+                Robot.baseMotor1.setPower(game1.left_stick_x + -game1.left_stick_y + game1.right_stick_x);
+                Robot.baseMotor2.setPower(-game1.left_stick_x + -game1.left_stick_y + game1.right_stick_x);
+                Robot.baseMotor3.setPower(-game1.left_stick_x + -game1.left_stick_y + -game1.right_stick_x);
+                Robot.baseMotor4.setPower(-game1.left_stick_x + -game1.left_stick_y + -game1.right_stick_x);
+
+                break;
         }
 
         if (DisplayEncoderVaule){
@@ -304,7 +327,7 @@ public class BaseDrive_2019 extends OpMode {
             case TileRunner2x40: controllerA.setTickMax(2); break;
             case TileRunner2x60: controllerA.setTickMax(2); break;
             case TileRunnerOrbital2x20: controllerA.setTickMax(2); break;
-            case TileRunnerMecanumOrbital2x20: controllerA.setTickMax(3); break;
+            case TileRunnerMecanumOrbital2x20: controllerA.setTickMax(4); break;
             case TankTread2x40Custom: controllerA.setTickMax(2); break;
             case TileRunnerMecanum2x20: controllerA.setTickMax(3); break;
             case TileRunnerMecanum2x40: controllerA.setTickMax(3); break;

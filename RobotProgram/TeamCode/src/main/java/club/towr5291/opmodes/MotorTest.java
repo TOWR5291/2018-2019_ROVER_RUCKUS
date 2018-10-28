@@ -30,7 +30,6 @@ public class MotorTest extends OpMode {
     private HardwareDriveMotors Robot = new HardwareDriveMotors();
     private HardwareArmMotorsRoverRuckus Arms = new HardwareArmMotorsRoverRuckus();
     private HardwareSensorsRoverRuckus Sensors = new HardwareSensorsRoverRuckus();
-    private LEDControl leds = new LEDControl();
     private ElapsedTime timeLED = new ElapsedTime();
 
     //Settings from the sharepreferences
@@ -86,7 +85,6 @@ public class MotorTest extends OpMode {
         Sensors.init(fileLogger, hardwareMap);
 
         timeLED.startTime();
-        leds.init(Sensors, timeLED.milliseconds(), 2000);
 
         controllerA.setTickMin(1);
         controllerA.setTickMax(4);
