@@ -55,6 +55,7 @@ import com.vuforia.Image;
 import com.vuforia.PIXEL_FORMAT;
 
 import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -82,14 +83,16 @@ import club.towr5291.functions.FileLogger;
 import club.towr5291.functions.JewelAnalysisOCV;
 import club.towr5291.functions.ReadStepFileRoverRuckus;
 import club.towr5291.libraries.LibraryStateSegAutoRoverRuckus;
+import club.towr5291.libraries.LibraryVuforiaRoverRuckus;
 import club.towr5291.libraries.TOWRDashBoard;
 import club.towr5291.libraries.robotConfig;
 import club.towr5291.libraries.TOWR5291LEDControl;
 import club.towr5291.libraries.LibraryVuforiaRelicRecovery;
 import club.towr5291.libraries.robotConfigSettings;
 import club.towr5291.functions.TOWR5291Utils;
+import club.towr5291.robotconfig.HardwareArmMotorsRoverRuckus;
 import club.towr5291.robotconfig.HardwareDriveMotors;
-
+import club.towr5291.robotconfig.HardwareSensorsRoverRuckus;
 
 
 /*
@@ -141,25 +144,6 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
     public FileLogger fileLogger;
     private int debug = 3;
 
-    //set up range sensor variables
-    //set up range sensor1
-    private byte[] range1Cache; //The read will return an array of bytes. They are stored in this variable
-    private I2cAddr RANGE1ADDRESS = new I2cAddr(0x14); //Default I2C address for MR Range (7-bit)
-    private static final int RANGE1_REG_START = 0x04; //Register to start reading
-    private static final int RANGE1_READ_LENGTH = 2; //Number of byte to read
-    private I2cDevice RANGE1;
-    private I2cDeviceSynch RANGE1Reader;
-    private double mdblRangeSensor1;
-
-    //set up rangesensor 2
-    private byte[] range2Cache; //The read will return an array of bytes. They are stored in this variable
-    private I2cAddr RANGE2ADDRESS = new I2cAddr(0x18); //Default I2C address for MR Range (7-bit)
-    private static final int RANGE2_REG_START = 0x04; //Register to start reading
-    private static final int RANGE2_READ_LENGTH = 2; //Number of byte to read
-    private I2cDevice RANGE2;
-    private I2cDeviceSynch RANGE2Reader;
-    private double mdblRangeSensor2;
-
     //adafruit IMU
     // The IMU sensor object
     private BNO055IMU imu;
@@ -172,6 +156,9 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
     private String mstrWiggleDir;
     private double mdblPowerBoost;
     private int mintPowerBoostCount;
+
+    //Camera Webcam
+    private WebcamName robotWebcam;
 
     //vuforia localisation variables
     private OpenGLMatrix lastLocation = null;
@@ -199,13 +186,17 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
     private Constants.stepState mintCurrentStateTankTurnGyroHeading;            // Current State of Tank Turn using Gyro
     private Constants.stepState mintCurrentStateMecanumStrafe;                  // Current State of mecanum strafe
     private Constants.stepState mintCurrentStepDelay;                           // Current State of Delay (robot doing nothing)
+    private Constants.stepState mintCurrentMoveLift;
     //private ArrayList<LibraryStateTrack> mValueSteps    = new ArrayList<>();  // Current State of the Step
     private HashMap<String, Integer> mintActiveSteps = new HashMap<>();
     private HashMap<String, Integer> mintActiveStepsCopy = new HashMap<>();
 
     //motors
     private HardwareDriveMotors robotDrive = new HardwareDriveMotors();   // Use a Pushbot's hardware
-    private HardwareDriveMotors armDrive = new HardwareDriveMotors();   // Use a Pushbot's hardware
+    private HardwareArmMotorsRoverRuckus armDrive = new HardwareArmMotorsRoverRuckus();
+    private HardwareSensorsRoverRuckus sensor = new HardwareSensorsRoverRuckus();
+
+    private boolean vuforiaWebcam = true;
 
     //variable for the state engine, declared here so they are accessible throughout the entire opmode with having to pass them through each function
     private double mdblStepTimeout;                          //Timeout value ofthe step, the step will abort if the timeout is reached
@@ -256,84 +247,14 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
     private boolean flipit = false;
     private int quadrant;
 
-
     //hashmap for the steps to be stored in.  A Hashmap is like a fancy array
     //private HashMap<String, LibraryStateSegAutoRoverRuckus> autonomousSteps = new HashMap<String, LibraryStateSegAutoRoverRuckus>();
     private HashMap<String, String> powerTable = new HashMap<String, String>();
     private ReadStepFileRoverRuckus autonomousStepsFile = new ReadStepFileRoverRuckus();
 
-    //OpenCV Stuff
-    private JewelAnalysisOCV JewelColour = new JewelAnalysisOCV();
-
-    private int mintCaptureLoop = 0;
-    private int mintNumberColourTries = 0;
-    private Constants.ObjectColours mColour;
-
-    //servos
-    private Servo servoGlyphGripTopLeft;
-    private Servo servoGlyphGripBotLeft;
-    private Servo servoGlyphGripTopRight;
-    private Servo servoGlyphGripBotRight;
-    private Servo servoJewelLeft;
-    private Servo servoJewelRight;
-    private Servo servoRelicFront;
-    private Servo servoRelicWrist1;
-    private Servo servoRelicWrist2;
-    private Servo servoRelicGrip;
-
-    // the servos are on the servo controller
-    private final static double SERVOLIFTLEFTTOP_MIN_RANGE      = 0;
-    private final static double SERVOLIFTLEFTTOP_MAX_RANGE      = 180;
-    private final static double SERVOLIFTLEFTTOP_HOME           = 165; //90
-    private final static double SERVOLIFTLEFTTOP_GLYPH_START    = 125;  //need to work this out
-    private final static double SERVOLIFTLEFTTOP_GLYPH_RELEASE  = 60;
-    private final static double SERVOLIFTLEFTTOP_GLYPH_GRAB     = 30;
-
-    private final static double SERVOLIFTRIGHTTOP_MIN_RANGE     = 0;
-    private final static double SERVOLIFTRIGHTTOP_MAX_RANGE     = 180;
-    private final static double SERVOLIFTRIGHTTOP_HOME          = 165;
-    private final static double SERVOLIFTRIGHTTOP_GLYPH_START   = 125;  //need to work this out
-    private final static double SERVOLIFTRIGHTTOP_GLYPH_RELEASE = 60;
-    private final static double SERVOLIFTRIGHTTOP_GLYPH_GRAB    = 30;
-
-    private final static double SERVOLIFTLEFTBOT_MIN_RANGE      = 0;
-    private final static double SERVOLIFTLEFTBOT_MAX_RANGE      = 180;
-    private final static double SERVOLIFTLEFTBOT_HOME           = 165;
-    private final static double SERVOLIFTLEFTBOT_GLYPH_START    = 125;  //need to work this out
-    private final static double SERVOLIFTLEFTBOT_GLYPH_RELEASE  = 60;
-    private final static double SERVOLIFTLEFTBOT_GLYPH_GRAB     = 30;
-
-    private final static double SERVOLIFTRIGHTBOT_MIN_RANGE     = 0;
-    private final static double SERVOLIFTRIGHTBOT_MAX_RANGE     = 180;
-    private final static double SERVOLIFTRIGHTBOT_HOME          = 165;
-    private final static double SERVOLIFTRIGHTBOT_GLYPH_START   = 125;  //need to work this out
-    private final static double SERVOLIFTRIGHTBOT_GLYPH_RELEASE = 60;
-    private final static double SERVOLIFTRIGHTBOT_GLYPH_GRAB    = 30;
-
-    private final static double SERVOJEWELLEFT_MIN_RANGE        = 0;
-    private final static double SERVOJEWELLEFT_MAX_RANGE        = 180;
-    private final static double SERVOJEWELLEFT_HOME             = 143;
-    private final static double SERVOJEWELRIGHT_MIN_RANGE       = 4;
-    private final static double SERVOJEWELRIGHT_MAX_RANGE       = 180;
-    private final static double SERVOJEWELRIGHT_HOME            = 149;
-
-    private final static double SERVORELICFRONT_MIN_RANGE       = 0;
-    private final static double SERVORELICFRONT_MAX_RANGE       = 180;
-    private final static double SERVORELICFRONT_HOME            = 0;
-    private final static double SERVORELICWRIST_MIN_RANGE       = 0;
-    private final static double SERVORELICWRIST_MAX_RANGE       = 180;
-    private final static double SERVORELICWRIST_HOME            = 180;
-    private final static double SERVORELICGRIP_MIN_RANGE        = 0;
-    private final static double SERVORELICGRIP_MAX_RANGE        = 180;
-    private final static double SERVORELICGRIP_HOME             = 90;   //Closed is position 90
-
     //LED Strips
     private TOWR5291LEDControl LEDs;
     private Constants.LEDState mint5291LEDStatus;                                                   // Flash the LED based on the status
-
-    //Limit Switches
-    DigitalChannel limitswitch1;  // Hardware Device Object
-    DigitalChannel limitswitch2;  // Hardware Device Object
 
     private static TOWRDashBoard dashboard = null;
 
@@ -435,20 +356,13 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
 
         dashboard.displayPrintf(1, "initRobot LED Initiated!");
 
-        // get a reference to our digitalTouch object.
-        limitswitch1 = hardwareMap.get(DigitalChannel.class, "limittop");
-        limitswitch2 = hardwareMap.get(DigitalChannel.class, "limitbot");
-        // set the digital channel to input.
-        limitswitch1.setMode(DigitalChannel.Mode.INPUT);
-        limitswitch2.setMode(DigitalChannel.Mode.INPUT);
-
         dashboard.displayPrintf(1, "initRobot Limit Switch Initiated!");
         //load the sequence based on alliance colour and team
 
         autonomousStepsFile.ReadStepFile(ourRobotConfig);
 
         //need to load initial step of a delay based on user input
-        autonomousStepsFile.insertSteps(ourRobotConfig.getDelay() + 1, "DELAY" ,0,0,0,0, false,false, false,  (ourRobotConfig.getDelay() * 1000), 0, 0, 0, 0, 0,1);
+        autonomousStepsFile.insertSteps(ourRobotConfig.getDelay() + 1, "DELAY", 0, 0, 0, 0, false, false, false, (ourRobotConfig.getDelay() * 1000), 0, 0, 0, 0, 0, 1);
 
         dashboard.displayPrintf(1, "initRobot STEPS LOADED");
 
@@ -476,8 +390,8 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
 
         dashboard.displayPrintf(1, "initRobot IMU Configured");
 
-        fileLogger.writeEvent(3,"Configuring Adafruit IMU - Finished");
-        fileLogger.writeEvent(3,"Configuring Motors Base - Start");
+        fileLogger.writeEvent(3, "Configuring Adafruit IMU - Finished");
+        fileLogger.writeEvent(3, "Configuring Motors Base - Start");
 
         dashboard.displayPrintf(1, "initRobot BaseDrive Loading");
 
@@ -486,99 +400,47 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         robotDrive.setHardwareDriveRunUsingEncoders();
 
         dashboard.displayPrintf(1, "initRobot BaseDrive Loaded");
+        fileLogger.writeEvent(3, "Configuring Motors Base - Finish");
 
-        fileLogger.writeEvent(3,"Configuring Motors Base - Finish");
-        fileLogger.writeEvent(3,"Configuring Motors Arms - Start");
+        dashboard.displayPrintf(1, "Configuring Arm Motors - Start");
+        fileLogger.writeEvent(3, "Configuring Arm Motors - Start");
 
-        armDrive.init(fileLogger, hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(ourRobotConfig.getRobotConfigBase()), "lifttop", "liftbot", null, null);
-        armDrive.setHardwareDriveResetEncoders();
-        armDrive.setHardwareDriveRunUsingEncoders();
+        armDrive.init(hardwareMap , dashboard);
+        armDrive.setHardwareLiftMotorResetEncoders();
+        armDrive.setHardwareLiftMotorRunUsingEncoders();
 
-        fileLogger.writeEvent(3,"Configuring Motors Lifts - Finish");
-        fileLogger.writeEvent(3, "Configuring Range Sensors - Start");
+        fileLogger.writeEvent(3, "Configuring Arm Motors - Finish");
+        dashboard.displayPrintf(1, "Configuring Arm Motors - Finish");
 
-        dashboard.displayPrintf(1, "initRobot Range Sensors Loading");
-
-        RANGE1 = hardwareMap.i2cDevice.get("range1");
-        RANGE1Reader = new I2cDeviceSynchImpl(RANGE1, RANGE1ADDRESS, false);
-        RANGE1Reader.engage();
-        RANGE2 = hardwareMap.i2cDevice.get("range2");
-        RANGE2Reader = new I2cDeviceSynchImpl(RANGE2, RANGE2ADDRESS, false);
-        RANGE2Reader.engage();
-
-        dashboard.displayPrintf(1, "initRobot Range Sensors Loaded");
-
-        fileLogger.writeEvent(3,"Configuring Range Sensors - Finish");
-        fileLogger.writeEvent(3,"Resetting State Engine - Start");
+        sensor.init(fileLogger, hardwareMap);
+        fileLogger.writeEvent(3, "Resetting State Engine - Start");
 
         initDefaultStates();
 
         mint5291LEDStatus = Constants.LEDState.STATE_TEAM;
         mblnNextStepLastPos = false;
 
-        fileLogger.writeEvent(3,"Resetting State Engine - Finish");
-        fileLogger.writeEvent(3,"Configuring Vuforia - Start");
+        fileLogger.writeEvent(3, "Resetting State Engine - Finish");
+        fileLogger.writeEvent(3, "Configuring Vuforia - Start");
 
         dashboard.displayPrintf(1, "initRobot VUFORIA Loading");
 
+        if (vuforiaWebcam) {
+            robotWebcam = hardwareMap.get(WebcamName.class, "Webcam 1");
+        }
+
         //load all the vuforia stuff
-        LibraryVuforiaRelicRecovery RelicRecoveryVuforia = new LibraryVuforiaRelicRecovery();
-        VuforiaTrackables RelicRecoveryTrackables;
-        RelicRecoveryTrackables = RelicRecoveryVuforia.LibraryVuforiaRelicRecovery(hardwareMap, ourRobotConfig);
+        LibraryVuforiaRoverRuckus RoverRuckusVuforia = new LibraryVuforiaRoverRuckus();
+        VuforiaTrackables RoverRuckusTrackables;
+        if (vuforiaWebcam) {
+            RoverRuckusTrackables = RoverRuckusVuforia.LibraryVuforiaRoverRuckus(hardwareMap, ourRobotConfig, robotWebcam);
+        } else{
+            RoverRuckusTrackables = RoverRuckusVuforia.LibraryVuforiaRoverRuckus(hardwareMap, ourRobotConfig);
+        }
 
         //activate vuforia
-        RelicRecoveryTrackables.activate();
+        RoverRuckusTrackables.activate();
 
-        //vuMark will be the position to load the glyph
-        RelicRecoveryVuMark vuMark;
-
-        //set up variable for our capturedimage
-        Image rgb = null;
-
-        dashboard.displayPrintf(1, "initRobot VUFORIA Loaded");
-        fileLogger.writeEvent(3,"Configuring Servos - Start");
-
-        //config the servos
-        servoGlyphGripTopLeft = hardwareMap.servo.get("griptopleft");
-        servoGlyphGripBotLeft = hardwareMap.servo.get("gripbotleft");
-        servoGlyphGripTopLeft.setDirection(Servo.Direction.REVERSE);
-        servoGlyphGripBotLeft.setDirection(Servo.Direction.REVERSE);
-        servoGlyphGripTopRight = hardwareMap.servo.get("griptopright");
-        servoGlyphGripBotRight = hardwareMap.servo.get("gripbotright");
-        servoJewelLeft = hardwareMap.servo.get("jewelleft");
-        servoJewelRight = hardwareMap.servo.get("jewelright");
-        servoRelicFront = hardwareMap.servo.get("relicfront");
-        servoRelicWrist1 = hardwareMap.servo.get("relicwrist1");
-        servoRelicWrist2 = hardwareMap.servo.get("relicwrist2");
-        servoRelicWrist2.setDirection(Servo.Direction.REVERSE);
-        servoRelicGrip = hardwareMap.servo.get("relicgrip");
-
-        //lock the jewel arms home
-        sendServosHome(servoGlyphGripTopLeft, servoGlyphGripBotLeft, servoGlyphGripTopRight, servoGlyphGripBotRight, servoJewelLeft, servoJewelRight);
-        fileLogger.writeEvent(3,"Configuring Servos - Finish");
-        //lock the relic servos in fetal position
-        moveServo(servoRelicFront,SERVORELICFRONT_HOME,SERVORELICFRONT_MIN_RANGE,SERVORELICFRONT_MAX_RANGE);
-        moveServo(servoRelicWrist1,SERVORELICWRIST_HOME,SERVORELICWRIST_MIN_RANGE,SERVORELICWRIST_MAX_RANGE);
-        moveServo(servoRelicWrist2,SERVORELICWRIST_HOME,SERVORELICWRIST_MIN_RANGE,SERVORELICWRIST_MAX_RANGE);
-        moveServo(servoRelicGrip,SERVORELICGRIP_HOME,SERVORELICGRIP_MIN_RANGE,SERVORELICGRIP_MAX_RANGE);
-
-        dashboard.displayPrintf(1, "initRobot Servos Loaded");
-
-        // get a reference to our digitalTouch object.
-        limitswitch1 = hardwareMap.get(DigitalChannel.class, "limittop");
-        limitswitch2 = hardwareMap.get(DigitalChannel.class, "limitbot");
-
-        // set the digital channel to input.
-        limitswitch1.setMode(DigitalChannel.Mode.INPUT);
-        limitswitch2.setMode(DigitalChannel.Mode.INPUT);
-
-        fileLogger.writeEvent(1,"Set Limit Switches");
-
-        dashboard.displayPrintf(1, "initRobot Limit Switches Configured");
-
-        Mat tmp = new Mat();
-
-        fileLogger.writeEvent(3,"Configuring Vuforia - Finished");
         fileLogger.writeEvent(3,"Configuring Robot Parameters - Start");
         dashboard.displayPrintf(1, "Init - Complete, Wait for Start");
 
@@ -592,109 +454,6 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
 
         //the main loop.  this is where the action happens
         while (opModeIsActive()) {
-            if (!mblnDisableVisionProcessing) {
-                //start capturing frames for analysis
-                if (mblnReadyToCapture) {
-                    //vuMark will be the position to load the glyph
-                    vuMark = RelicRecoveryVuMark.from(RelicRecoveryVuforia.getRelicTemplate());
-
-                    tmp = new Mat();
-                    try {
-                        VuforiaLocalizer.CloseableFrame frame = RelicRecoveryVuforia.getVuforia().getFrameQueue().take(); //takes the frame at the head of the queue
-                        long numImages = frame.getNumImages();
-
-                        for (int i = 0; i < numImages; i++) {
-                            if (frame.getImage(i).getFormat() == PIXEL_FORMAT.RGB565) {
-                                rgb = frame.getImage(i);
-                                break;
-                            }
-                        }
-
-                        /*rgb is now the Image object that we’ve used in the video*/
-                        Bitmap bm = Bitmap.createBitmap(rgb.getWidth(), rgb.getHeight(), Bitmap.Config.RGB_565);
-                        bm.copyPixelsFromBuffer(rgb.getPixels());
-
-                        //put the image into a MAT for OpenCV
-                        tmp = new Mat(rgb.getWidth(), rgb.getHeight(), CvType.CV_8UC4);
-                        Utils.bitmapToMat(bm, tmp);
-                        //close the frame, prevents memory leaks and crashing
-                        frame.close();
-                    } catch (InterruptedException e) {
-                        dashboard.displayPrintf(1, "VUFORIA --- ERROR ERROR ERROR");
-                        dashboard.displayPrintf(2, "VUFORIA --- ERROR ERROR ERROR");
-                        LEDs.LEDControlUpdate(Constants.LEDState.STATE_ERROR);
-                        fileLogger.writeEvent(3,"Init Colour Returned " + mColour + " Column " + vuMark.toString());
-                    }
-
-                    if (ourRobotConfig.getAllianceColor().equals("Blue")) {
-                        flipit = false;
-                        quadrant = 3;
-                    }
-                    else {
-                        flipit = false;
-                        quadrant = 3;
-                    }
-
-                    mColour = JewelColour.JewelAnalysisOCV(fileLogger, tmp, mintCaptureLoop, flipit, quadrant, false);
-                    fileLogger.writeEvent(3,"Colour Returned " + mColour + " Column " + vuMark.toString());
-                    dashboard.displayPrintf(2, "Jewel Colour-" + mColour + " Column-" + vuMark.toString());
-                    switch (vuMark) {
-                        case LEFT:
-                            mintGlyphPosition = 1;
-                            break;
-                        case CENTER:
-                            mintGlyphPosition = 2;
-                            break;
-                        case RIGHT:
-                            mintGlyphPosition = 3;
-                            break;
-                        default:
-                            mintGlyphPosition = 0;
-                            break;
-                    }
-                    mintCaptureLoop++;
-                }
-
-                //use vuforia to get location information
-                for (VuforiaTrackable trackable : RelicRecoveryVuforia.getAllTrackables()) {
-                    /**
-                     * getUpdatedRobotLocation() will return null if no new information is available since
-                     * the last time that call was made, or if the trackable is not currently visible.
-                     * getRobotLocation() will return null if the trackable is not currently visible.
-                     */
-                    dashboard.displayPrintf(1, LABEL_WIDTH, trackable.getName(), ((VuforiaTrackableDefaultListener) trackable.getListener()).isVisible() ? "Visible" : "Not Visible");    //
-
-                    OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener) trackable.getListener()).getUpdatedRobotLocation();
-                    if (robotLocationTransform != null) {
-                        lastLocation = robotLocationTransform;
-                    }
-                }
-                /**
-                 * Provide feedback as to where the robot was last located (if we know).
-                 */
-                if (lastLocation != null) {
-                    // Then you can extract the positions and angles using the getTranslation and getOrientation methods.
-                    VectorF trans = lastLocation.getTranslation();
-                    Orientation rot = Orientation.getOrientation(lastLocation, AxesReference.EXTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES);
-                    // Robot position is defined by the standard Matrix translation (x and y)
-                    localisedRobotX = trans.get(0);
-                    localisedRobotY = trans.get(1);
-                    // Robot bearing (in Cartesian system) position is defined by the standard Matrix z rotation
-                    localisedRobotBearing = rot.thirdAngle;
-                    if (localisedRobotBearing < 0) {
-                        localisedRobotBearing = 360 + localisedRobotBearing;
-                    }
-                    dashboard.displayPrintf(3, "Pos X " + localisedRobotX);
-                    dashboard.displayPrintf(4, "Pos Y ", localisedRobotY);
-                    dashboard.displayPrintf(5, "Bear  ", localisedRobotBearing);
-                    dashboard.displayPrintf(6, "Pos   ", format(lastLocation));
-                    localiseRobotPos = true;
-                } else {
-                    localiseRobotPos = false;
-                    dashboard.displayPrintf(3, "Pos   ", "Unknown");
-                }
-            }
-
             switch (mintCurrentStateStep) {
                 case STATE_INIT:
                     fileLogger.writeEvent(1,"mintCurrentStateStep:- " + mintCurrentStateStep + " mintCurrentStateStep " + mintCurrentStateStep);
@@ -758,6 +517,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                     break;
                 case STATE_TIMEOUT:
                     robotDrive.setHardwareDrivePower(0);
+                    armDrive.setAngleLiftPower(0);
                     //  Transition to a new state.
                     mintCurrentStateStep = Constants.stepState.STATE_FINISHED;
                     break;
@@ -768,6 +528,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 case STATE_FINISHED:
                     LEDs.LEDControlUpdate(Constants.LEDState.STATE_FINISHED);
                     robotDrive.setHardwareDrivePower(0);
+                    armDrive.setAngleLiftPower(0);
                     //stop the logging
                     if (fileLogger != null) {
                         fileLogger.writeEvent(1, "Step FINISHED - FINISHED");
@@ -777,7 +538,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                         fileLogger = null;
                     }
                     //deactivate vuforia
-                    RelicRecoveryTrackables.deactivate();
+                    RoverRuckusTrackables.deactivate();
                     dashboard.displayPrintf(1, "STATE", "FINISHED " + mintCurrentStep);
                     break;
 
@@ -879,6 +640,9 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
             case "VTE":  // Turn the Robot using information from Vuforia and Pythag
                 VuforiaTurn();
                 break;
+            case "LDP":    // Moves the lift up and down for the 2018-19 game
+                moveLiftUpOrDown();
+                break;
         }
     }
 
@@ -902,50 +666,52 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
 
         switch (mstrRobotCommand.substring(0, 3)) {
             case "DELAY":
-                mintCurrentStepDelay = Constants.stepState.STATE_INIT;
+                mintCurrentStepDelay                = Constants.stepState.STATE_INIT;
                 break;
             case "GTH":
                 mintCurrentStateTankTurnGyroHeading = Constants.stepState.STATE_INIT;
                 break;
             case "MST":
-                mintCurrentStateMecanumStrafe = Constants.stepState.STATE_INIT;
+                mintCurrentStateMecanumStrafe       = Constants.stepState.STATE_INIT;
                 break;
             case "LTE":
-                mintCurrentStateTankTurn = Constants.stepState.STATE_INIT;
+                mintCurrentStateTankTurn            = Constants.stepState.STATE_INIT;
                 break;
             case "RTE":
-                mintCurrentStateTankTurn = Constants.stepState.STATE_INIT;
+                mintCurrentStateTankTurn            = Constants.stepState.STATE_INIT;
                 break;
             case "LPE":
-                mintCurrentStatePivotTurn = Constants.stepState.STATE_INIT;
+                mintCurrentStatePivotTurn           = Constants.stepState.STATE_INIT;
                 break;
             case "RPE":
-                mintCurrentStatePivotTurn = Constants.stepState.STATE_INIT;
+                mintCurrentStatePivotTurn           = Constants.stepState.STATE_INIT;
                 break;
             case "LRE":  // Left turn with a Radius in Parm 1
-                mintCurrentStateRadiusTurn = Constants.stepState.STATE_INIT;
+                mintCurrentStateRadiusTurn          = Constants.stepState.STATE_INIT;
                 break;
             case "RRE":  // Right turn with a Radius in Parm 1
-                mintCurrentStateRadiusTurn = Constants.stepState.STATE_INIT;
+                mintCurrentStateRadiusTurn          = Constants.stepState.STATE_INIT;
                 break;
             case "FWE":  // Drive forward a distance in inches and power setting
-                mintCurrentStateDriveHeading = Constants.stepState.STATE_INIT;
+                mintCurrentStateDriveHeading        = Constants.stepState.STATE_INIT;
                 break;
             case "VFL":  // Position the robot using vuforia parameters ready fro AStar  RObot should postion pointing to Red wall and Blue wall where targets are located
                 mintCurrentStateVuforiaLocalise5291 = Constants.stepState.STATE_INIT;
                 break;
             case "VME":  // Move the robot using localisation from the targets
-                mintCurStVuforiaMove5291 = Constants.stepState.STATE_INIT;
+                mintCurStVuforiaMove5291            = Constants.stepState.STATE_INIT;
                 break;
             case "VTE":  // Turn the Robot using information from Vuforia and Pythag
-                mintCurStVuforiaTurn5291 = Constants.stepState.STATE_INIT;
+                mintCurStVuforiaTurn5291            = Constants.stepState.STATE_INIT;
                 break;
             case "GTE":  // Special Function, 5291 Move forward until line is found
                 mintCurrentStateGyroTurnEncoder5291 = Constants.stepState.STATE_INIT;
                 break;
             case "EYE":  // Special Function, 5291 Move forward until line is found
-                mintCurrentStateEyes5291 = Constants.stepState.STATE_INIT;
+                mintCurrentStateEyes5291            = Constants.stepState.STATE_INIT;
                 break;
+            case "LDP":
+                mintCurrentMoveLift                 = Constants.stepState.STATE_INIT;
             case "FNC":  //  Run a special Function with Parms
 
                 break;
@@ -1668,7 +1434,6 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
 
     private void MecanumStrafe() {
         fileLogger.setEventTag("MecanumStrafe()");
-        int direction;
 
         double dblDistanceToEndLeft1;
         double dblDistanceToEndLeft2;
@@ -2313,17 +2078,6 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         return unit.fromUnit(DistanceUnit.CM, cm);
     }
 
-    private void readRangeSensors()
-    {
-        fileLogger.setEventTag("readRangeSensors()");
-        //adds 100ms to scan time, try use this as little as possible
-        range1Cache = RANGE1Reader.read(RANGE1_REG_START, RANGE1_READ_LENGTH);
-        range2Cache = RANGE2Reader.read(RANGE2_REG_START, RANGE2_READ_LENGTH);
-        mdblRangeSensor1 = getDistance(range1Cache[0] & 0xFF, range1Cache[1] & 0xFF, DistanceUnit.CM);
-        mdblRangeSensor2 = getDistance(range2Cache[0] & 0xFF, range2Cache[1] & 0xFF, DistanceUnit.CM);
-        fileLogger.writeEvent(2,"mdblRangeSensor1 " + mdblRangeSensor1 + ",mdblRangeSensor2 " + mdblRangeSensor2);
-    }
-
     /**
      * getError determines the error between the target angle and the robot's current heading
      * @param   targetAngle  Desired angle (relative to global reference established at last Gyro Reset).
@@ -2389,30 +2143,6 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
             return angle;
     }
 
-    private void sendServosHome(Servo servoGlyphGripTopLeft, Servo servoGlyphGripBotLeft, Servo servoGlyphGripTopRight, Servo servoGlyphGripBotRight, Servo servoJewelLeft, Servo servoJewelRight) {
-        moveServo(servoGlyphGripTopLeft, SERVOLIFTLEFTTOP_HOME, SERVOLIFTLEFTTOP_MIN_RANGE, SERVOLIFTLEFTTOP_MAX_RANGE);
-        moveServo(servoGlyphGripBotLeft, SERVOLIFTLEFTBOT_HOME, SERVOLIFTLEFTBOT_MIN_RANGE, SERVOLIFTLEFTBOT_MAX_RANGE);
-        moveServo(servoGlyphGripTopRight, SERVOLIFTRIGHTTOP_HOME, SERVOLIFTRIGHTTOP_MIN_RANGE, SERVOLIFTRIGHTTOP_MAX_RANGE);
-        moveServo(servoGlyphGripBotRight, SERVOLIFTRIGHTBOT_HOME, SERVOLIFTRIGHTBOT_MIN_RANGE, SERVOLIFTRIGHTBOT_MAX_RANGE);
-        moveServo(servoJewelLeft, SERVOJEWELLEFT_HOME, SERVOJEWELLEFT_MIN_RANGE, SERVOJEWELLEFT_MAX_RANGE);
-        moveServo(servoJewelRight, SERVOJEWELRIGHT_HOME, SERVOJEWELRIGHT_MIN_RANGE, SERVOJEWELRIGHT_MAX_RANGE);
-    }
-
-    private void moveTopServos(Servo servoGlyphGripTopLeft, Servo servoGlyphGripTopRight, double positionTopLeft, double positionTopRight) {
-        moveServo(servoGlyphGripTopLeft, positionTopLeft, SERVOLIFTLEFTTOP_MIN_RANGE, SERVOLIFTLEFTTOP_MAX_RANGE);
-        moveServo(servoGlyphGripTopRight, positionTopRight, SERVOLIFTRIGHTTOP_MIN_RANGE, SERVOLIFTRIGHTTOP_MAX_RANGE);
-    }
-
-    private void moveBotServos(Servo servoGlyphGripBotLeft, Servo servoGlyphGripBotRight, double positionBotLeft, double positionBotRight) {
-        moveServo(servoGlyphGripBotLeft, positionBotLeft, SERVOLIFTLEFTBOT_MIN_RANGE, SERVOLIFTLEFTBOT_MAX_RANGE);
-        moveServo(servoGlyphGripBotRight, positionBotRight, SERVOLIFTRIGHTBOT_MIN_RANGE, SERVOLIFTRIGHTBOT_MAX_RANGE);
-    }
-
-    private void moveServosPair(Servo servoLeft, Servo servoRight, double positionLeft, double positionRight) {
-        moveServo(servoLeft, positionLeft, 0, 180);
-        moveServo(servoRight, positionRight, 0, 180);
-    }
-
     private boolean moveServo (Servo Servo, double Position, double RangeMin, double RangeMax ) {
         //if ((Range.scale(Position, 0, 180, 0, 1) < RangeMin ) || (Range.scale(Position, 0, 180, 0, 1) > RangeMax )) {
         //    return false;
@@ -2459,5 +2189,39 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         mintCurrentStateTankTurnGyroHeading = Constants.stepState.STATE_COMPLETE;
         mintCurrentStateMecanumStrafe       = Constants.stepState.STATE_COMPLETE;
         mintCurrentStateGyroTurnEncoder5291 = Constants.stepState.STATE_COMPLETE;
+    }
+
+    private void moveLiftUpOrDown(){
+        while(mintCurrentMoveLift != Constants.stepState.STATE_COMPLETE || mintCurrentMoveLift != Constants.stepState.STATE_ERROR){
+            moveLiftUpOrDownFallThrough();
+        }
+    }
+    private void moveLiftUpOrDownFallThrough(){
+        switch (mintCurrentMoveLift){
+            case STATE_INIT:
+                armDrive.setHardwareArmDirections();
+                armDrive.liftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                armDrive.liftMotor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                mintCurrentMoveLift = Constants.stepState.STATE_START;
+                break;
+            case STATE_START:
+                mintCurrentMoveLift = Constants.stepState.STATE_RUNNING;
+                break;
+            case STATE_RUNNING:
+                armDrive.liftMotor.setPower(.5);
+                armDrive.liftMotor2.setPower(.5);
+
+                if (armDrive.liftMotor.getCurrentPosition() >= mdblRobotParm1 - 5 && armDrive.liftMotor2.getCurrentPosition() >= mdblRobotParm1 - 5){
+                    mintCurrentMoveLift = Constants.stepState.STATE_COMPLETE;
+                    armDrive.liftMotor.setPower(0);
+                    armDrive.liftMotor2.setPower(0);
+                }
+                break;
+            case STATE_COMPLETE:
+                armDrive.liftMotor.setPower(0);
+                armDrive.liftMotor2.setPower(0);
+                break;
+        }
+
     }
 }
