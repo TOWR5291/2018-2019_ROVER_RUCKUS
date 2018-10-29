@@ -139,6 +139,7 @@ public class HardwareDriveMotors
     public void setHardwareDriveDirections(robotConfigSettings.robotConfigChoice baseConfig){
 
         switch (baseConfig) {
+            case TileRunnerOrbital2x20:
             case TileRunner2x20:
             case TileRunner2x40:
             case TileRunner2x60:
@@ -151,6 +152,7 @@ public class HardwareDriveMotors
                 if (baseMotor4 != null)
                     baseMotor4.setDirection(DcMotor.Direction.FORWARD);
                 break;
+            case TileRunnerMecanumOrbital2x20:
             case TileRunnerMecanum2x40:
                 //TOWR5291 Tilrunner has 2 motors running from belts to the wheel, 2 motors running on gears
                 if (baseMotor1 != null)
