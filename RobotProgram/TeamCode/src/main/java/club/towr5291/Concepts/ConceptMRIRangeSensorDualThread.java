@@ -37,6 +37,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 // Based of the single MR Range Sensor Code
 
 @TeleOp(name = "Concept Range Sensor Dual Thread", group = "5291Concept")
+@Disabled
 public class ConceptMRIRangeSensorDualThread extends OpMode {
 
     public double mdblRangeSensor1 = 0;

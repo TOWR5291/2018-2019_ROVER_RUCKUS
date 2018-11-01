@@ -36,6 +36,7 @@ public class robotConfig {
     private String teamNumber;
     private String allianceColor;
     private String allianceStartPosition;
+    private String allianceParkPosition;
     private int delay;
     private String robotConfigBase;
 
@@ -102,6 +103,30 @@ public class robotConfig {
         private final int value;
 
         motors (String name, int value) {
+            this.name = name;
+            this.value = value;
+        }
+
+
+        public String toString() {
+            return name;
+        }
+
+        public int toInt() {
+            return value;
+        }
+    }
+
+    public enum armMotorsROVERRUCKUS {
+        Motor1 ("liftMotor1", 1),
+        Motor2 ("liftMotor2", 2),
+        Motor3 ("angleMotor1", 4),
+        Motor4 (null, 8);
+
+        private final String name;
+        private final int value;
+
+        armMotorsROVERRUCKUS (String name, int value) {
             this.name = name;
             this.value = value;
         }
@@ -185,6 +210,7 @@ public class robotConfig {
         this.teamNumber = "";
         this.allianceColor = "";
         this.allianceStartPosition = "";
+        this.allianceParkPosition = "";
         this.delay = 0;
         this.robotConfigBase = "";
     }
@@ -313,8 +339,8 @@ public class robotConfig {
                 COUNTS_PER_INCH_STRAFE_FRONT_OFFSET = 1;
                 COUNTS_PER_INCH_STRAFE_REAR_OFFSET = 1;
                 COUNTS_PER_INCH_STRAFE_LEFT_OFFSET = 1;
-                COUNTS_PER_INCH_STRAFE_RIGHT_OFFSET = .85;
-                COUNTS_PER_INCH_STRAFE = COUNTS_PER_INCH * 1.65;
+                COUNTS_PER_INCH_STRAFE_RIGHT_OFFSET = 1;
+                COUNTS_PER_INCH_STRAFE = COUNTS_PER_INCH * 1.1;
                 ROBOT_TRACK = 16.5;                                                     //  distance between centerline of rear wheels robot will pivot on rear wheel of omni on front, 16.5 track is 103.67 inches full circle
                 WHEEL_TURN_FUDGE = 1.0;                                                        // Fine tuning amount
                 COUNTS_PER_DEGREE = (((2 * 3.1415 * ROBOT_TRACK) * COUNTS_PER_INCH) / 360) * WHEEL_TURN_FUDGE;
@@ -371,8 +397,16 @@ public class robotConfig {
         return allianceStartPosition;
     }
 
-    public void setAllianceStartPosition(String allianceStartPosition) {
-        this.allianceStartPosition = allianceStartPosition;
+    public void setAllianceStartPosition(String allianceStartPositions) {
+        this.allianceStartPosition = allianceStartPositions;
+    }
+
+    public String getAllianceParkPosition() {
+        return allianceParkPosition;
+    }
+
+    public void setAllianceParkPosition(String allianceParkPositions) {
+        this.allianceParkPosition = allianceParkPositions;
     }
 
     public int getDelay() {
@@ -391,4 +425,5 @@ public class robotConfig {
         this.robotConfigBase = robotConfig;
     }
 
+    public double getMecanumTurnOffset() { return this.MECANUM_TURN_OFFSET;}
 }

@@ -26,8 +26,8 @@ import club.towr5291.libraries.robotConfigSettings;
  * Created by Ian Haden on 11/7/2016.
  */
 
-@TeleOp(name = "**Configure Robot 2**", group = "0")
-//@Disabled
+@TeleOp(name = "**Configure Robot TEST**", group = "0")
+@Disabled
 public class AutoSetupMenuTest extends OpModeMasterLinear implements FTCMenu.MenuButtons {
 
     //set up the variables for the logger

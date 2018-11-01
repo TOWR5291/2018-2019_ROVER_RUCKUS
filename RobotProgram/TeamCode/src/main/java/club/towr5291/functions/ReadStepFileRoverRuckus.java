@@ -43,19 +43,16 @@ public class ReadStepFileRoverRuckus {
     private int numberLoadedSteps = 1;
     private final int positionTimeout      = 0;
     private final int positionComnmand     = 1;
-    private final int positionDistanceX    = 2;
-    private final int positionDistanceY    = 3;
-    private final int positionDirection    = 4;
-    private final int positionPower        = 5;
-    private final int positionGyroDrive    = 6;
-    private final int positionParallel     = 7;
-    private final int positionLastPosition = 8;
-    private final int positionParm1        = 9;
-    private final int positionParm2        = 10;
-    private final int positionParm3        = 11;
-    private final int positionParm4        = 12;
-    private final int positionParm5        = 13;
-    private final int positionParm6        = 14;
+    private final int positionDistance     = 2;
+    private final int positionPower        = 3;
+    private final int positionParallel     = 4;
+    private final int positionLastPosition = 5;
+    private final int positionParm1        = 6;
+    private final int positionParm2        = 7;
+    private final int positionParm3        = 8;
+    private final int positionParm4        = 9;
+    private final int positionParm5        = 10;
+    private final int positionParm6        = 11;
 
     public int getNumberLoadedSteps() {
         return numberLoadedSteps;
@@ -74,16 +71,15 @@ public class ReadStepFileRoverRuckus {
         return autonomousStepsFromFile;
     }
 
-    private void loadSteps(int timeOut, String command, double distanceX, double distanceY, double direction, double power, boolean gyrodrive, boolean parallel, boolean lastPos, double parm1, double parm2, double parm3, double parm4, double parm5, double parm6)
+    private void loadSteps(int timeOut, String command, double distance, double power, boolean parallel, boolean lastPos, double parm1, double parm2, double parm3, double parm4, double parm5, double parm6)
     {
-        autonomousStepsFromFile.put(String.valueOf(this.getNumberLoadedSteps()), new LibraryStateSegAutoRoverRuckus (timeOut, command, distanceX, distanceY, direction, power, gyrodrive, parallel, lastPos, parm1, parm2, parm3, parm4, parm5, parm6));
-        //mValueSteps.add(loadStep, new LibraryStateTrack(false,false));
+        autonomousStepsFromFile.put(String.valueOf(this.getNumberLoadedSteps()), new LibraryStateSegAutoRoverRuckus (this.getNumberLoadedSteps(), timeOut, command, distance, power, parallel, lastPos, parm1, parm2, parm3, parm4, parm5, parm6));
         this.numberLoadedSteps++;
     }
 
-    public HashMap<String,LibraryStateSegAutoRoverRuckus> insertSteps(int timeOut, String command, double distanceX, double distanceY, double direction, double power, boolean gyrodrive,  boolean parallel, boolean lastPos, double parm1, double parm2, double parm3, double parm4, double parm5, double parm6, int insertlocation)
+    public HashMap<String,LibraryStateSegAutoRoverRuckus> insertSteps(int timeOut, String command, double distance,  double power, boolean parallel, boolean lastPos, double parm1, double parm2, double parm3, double parm4, double parm5, double parm6, int insertlocation)
     {
-        Log.d("insertSteps", " timout " + timeOut + " command " + command + " distanceX " + distanceX + " distanceY " + distanceY + " direction " + direction + " power " + power + " parallel " + parallel + " lastPos " + lastPos + " parm1 " + parm1 + " parm2 " + parm2 + " parm3 " + parm3 + " parm4 " + parm4 + " parm5 " + parm5 + " parm6 " + parm6);
+        Log.d("insertSteps", " timout " + timeOut + " command " + command + " distance " + distance + "  power " + power + " parallel " + parallel + " lastPos " + lastPos + " parm1 " + parm1 + " parm2 " + parm2 + " parm3 " + parm3 + " parm4 " + parm4 + " parm5 " + parm5 + " parm6 " + parm6);
         HashMap<String,LibraryStateSegAutoRoverRuckus> autonomousStepsTemp = new HashMap<String,LibraryStateSegAutoRoverRuckus>();
         LibraryStateSegAutoRoverRuckus processingStepsTemp;
 
@@ -97,7 +93,8 @@ public class ReadStepFileRoverRuckus {
         Log.d("insertSteps", "All steps loaded to a temp hasmap");
 
         //insert the step we want
-        autonomousStepsFromFile.put(String.valueOf(insertlocation), new LibraryStateSegAutoRoverRuckus (timeOut, command, distanceX, distanceY, direction, power, gyrodrive, parallel, lastPos, parm1, parm2, parm3, parm4, parm5, parm6));
+
+        autonomousStepsFromFile.put(String.valueOf(insertlocation), new LibraryStateSegAutoRoverRuckus (this.getNumberLoadedSteps(), timeOut, command, distance, power, parallel, lastPos, parm1, parm2, parm3, parm4, parm5, parm6));
         Log.d("insertSteps", "Inserted New step");
 
         //move all the other steps back into the sequence
@@ -130,6 +127,7 @@ public class ReadStepFileRoverRuckus {
             while((csvLine = reader.readLine()) != null) {
                 //check if line is a comment and ignore it
                 if (!((csvLine.substring(0, 2).equals("//")) || (csvLine.substring(0, 2).equals("\"")))) {
+                    Log.d("readStepsFromFile", "Line " + csvLine);
                     String[] row = csvLine.split(",");
                     //check if the first value in CSV has a length larger than the expected value of a timout, a timeout would have no more than 2 characters
                     if (row[0].length() > 6) {
@@ -152,14 +150,12 @@ public class ReadStepFileRoverRuckus {
                         if ((blnIfActive && blnIfStart) || (!blnIfActive && !blnIfStart)) {
                             //String[] row = csvLine.split(",");
                             //1,EYE,1,30,0.5,FALSE,FALSE,0,0,0,0,0,0
-                            Log.d("readStepsFromFile", "CSV Value " + row[0].trim() + "," + row[1].trim() + "," + row[2].trim() + "," + row[3].trim() + "," + row[4].trim() + "," + row[5].trim() + "," + row[6].trim() + "," + row[7].trim() + "," + row[8].trim() + "," + row[9].trim() + "," + row[10].trim() + "," + row[11].trim() + "," + row[12].trim() + "," + row[13].trim());
+                            Log.d("readStepsFromFile", "CSV Value " + row[0].trim() + "," + row[1].trim() + "," + row[2].trim() + "," + row[3].trim() + "," + row[4].trim() + "," + row[5].trim() + "," + row[6].trim() + "," + row[7].trim() + "," + row[8].trim() + "," + row[9].trim() + "," + row[10].trim());
+
                             loadSteps(Integer.parseInt(row[positionTimeout].trim()),
                                     row[positionComnmand].trim().toUpperCase(),
-                                    Double.parseDouble(row[positionDistanceX].trim()),
-                                    Double.parseDouble(row[positionDistanceY].trim()),
-                                    Double.parseDouble(row[positionDirection].trim()),
+                                    Double.parseDouble(row[positionDistance].trim()),
                                     Double.parseDouble(row[positionPower].trim()),
-                                    Boolean.parseBoolean(row[positionGyroDrive].trim().toUpperCase()),
                                     Boolean.parseBoolean(row[positionParallel].trim().toUpperCase()),
                                     Boolean.parseBoolean(row[positionLastPosition].trim().toUpperCase()),
                                     Double.parseDouble(row[positionParm1].trim()),

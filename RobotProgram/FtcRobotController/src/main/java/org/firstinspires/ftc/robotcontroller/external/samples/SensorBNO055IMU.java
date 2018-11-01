@@ -69,7 +69,10 @@ public class SensorBNO055IMU extends LinearOpMode
     Orientation angles;
     Acceleration gravity;
 
-    //----------------------------------------------------------------------------------------------
+    private int imuStartCorrectionVar = 0;
+    private int imuMountCorrectionVar = 90;
+
+        //----------------------------------------------------------------------------------------------
     // Main logic
     //----------------------------------------------------------------------------------------------
 
@@ -180,5 +183,15 @@ public class SensorBNO055IMU extends LinearOpMode
 
     String formatDegrees(double degrees){
         return String.format(Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
+    }
+    //for adafruit IMU as it returns z angle only
+    private double angleToHeading(double z) {
+        double angle = -z + imuStartCorrectionVar + imuMountCorrectionVar;
+        if (angle < 0)
+            return angle + 360;
+        else if (angle > 360)
+            return angle - 360;
+        else
+            return angle;
     }
 }

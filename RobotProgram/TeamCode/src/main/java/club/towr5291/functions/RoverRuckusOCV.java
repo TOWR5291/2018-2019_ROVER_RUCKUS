@@ -41,7 +41,7 @@ import static org.opencv.core.Core.flip;
 
 public class RoverRuckusOCV {
 
-    private final static double MIN_COLOR_ZONE_AREA = 0.2;// fraction of total image area
+    private final static double MIN_COLOR_ZONE_AREA = 10000;// Min Area to look for
 
     private Mat hsvImg;
     private Mat finalImg;
@@ -59,36 +59,30 @@ public class RoverRuckusOCV {
     private Mat white;
     private Mat out;
     private Mat original;
-    private Mat crap1;
-    private Mat crap2;
+    private Mat garbage1;
+    private Mat garbage2;
     private Mat btnTmpImg;
-    private Mat blue;
     private Mat red;
 
-    private Rect white_box = new Rect();
-    private Rect blue_box = new Rect();
     private Rect red_box = new Rect();
 
     private List<Mat>        hsv_channels    = new ArrayList<>();
     private List<Mat>        rgb_channels    = new ArrayList<>();
     private List<MatOfPoint> red_blobs       = new ArrayList<>();
-    private List<MatOfPoint> blue_blobs      = new ArrayList<>();
     private List<MatOfPoint> white_blobs     = new ArrayList<>();
     private List<MatOfPoint> black_blobs     = new ArrayList<>();
 
     private ArrayList<Rect>  red_matches     = new ArrayList<>();
-    private ArrayList<Rect>  blue_matches    = new ArrayList<>();
     private ArrayList<Rect>  white_matches   = new ArrayList<>();
     private List<Rect>       buttons         = new ArrayList<>();
     private ArrayList<Point> centroidRed     = new ArrayList<>();
-    private ArrayList<Point> centroidBlue    = new ArrayList<>();
     private ArrayList<Point> centroidWhite   = new ArrayList<>();
 
     private double lumAvg = 0;
 
     private Constants.ObjectColours ObjectColourResult;
 
-    private int debug = 1;
+    private int debug;
 
     private int imageCounter;
 
@@ -100,8 +94,7 @@ public class RoverRuckusOCV {
     private HashMap<String,LibraryOCVHSVFilter> HSVRedFilters = new HashMap<String,LibraryOCVHSVFilter>();
     private HashMap<String,LibraryOCVHSVFilter> HSVCrapFilters = new HashMap<String,LibraryOCVHSVFilter>();
     private int loadHSVRedindex = 0;
-    private int loadHSVBlueindex = 0;
-    private int loadHSVCrapindex = 0;
+    private int loadHSVGarbageindex = 0;
     private double imageTimeStamp;
 
     //default resolution
@@ -112,18 +105,21 @@ public class RoverRuckusOCV {
 
     }
 
-    public Constants.ObjectColours JewelAnalysisOCV(FileLogger fileLoggerFromMaster, TOWRDashBoard dashBoard, Mat img, int count, boolean flipit, int quadrant, boolean calibrate) {
+    public Constants.ObjectColours RoverRuckusOCV(FileLogger fileLoggerFromMaster, TOWRDashBoard dashBoard, Mat img, int count, boolean flipit, int quadrant, boolean calibrate) {
+        Rect white_box = new Rect();
 
         this.fileLogger = fileLoggerFromMaster;
 
         debug = fileLogger.getDebugLevel();
 
+        fileLogger.writeEvent(debug, "OCV", "Started OCV Processing");
+
         //clear out old information
         finalImg = new Mat();
         original = new Mat();
         hsvImg = new Mat();
-        crap1 = new Mat();
-        crap2 = new Mat();
+        garbage1 = new Mat();
+        garbage2 = new Mat();
         btnTmpImg = new Mat();
         showImg = new Mat();
 
@@ -143,12 +139,12 @@ public class RoverRuckusOCV {
         //start loading HSV Paramters from file, if this takes too long abandon this process
         readHSVFiltersFromFile("HSVFilters.csv");
 
-        fileLogger.writeEvent(3, TAG, "HSV Filters loaded");
+        fileLogger.writeEvent(debug, TAG, "HSV Filters loaded");
 
         imageCounter = count;
         Rect roi = new Rect(img.width() / 2, img.height() / 2, img.width() / 2, img.height() / 2);
 
-        double offset = img.height() / 6;
+        double offset = img.height() / 10;
 
         switch (quadrant) {
             case 0:
@@ -175,8 +171,23 @@ public class RoverRuckusOCV {
                 // Just get where the Jewel is so we don't analyse the wrong items in the image
                 roi = new Rect(0, img.height() / 2 - (int)offset, img.width() / 2, img.height() / 2);
                 break;
-            default:
+            case 5:
+                // top
                 // Just get where the Jewel is so we don't analyse the wrong items in the image
+                roi = new Rect(0, 0, img.width(), img.height() / 2);
+                break;
+            case 6:
+                // bottom
+                // Just get where the object is so we don't analyse the wrong items in the image
+                roi = new Rect(0, img.height() / 2 - (int)offset, img.width() / 1, img.height() / 2);
+                break;
+            case 7:
+                // center bottom
+                // Just get where the object is so we don't analyse the wrong items in the image
+                roi = new Rect(img.width() / 3, img.height() / 2 - (int)offset, img.width() / 3, img.height() / 2 - (int)offset);
+                break;
+            default:
+                // Just get where the object is so we don't analyse the wrong items in the image
                 roi = new Rect(img.width() / 2, img.height() / 2, img.width() / 2, img.height() / 2);
         }
 
@@ -221,14 +232,11 @@ public class RoverRuckusOCV {
 
         //Core.split( original, rgb_channels );
         red = new Mat();
-        blue = new Mat();
         Core.extractChannel(original,red,2);
-        Core.extractChannel(original,blue,0);
 
         fileLogger.writeEvent(3, TAG, "Saving RED and Blue to 5 and 6");
 
         SaveImage(9,red, imageTimeStamp + "-05 red " + imageCounter);
-        SaveImage(9,blue, imageTimeStamp + "-06 blue " + imageCounter);
 
         fileLogger.writeEvent(3,TAG, "Creating a new MAT colorDiff");
         fileLogger.writeEvent(3,TAG, "colorDiff Size " + red.rows() + ", " + red.cols());
@@ -240,62 +248,19 @@ public class RoverRuckusOCV {
             ObjectColourResult = Constants.ObjectColours.OBJECT_RED_BLUE;
         } else {
             fileLogger.writeEvent(1, TAG, "findRed() Start");
-            findRed2();
+            findRed();
 
             fileLogger.writeEvent(1, TAG, "draw() Start");
             finalImg = draw();
 
-            SaveImage(2, finalImg, imageTimeStamp + "-99 final " + imageCounter);
+            SaveImage(9, finalImg, imageTimeStamp + "-99 final " + imageCounter);
 
             calcPosition();
         }
         return ObjectColourResult;
     }
 
-    private void findAreas(TOWRDashBoard dashBoard) {
-        Mat imageAreas = new Mat();
-        Mat mergeBlueSubtracted = new Mat();
-        Mat mergeRedSubtracted = new Mat();
-        Mat imageBlueRGB = new Mat();
-        Mat imageRedRGB = new Mat();
-
-        fileLogger.writeEvent(3,TAG, "Finding HSV Values");
-
-        SaveImage(1,blue, "97 FA Blue " + imageCounter );
-        SaveImage(1,red, "97 FA Red " + imageCounter );
-
-        Imgproc.cvtColor( blue, imageBlueRGB, Imgproc.COLOR_GRAY2RGB, 4);
-        SaveImage(1,imageBlueRGB, "98 FA BlueRGB " + imageCounter );
-        fileLogger.writeEvent(3,TAG, "Blue Channels " + blue.channels());
-        fileLogger.writeEvent(3,TAG, "BlueRGB Channels " + imageBlueRGB.channels());
-        fileLogger.writeEvent(3,TAG, "original Channels " + original.channels());
-
-        Core.subtract(original, imageBlueRGB, mergeBlueSubtracted);
-        SaveImage(1,mergeBlueSubtracted, "98 FA BlueSub " + imageCounter );
-
-        Imgproc.cvtColor( red, imageRedRGB, Imgproc.COLOR_GRAY2RGB, 4);
-        SaveImage(1,imageRedRGB, "98 FA RedRGB " + imageCounter );
-        Core.subtract(original, imageRedRGB, mergeRedSubtracted);
-        SaveImage(1,mergeRedSubtracted, "98 FA RedSub " + imageCounter );
-
-        //lets try find a value or values that work
-        for (int x = 0; x < 265; x = x + 10) {
-            for (int y = 0; y < 265; y = y + 10) {
-                for (int z = 0; z < 265; z = z + 10) {
-                    Core.inRange(mergeRedSubtracted, new Scalar(x, y, z), new Scalar(x + 20, y + 20, z + 20), imageAreas);
-                    if (Core.countNonZero(imageAreas) > 0) {
-                        SaveImage(1, imageAreas, "99 FA R Seeking " + imageCounter + "- x " + x + " y " + y + " z " + z);
-                    }
-                    dashBoard.displayPrintf(9, "X = " + String.valueOf(x));
-                    dashBoard.displayPrintf(10, "Y = " + String.valueOf(y));
-                    dashBoard.displayPrintf(11, "Z = " + String.valueOf(z));
-                }
-            }
-        }
-
-    }
-
-    private void findRed2()
+    private void findRed()
     {
         // Same game, just a different hue
         Mat red1 = new Mat();
@@ -327,8 +292,8 @@ public class RoverRuckusOCV {
         fileLogger.writeEvent(3,TAG, "Finish Red Filter");
 
         //filter out the known crap
-        if (!crap1.empty())
-            Core.subtract(red_areas, crap1, red_areas);
+        if (!garbage1.empty())
+            Core.subtract(red_areas, garbage1, red_areas);
         SaveImage(9,red_areas, imageTimeStamp + "-28.1 findRed subtract " + imageCounter);
 
         red_areas.copyTo(tmpHsv2Img);
@@ -353,11 +318,12 @@ public class RoverRuckusOCV {
         for ( Rect rb : red_matches ) {
             fileLogger.writeEvent(1, "for red_matches");
             Imgproc.rectangle( out, rb.tl(), rb.br(), new Scalar(255,150,150), 3 );
-            if (red_box.area() < rb.area())
-                red_box = rb;
+            if (rb.area() > MIN_COLOR_ZONE_AREA) {
+                if (red_box.area() < rb.area())
+                    red_box = rb;
+                fileLogger.writeEvent(1, "red areas " + rb.area());
+            }
         }
-
-        fileLogger.writeEvent(1, "DONE", "DONE 1");
 
         for ( Point rc : centroidRed) {
             fileLogger.writeEvent(1, "cetroidRED", "RC");
@@ -368,56 +334,72 @@ public class RoverRuckusOCV {
         fileLogger.writeEvent(3,TAG, "Red Box Area " +red_box.area());
         fileLogger.writeEvent(1, "HElP 1", "HELP");
 
-        SaveImage(1, out, "Test Red Blobs");
+        SaveImage(9, out, "Test Red Blobs - circle");
         Imgproc.drawContours( out, red_blobs, -1, new Scalar(255,0,0), 2 );
+        SaveImage(9, out, "Test Red Blobs - drawcontours");
 
         fileLogger.writeEvent(1, "HElP 2", "HELP");
 
         return out;
     }
 
+
+    private void findAreas(TOWRDashBoard dashBoard) {
+        Mat imageAreas = new Mat();
+        Mat mergeRedSubtracted = new Mat();
+        Mat imageRedRGB = new Mat();
+
+        fileLogger.writeEvent(3,TAG, "Finding HSV Values");
+
+        SaveImage(9,red, "97 FA Red " + imageCounter );
+        fileLogger.writeEvent(3,TAG, "original Channels " + original.channels());
+
+        Imgproc.cvtColor( red, imageRedRGB, Imgproc.COLOR_GRAY2RGB, 4);
+        SaveImage(9,imageRedRGB, "98 FA RedRGB " + imageCounter );
+        Core.subtract(original, imageRedRGB, mergeRedSubtracted);
+        SaveImage(9,mergeRedSubtracted, "98 FA RedSub " + imageCounter );
+
+        //lets try find a value or values that work
+        for (int x = 0; x < 260; x = x + 20) {
+            dashBoard.displayPrintf(9, "X = " + String.valueOf(x));
+            for (int y = 0; y < 260; y = y + 20) {
+                dashBoard.displayPrintf(10, "Y = " + String.valueOf(y));
+                for (int z = 0; z < 260; z = z + 20) {
+                    dashBoard.displayPrintf(11, "Z = " + String.valueOf(z));
+                    Core.inRange(mergeRedSubtracted, new Scalar(x, y, z), new Scalar(x + 20, y + 20, z + 20), imageAreas);
+                    if (Core.countNonZero(imageAreas) > 0) {
+                        SaveImage(1, imageAreas, "99 FA R Seeking " + imageCounter + "- x " + x + " y " + y + " z " + z);
+                    }
+                }
+            }
+        }
+
+    }
+
     private void calcPosition()
     {
 
         Point centroidRedPosition;
-        Point centroidBluePosition;
-
+        
         ObjectColourResult = Constants.ObjectColours.UNKNOWN;
-        fileLogger.writeEvent(3,TAG, "Jewel colour - colour unknown");
-        fileLogger.writeEvent(3,TAG, "Jewel centroidBlue " + centroidBlue.size());
-        fileLogger.writeEvent(3,TAG, "Jewel centroidRed " + centroidRed.size());
-        fileLogger.writeEvent(3,TAG, "Jewel red_box area " + red_box.area());
-        fileLogger.writeEvent(3,TAG, "Jewel blue_box area " + blue_box.area());
+        fileLogger.writeEvent(3,TAG, "Element colour - colour unknown");
+        fileLogger.writeEvent(3,TAG, "Element centroidRed " + centroidRed.size());
+        fileLogger.writeEvent(3,TAG, "Element red_box area " + red_box.area());
 
         try {
-            centroidBluePosition = centroidBlue.get(0);
-            centroidRedPosition = centroidRed.get(0);
+            //centroidRedPosition = centroidRed.get(0);
 
-            //can see 2 jewels, need to work out which one is left or right
-            if ((red_box.area() > 10000) && (blue_box.area() > 10000)) {
-                if (centroidBluePosition.x < centroidRedPosition.x) {
-                    ObjectColourResult = Constants.ObjectColours.OBJECT_BLUE_RED;
-                    return;
-                } else if (centroidBluePosition.x > centroidRedPosition.x) {
-                    ObjectColourResult = Constants.ObjectColours.OBJECT_RED_BLUE;
-                    return;
-                }
+            if ((red_box.area() > MIN_COLOR_ZONE_AREA)) {
+                ObjectColourResult = Constants.ObjectColours.OBJECT_RED;
+            } else {
+                ObjectColourResult = Constants.ObjectColours.OBJECT_NONE;
             }
         } catch (Exception e) {
+            ObjectColourResult = Constants.ObjectColours.UNKNOWN;
             //throw new RuntimeException("Error in reading CSV file:" + ex);
-            fileLogger.writeEvent(2,TAG, "Error getting centroid:" + e);
+            fileLogger.writeEvent(debug,TAG, "Error getting centroid:" + e);
         }
-
-
-        if ( red_box.area()  > blue_box.area() ) {
-            ObjectColourResult = Constants.ObjectColours.OBJECT_RED;
-            return;
-        } else if ( red_box.area() < blue_box.area() ) {
-            ObjectColourResult = Constants.ObjectColours.OBJECT_BLUE;
-            return;
-        }
-
-        ObjectColourResult = Constants.ObjectColours.UNKNOWN;
+        fileLogger.writeEvent(debug,TAG, "Returning Answer:" + ObjectColourResult.toString());
         return;
 
     }
@@ -456,7 +438,9 @@ public class RoverRuckusOCV {
             contour_area = Imgproc.contourArea( contour );
             bounded_box = Imgproc.boundingRect( contour );
 
-            if ( contour_area > MIN_COLOR_ZONE_AREA * maxArea ) {
+            if ( contour_area > MIN_COLOR_ZONE_AREA) {
+                fileLogger.writeEvent(1,"opencv", "contourarea = "  + contour_area);
+                fileLogger.writeEvent(1,"opencv", "Maxarea = "  + maxArea);
                 int largestContour = contoursLargestIndex(contours);
                 centroid.add(massCenterMatOfPoint2f(contours.get(largestContour)));
                 calcCtr.add(contour);
@@ -487,32 +471,6 @@ public class RoverRuckusOCV {
         centroid.x = moments.get_m10() / moments.get_m00();
         centroid.y = moments.get_m01() / moments.get_m00();
         return centroid;
-    }
-
-    private double scoreFit( Rect wb, Rect rb, Rect bb )
-    {
-        double beac_w = 9.0;
-        double beac_h = 6.5;
-
-        double actl_beac_rt = beac_w / beac_h;
-        double sens_bcn_rt = wb.width / wb.height;
-
-        double beac_rt = wb.area() / ( hsvImg.cols() * hsvImg.rows() );
-        double red_rt = rb.area() / wb.area();
-        double blue_rt = bb.area() / wb.area();
-
-        double beac_aspect_factor =
-                Math.pow( Range.clip( sens_bcn_rt - actl_beac_rt, -1.0, 1.0 ) / actl_beac_rt, 2 );
-        double wb_ratio_factor =
-                Math.pow( Range.clip( 0.6 - beac_rt, -0.6, 0.6 ) * 1.67, 2 );
-        double rb_ratio_factor =
-                Math.pow( Range.clip( 0.4 - ( red_rt + blue_rt ) / 2, -0.4, 0.4 ) * 2.5, 2 );
-
-        return Range.clip( 1 - Math.sqrt(
-                ( beac_aspect_factor +
-                        3 * wb_ratio_factor +
-                        2 * rb_ratio_factor
-                ) / 6.0 ), 0.0, 1.0 );
     }
 
     private double minOf( double w, double r, double b )
@@ -614,8 +572,8 @@ public class RoverRuckusOCV {
                 loadHSVRedindex++;
                 break;
             case "crap":
-                HSVCrapFilters.put(String.valueOf(loadHSVCrapindex), new LibraryOCVHSVFilter(parm1, parm2, parm3, parm4, parm5, parm6));
-                loadHSVCrapindex++;
+                HSVCrapFilters.put(String.valueOf(loadHSVGarbageindex), new LibraryOCVHSVFilter(parm1, parm2, parm3, parm4, parm5, parm6));
+                loadHSVGarbageindex++;
                 break;
             default:
                 fileLogger.writeEvent(1,TAG, "CSV Value UNKNOWN " + Filter);

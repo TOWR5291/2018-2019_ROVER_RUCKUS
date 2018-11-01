@@ -6,6 +6,7 @@ import android.preference.PreferenceManager;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.hardware.lynx.LynxModule;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -50,6 +51,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.FRONT;
 
 @TeleOp(group = "Vufroia", name = "Vuforia Demo")
+@Disabled
 public class ConceptForEvent extends LinearOpMode {
 
     private static final float mmPerInch        = 25.4f;
@@ -121,6 +123,7 @@ public class ConceptForEvent extends LinearOpMode {
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
         parameters.vuforiaLicenseKey = "AW9Mt0r/////AAAAGZTQpkbS80ZAmcBkWIDLcy6CS9VhLDFoyKS2MgMoVfFc4dJZnfKCp8KkOAJoW9SBWFImTgCniDMEbhB4Pk1R+q1R5iWbeE9m6JhgwNT1kZOmpJohh59A8H8yEqkl0v7gL4LgRLVWH/GrOw+RVxCNrP2kYNyr9mAoCGxoU8pKZQ2XUPDclGl5xzt0y4yTElsZL+92X6tJ7uEOoqhyvoviORCWU3oPDUQX9ki7ZedBC0IWXZWu38Uw/XuIJNGvDw3YfX7zs1z6rfTvAh85jns5l2PZ4QQtknCCBd4ynRFkG+d0PIYKAdPDZ47gJ4jm5scg9cp3Am2lElbPQOuv0SnYLyqD2DPsnclhBQz3PVt3smr0";
         parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+
         this.vuforia = ClassFactory.getInstance().createVuforia(parameters);
 
         /**

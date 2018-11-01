@@ -15,7 +15,7 @@ import club.towr5291.functions.FileLogger;
  */
 
 @TeleOp(name = "Concept Logging", group = "5291Concept")
-//@Disabled
+@Disabled
 public class ConceptLogging extends OpMode {
 
     //set up the variables for the logger

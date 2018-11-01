@@ -29,9 +29,9 @@ import club.towr5291.libraries.robotConfigSettings;
 public class HardwareArmMotorsRoverRuckus
 {
     /* Public OpMode members. */
-    public DcMotor  liftMotor       = null;
+    public DcMotor  liftMotor1      = null;
     public DcMotor  liftMotor2      = null;
-    public DcMotor  angleMotor1     = null;
+    public DcMotor  tiltMotor1      = null;
     public Servo teamMarkerServo    = null;
     public Servo intakeServo        = null;
 
@@ -51,14 +51,14 @@ public class HardwareArmMotorsRoverRuckus
         this.hwMap = ahwMap;
 
         // Define and Initialize Motors
-        this.liftMotor          = hwMap.dcMotor.get("liftMotor1");
+        this.liftMotor1         = hwMap.dcMotor.get("liftMotor1");
         this.liftMotor2         = hwMap.dcMotor.get("liftMotor2");
-        this.angleMotor1        = hwMap.dcMotor.get("angleMotor1");
+        this.tiltMotor1         = hwMap.dcMotor.get("tiltMotor1");
         this.teamMarkerServo    = hwMap.servo.get("teamMarkerServo");
         this.intakeServo        = hwMap.servo.get("intakeServo");
         setHardwareArmDirections();
 
-        liftMotor.setPower(0);
+        liftMotor1.setPower(0);
         liftMotor2.setPower(0);
         setHardwareLiftMotorResetEncoders();
         setHardwareLiftMotorRunWithoutEncoders();
@@ -66,37 +66,37 @@ public class HardwareArmMotorsRoverRuckus
     }
 
     public void setHardwareArmDirections(){
-        liftMotor.setDirection(DcMotor.Direction.REVERSE);
+        liftMotor1.setDirection(DcMotor.Direction.REVERSE);
         liftMotor2.setDirection(DcMotor.Direction.REVERSE);
-        angleMotor1.setDirection(DcMotor.Direction.FORWARD);
+        tiltMotor1.setDirection(DcMotor.Direction.FORWARD);
     }
 
     public void setHardwareLiftPower(double power){
-        liftMotor.setPower(power);
+        liftMotor1.setPower(power);
         liftMotor2.setPower(power);
     }
     public void setHardwareLiftMotorResetEncoders() {
-        liftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        liftMotor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         liftMotor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
     public void setHardwareLiftMotorRunUsingEncoders() {
-        liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        liftMotor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         liftMotor2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
     public void setHardwareLiftMotorRunWithoutEncoders() {
-        liftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        liftMotor1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         liftMotor2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
     public void setHardwareLiftMotorRunToPosition(){
-        liftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        liftMotor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         liftMotor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
-    public void setAngleLiftPower(double power){
-        if (angleMotor1.getCurrentPosition() > 0 && angleMotor1.getCurrentPosition() < 120){
-            angleMotor1.setPower(power);
+    public void setTiltLiftPower(double power){
+        if (tiltMotor1.getCurrentPosition() > 0 && tiltMotor1.getCurrentPosition() < 120){
+            tiltMotor1.setPower(power);
         } else {
-            angleMotor1.setPower(0);
+            tiltMotor1.setPower(0);
         }
     }
 

@@ -7,13 +7,10 @@ package club.towr5291.libraries;
 
 public class LibraryStateSegAutoRoverRuckus {
 
+    private int mStep;                   //step number
     private double mRobotTimeOut;        //how much time is allowed for the step to complete
     private String mRobotCommand;        //Command
-    private double mRobotDistanceX;      //distance to move
-    private double mRobotDistanceY;      //distance to move
-    private double mRobotDirection;      //direction to move
-    private boolean mGyroDrive;          //if enable use the fyro to maintain the direction
-    private double mRobotSpeed;          //what angle to move in
+    private double mRobotDistance;       //how far to move
     private boolean mRobotParallel;      //run in parallel with next step
     private boolean mRobotLastPos;       //run using last known position or current encoder position
     private double mRobotParm1;          //1st Parameter
@@ -22,25 +19,25 @@ public class LibraryStateSegAutoRoverRuckus {
     private double mRobotParm4;          //4th Parameter
     private double mRobotParm5;          //5rd Parameter
     private double mRobotParm6;          //6th Parameter
+    private double mRobotSpeed;          //what angle to move in
 
     // Constructor
-    public LibraryStateSegAutoRoverRuckus(double timeout, String RobotCommand, double RobotDistanceX, double RobotDistanceY, double RobotDirection, double robotSpeed,boolean GyroDrive, boolean RobotParallel, boolean RobotLastPos, double RobotParm1, double RobotParm2, double RobotParm3, double RobotParm4, double RobotParm5, double RobotParm6)
+    // Constructor
+    public LibraryStateSegAutoRoverRuckus(int step, double timeout, String RobotCommand, double RobotDistance, double robotSpeed, boolean RobotParallel, boolean RobotLastPos, double RobotParm1, double RobotParm2, double RobotParm3, double RobotParm4, double RobotParm5, double RobotParm6)
     {
-        mRobotTimeOut    = timeout;
-        mRobotCommand    = RobotCommand;
-        mRobotDistanceX  = RobotDistanceX;
-        mRobotDistanceY  = RobotDistanceY;
-        mRobotDirection  = RobotDirection;
-        mRobotSpeed      = robotSpeed;
-        mGyroDrive       = GyroDrive;
-        mRobotParallel   = RobotParallel;
-        mRobotLastPos    = RobotLastPos;
-        mRobotParm1      = RobotParm1;
-        mRobotParm2      = RobotParm2;
-        mRobotParm3      = RobotParm3;
-        mRobotParm4      = RobotParm4;
-        mRobotParm5      = RobotParm5;
-        mRobotParm6      = RobotParm6;
+        mStep = step;
+        mRobotTimeOut = timeout;
+        mRobotCommand = RobotCommand;
+        mRobotDistance = RobotDistance;
+        mRobotSpeed = robotSpeed;
+        mRobotParallel = RobotParallel;
+        mRobotLastPos = RobotLastPos;
+        mRobotParm1 = RobotParm1;
+        mRobotParm2 = RobotParm2;
+        mRobotParm3 = RobotParm3;
+        mRobotParm4 = RobotParm4;
+        mRobotParm5 = RobotParm5;
+        mRobotParm6 = RobotParm6;
     }
 
     public void setmRobotTimeOut(double mRobotTimeOut)
@@ -53,16 +50,9 @@ public class LibraryStateSegAutoRoverRuckus {
         this.mRobotCommand = mRobotCommand;
     }
 
-    public void setmRobotDistanceX(double RobotDistanceX) {
-        this.mRobotDistanceX = RobotDistanceX;
-    }
-
-    public void setmRobotDistanceY(double RobotDistanceY) {
-        this.mRobotDistanceY = RobotDistanceY;
-    }
-
-    public void setmRobotDirection(double RobotDirection) {
-        this.mRobotDirection = RobotDirection;
+    public void setmRobotDistance(double mRobotDistance)
+    {
+        this.mRobotDistance = mRobotDistance;
     }
 
     public void setmRobotParallel(boolean mRobotParallel)
@@ -110,12 +100,9 @@ public class LibraryStateSegAutoRoverRuckus {
         this.mRobotSpeed = mRobotSpeed;
     }
 
-    public void setmGyroDrive(boolean mGyroDrive) {
-        this.mGyroDrive = mGyroDrive;
-    }
-
-    public boolean ismGyroDrive() {
-        return mGyroDrive;
+    public double getmStep()
+    {
+        return mStep;
     }
 
     public double getmRobotTimeOut()
@@ -128,15 +115,9 @@ public class LibraryStateSegAutoRoverRuckus {
         return mRobotCommand;
     }
 
-    public double getmRobotDistanceX() {
-        return mRobotDistanceX;
-    }
-    public double getmRobotDistanceY() {
-        return mRobotDistanceY;
-    }
-
-    public double getmRobotDirection() {
-        return mRobotDirection;
+    public double getmRobotDistance()
+    {
+        return this.mRobotDistance;
     }
 
     public boolean getmRobotParallel()
@@ -149,39 +130,40 @@ public class LibraryStateSegAutoRoverRuckus {
         return mRobotLastPos;
     }
 
-    public double mRobotParm1()
+    public double getmRobotParm1()
     {
         return mRobotParm1;
     }
 
-    public double mRobotParm2()
+    public double getmRobotParm2()
     {
         return mRobotParm2;
     }
 
-    public double mRobotParm3()
+    public double getmRobotParm3()
     {
         return mRobotParm3;
     }
 
-    public double mRobotParm4()
+    public double getmRobotParm4()
     {
         return mRobotParm4;
     }
 
-    public double mRobotParm5()
+    public double getmRobotParm5()
     {
         return mRobotParm5;
     }
 
-    public double mRobotParm6()
+    public double getmRobotParm6()
     {
         return mRobotParm6;
     }
 
-    public double mRobotSpeed()
+    public double getmRobotSpeed()
     {
         return mRobotSpeed;
     }
+
 
 }

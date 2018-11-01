@@ -10,8 +10,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import java.util.HashMap;
 
 import club.towr5291.functions.FileLogger;
-import club.towr5291.functions.ReadStepFile;
-import club.towr5291.libraries.LibraryStateSegAuto;
+import club.towr5291.functions.ReadStepFileRoverRuckus;
+import club.towr5291.libraries.LibraryStateSegAutoRoverRuckus;
+import club.towr5291.libraries.robotConfig;
 
 
 /**
@@ -40,7 +41,7 @@ import club.towr5291.libraries.LibraryStateSegAuto;
 ***/
 
 @TeleOp(name = "Concept Read Steps Rover Ruckus", group = "5291Concept")
-@Disabled
+//@Disabled
 public class ConceptReadStepFileRoverRuckus extends LinearOpMode {
 
     private String teamNumber;
@@ -57,14 +58,15 @@ public class ConceptReadStepFileRoverRuckus extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private FileLogger fileLogger;
 
-    private ReadStepFile autonomousStepsTest = new ReadStepFile();
+    private ReadStepFileRoverRuckus autonomousStepsTest = new ReadStepFileRoverRuckus();
 
-    private HashMap<String,LibraryStateSegAuto> autonomousStepsMap = new HashMap<String,LibraryStateSegAuto>();
+    private HashMap<String,LibraryStateSegAutoRoverRuckus> autonomousStepsMap = new HashMap<String,LibraryStateSegAutoRoverRuckus>();
+    private club.towr5291.libraries.robotConfig robotconfig = new robotConfig();
 
     @Override
     public void runOpMode() throws InterruptedException {
 
-        LibraryStateSegAuto mStateSegAuto;
+        LibraryStateSegAutoRoverRuckus mStateSegAuto;
 
         if (debug >= 1) {
             fileLogger = new FileLogger(runtime);
@@ -78,16 +80,13 @@ public class ConceptReadStepFileRoverRuckus extends LinearOpMode {
         waitForStart();
         runtime.reset();
 
-        allianceColor = "Red";
-        allianceStartPosition = "Left";
-        allianceParkPosition = "Centre";
-        numBeacons = "both";
-        if (debug >= 1) {
-            fileLogger.writeEvent("Status", "Reading Steps : 5291RedLeft.csv");
-            Log.d("Status", "Reading Steps : 5291RedLeft.csv");
+        robotconfig.setTeamNumber("5291");
+        robotconfig.setAllianceColor("Blue");
+        robotconfig.setAllianceStartPosition("Left");
+        robotconfig.setAllianceParkPosition("alliance");
+        fileLogger.writeEvent(debug,"Status", "Reading Steps : ");
 
-        }
-        autonomousStepsMap = autonomousStepsTest.ReadStepFileRelicRecovery("5291RedLeft.csv" , allianceParkPosition, numBeacons);
+        autonomousStepsMap = autonomousStepsTest.ReadStepFile(robotconfig);
 
         Log.d("Steplist", "Number of loaded steps " + autonomousStepsTest.getNumberLoadedSteps());
         for (int loop = 1; loop < autonomousStepsTest.getNumberLoadedSteps(); loop++) {
@@ -95,138 +94,19 @@ public class ConceptReadStepFileRoverRuckus extends LinearOpMode {
             Log.d("Steplist", "Reading  " + loop + " timeout " + mStateSegAuto.getmRobotTimeOut() + " command " + mStateSegAuto.getmRobotCommand());
         }
 
-        allianceColor = "Red";
-        allianceStartPosition = "Left";
-        allianceParkPosition = "Corner";
-        if (debug >= 1) {
-            fileLogger.writeEvent("Status", "Reading Steps : 5291RedLeft.csv");
-            Log.d("Status", "Reading Steps : 5291RedLeft.csv");
-        }
-        autonomousStepsMap = autonomousStepsTest.ReadStepFileRelicRecovery("5291RedLeft.csv" , allianceParkPosition, numBeacons);
+        //autonomousStepsTest.insertSteps(3, "DEL1000", false, false, 0,    0,    0,    0,    0,    0,  0, 1);
 
-        Log.d("Steplist", "Number of loaded steps " + autonomousStepsTest.getNumberLoadedSteps());
-        for (int loop = 1; loop < autonomousStepsTest.getNumberLoadedSteps(); loop++) {
-            mStateSegAuto = autonomousStepsMap.get(String.valueOf(loop));
-            Log.d("Steplist", "Reading  " + loop + " timeout " + mStateSegAuto.getmRobotTimeOut() + " command " + mStateSegAuto.getmRobotCommand());
-        }
+        //autonomousStepsTest.insertSteps(2, "IAN1", false, false, 0, 0, 0, 0, 0, 0, 0, 6);
 
-        allianceColor = "Red";
-        allianceStartPosition = "Right";
-        allianceParkPosition = "Centre";
-        if (debug >= 1) {
-            fileLogger.writeEvent("Status", "Reading Steps : 5291RedRight.csv");
-            Log.d("Status", "Reading Steps : 5291RedRight.csv");
-        }
-        autonomousStepsMap = autonomousStepsTest.ReadStepFileRelicRecovery("5291RedRight.csv" , allianceParkPosition, numBeacons);
+        //autonomousStepsTest.insertSteps(2, "IAN2", false, false, 0, 0, 0, 0, 0, 0, 0, 8);
 
-        Log.d("Steplist", "Number of loaded steps " + autonomousStepsTest.getNumberLoadedSteps());
-        for (int loop = 1; loop < autonomousStepsTest.getNumberLoadedSteps(); loop++) {
-            mStateSegAuto = autonomousStepsMap.get(String.valueOf(loop));
-            Log.d("Steplist", "Reading  " + loop + " timeout " + mStateSegAuto.getmRobotTimeOut() + " command " + mStateSegAuto.getmRobotCommand());
-        }
+        //autonomousStepsTest.insertSteps(2, "IAN3", false, false, 0, 0, 0, 0, 0, 0, 0, 10);
 
-        allianceColor = "Red";
-        allianceStartPosition = "Right";
-        allianceParkPosition = "Corner";
-        if (debug >= 1) {
-            fileLogger.writeEvent("Status", "Reading Steps : 5291RedRight.csv");
-            Log.d("Status", "Reading Steps : 5291RedRight.csv");
-        }
-        autonomousStepsMap = autonomousStepsTest.ReadStepFileRelicRecovery("5291RedRight.csv" , allianceParkPosition, numBeacons);
-
-        Log.d("Steplist", "Number of loaded steps " + autonomousStepsTest.getNumberLoadedSteps());
-        for (int loop = 1; loop < autonomousStepsTest.getNumberLoadedSteps(); loop++) {
-            mStateSegAuto = autonomousStepsMap.get(String.valueOf(loop));
-            Log.d("Steplist", "Reading  " + loop + " timeout " + mStateSegAuto.getmRobotTimeOut() + " command " + mStateSegAuto.getmRobotCommand());
-        }
-
-        allianceColor = "Blue";
-        allianceStartPosition = "Left";
-        allianceParkPosition = "Centre";
-        if (debug >= 1) {
-            fileLogger.writeEvent("Status", "Reading Steps : 5291BlueLeft.csv");
-            Log.d("Status", "Reading Steps : 5291BlueLeft.csv");
-        }
-        autonomousStepsMap = autonomousStepsTest.ReadStepFileRelicRecovery("5291BlueLeft.csv" , allianceParkPosition, numBeacons);
-
-        Log.d("Steplist", "Number of loaded steps " + autonomousStepsTest.getNumberLoadedSteps());
-        for (int loop = 1; loop < autonomousStepsTest.getNumberLoadedSteps(); loop++)
-        {
-            mStateSegAuto = autonomousStepsMap.get(String.valueOf(loop));
-            Log.d("Steplist", "Reading  " + loop + " timeout " + mStateSegAuto.getmRobotTimeOut() + " command " + mStateSegAuto.getmRobotCommand());
-        }
-
-        allianceColor = "Blue";
-        allianceStartPosition = "Left";
-        allianceParkPosition = "Corner";
-        if (debug >= 1) {
-            fileLogger.writeEvent("Status", "Reading Steps : 5291BlueLeft.csv");
-            Log.d("Status", "Reading Steps : 5291BlueLeft.csv");
-        }
-        autonomousStepsMap = autonomousStepsTest.ReadStepFileRelicRecovery("5291BlueLeft.csv" , allianceParkPosition, numBeacons);
-
-        Log.d("Steplist", "Number of loaded steps " + autonomousStepsTest.getNumberLoadedSteps());
-        for (int loop = 1; loop < autonomousStepsTest.getNumberLoadedSteps(); loop++)
-        {
-            mStateSegAuto = autonomousStepsMap.get(String.valueOf(loop));
-            Log.d("Steplist", "Reading  " + loop + " timeout " + mStateSegAuto.getmRobotTimeOut() + " command " + mStateSegAuto.getmRobotCommand());
-        }
-
-        allianceColor = "Blue";
-        allianceStartPosition = "Right";
-        allianceParkPosition = "Centre";
-        if (debug >= 1) {
-            fileLogger.writeEvent("Status", "Reading Steps : 5291BlueRight.csv");
-            Log.d("Status", "Reading Steps : 5291BlueRight.csv");
-        }
-        autonomousStepsMap = autonomousStepsTest.ReadStepFileRelicRecovery("5291BlueRight.csv" , allianceParkPosition, numBeacons);
-
-        Log.d("Steplist", "Number of loaded steps " + autonomousStepsTest.getNumberLoadedSteps());
-        for (int loop = 1; loop < autonomousStepsTest.getNumberLoadedSteps(); loop++)
-        {
-            mStateSegAuto = autonomousStepsMap.get(String.valueOf(loop));
-            Log.d("Steplist", "Reading  " + loop + " timeout " + mStateSegAuto.getmRobotTimeOut() + " command " + mStateSegAuto.getmRobotCommand());
-        }
-
-        allianceColor = "Blue";
-        allianceStartPosition = "Right";
-        allianceParkPosition = "Corner";
-        if (debug >= 1) {
-            fileLogger.writeEvent("Status", "Reading Steps : 5291BlueRight.csv");
-            Log.d("Status", "Reading Steps : 5291BlueRight.csv");
-        }
-        autonomousStepsMap = autonomousStepsTest.ReadStepFileRelicRecovery("5291BlueRight.csv" , allianceParkPosition, numBeacons);
-
-        Log.d("Steplist", "Number of loaded steps " + autonomousStepsTest.getNumberLoadedSteps());
-        for (int loop = 1; loop < autonomousStepsTest.getNumberLoadedSteps(); loop++)
-        {
-            mStateSegAuto = autonomousStepsMap.get(String.valueOf(loop));
-            Log.d("Steplist", "Reading  " + loop + " timeout " + mStateSegAuto.getmRobotTimeOut() + " command " + mStateSegAuto.getmRobotCommand());
-        }
-
-        Log.d("Steplist", "Number of loaded steps " + autonomousStepsTest.getNumberLoadedSteps());
-
-        autonomousStepsMap = autonomousStepsTest.ReadStepFileRelicRecovery("5291BlueLeft.csv" , allianceParkPosition, "both");
-
-        for (int loop = 1; loop < autonomousStepsTest.getNumberLoadedSteps(); loop++)
-        {
-            mStateSegAuto = autonomousStepsMap.get(String.valueOf(loop));
-            Log.d("Steplist", "Reading  " + loop + " timeout " + mStateSegAuto.getmRobotTimeOut() + " command " + mStateSegAuto.getmRobotCommand());
-        }
-
-        autonomousStepsTest.insertSteps(3, "DEL1000", false, false, 0,    0,    0,    0,    0,    0,  0, 1);
-
-        autonomousStepsTest.insertSteps(2, "IAN1", false, false, 0, 0, 0, 0, 0, 0, 0, 6);
-
-        autonomousStepsTest.insertSteps(2, "IAN2", false, false, 0, 0, 0, 0, 0, 0, 0, 8);
-
-        autonomousStepsTest.insertSteps(2, "IAN3", false, false, 0, 0, 0, 0, 0, 0, 0, 10);
-
-        for (int loop = 1; loop < autonomousStepsTest.getNumberLoadedSteps(); loop++)
-        {
-            mStateSegAuto = autonomousStepsMap.get(String.valueOf(loop));
-            Log.d("Steplist", "Reading  " + loop + " timeout " + mStateSegAuto.getmRobotTimeOut() + " command " + mStateSegAuto.getmRobotCommand());
-        }
+        //for (int loop = 1; loop < autonomousStepsTest.getNumberLoadedSteps(); loop++)
+        //{
+        //    mStateSegAuto = autonomousStepsMap.get(String.valueOf(loop));
+        //    Log.d("Steplist", "Reading  " + loop + " timeout " + mStateSegAuto.getmRobotTimeOut() + " command " + mStateSegAuto.getmRobotCommand());
+        //}
 
         while (opModeIsActive()) {
             telemetry.addData("Status", "Run Time: " + runtime.toString());

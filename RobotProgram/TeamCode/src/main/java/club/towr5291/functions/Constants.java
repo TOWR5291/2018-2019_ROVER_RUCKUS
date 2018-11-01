@@ -165,6 +165,7 @@ public abstract class Constants {
         OBJECT_RED_RIGHT ("OBJECT_RED_RIGHT"),
         OBJECT_BLUE_LEFT ("OBJECT_BLUE_LEFT"),
         OBJECT_BLUE_RIGHT ("OBJECT_BLUE_RIGHT"),
+        OBJECT_NONE ("OBJECT_NONE"),
         UNKNOWN ("OBJECT_?????");
 
         private final String name;

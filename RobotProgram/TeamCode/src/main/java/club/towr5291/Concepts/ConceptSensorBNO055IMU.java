@@ -34,6 +34,7 @@ import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
@@ -54,7 +55,7 @@ import java.util.Locale;
  *
  * @see <a href="http://www.adafruit.com/products/2472">Adafruit IMU</a>
  */
-@Autonomous(name = "Sensor: BNO055 IMU", group = "Sensor")
+@TeleOp(name = "Sensor: BNO055 IMU", group = "Sensor")
 //@Disabled                            // Comment this out to add to the opmode list
 public class ConceptSensorBNO055IMU extends LinearOpMode
     {
@@ -68,6 +69,9 @@ public class ConceptSensorBNO055IMU extends LinearOpMode
     // State used for updating telemetry
     Orientation angles;
     Acceleration gravity;
+
+    private int imuStartCorrectionVar = -45;
+    private int imuMountCorrectionVar = 90;
 
     //----------------------------------------------------------------------------------------------
     // Main logic
@@ -140,17 +144,17 @@ public class ConceptSensorBNO055IMU extends LinearOpMode
         telemetry.addLine()
             .addData("heading", new Func<String>() {
                 @Override public String value() {
-                    return formatAngle(angles.angleUnit, angles.firstAngle);
+                    return getAdafruitHeading().toString();
                     }
                 })
             .addData("roll", new Func<String>() {
                 @Override public String value() {
-                    return formatAngle(angles.angleUnit, angles.secondAngle);
+                    return formatAngle(angles.angleUnit, angles.secondAngle).toString();
                     }
                 })
             .addData("pitch", new Func<String>() {
                 @Override public String value() {
-                    return formatAngle(angles.angleUnit, angles.thirdAngle);
+                    return formatAngle(angles.angleUnit, angles.thirdAngle).toString();
                     }
                 });
 
@@ -173,12 +177,29 @@ public class ConceptSensorBNO055IMU extends LinearOpMode
     //----------------------------------------------------------------------------------------------
     // Formatting
     //----------------------------------------------------------------------------------------------
+    private Double getAdafruitHeading ()
+    {
+        Orientation angles;
+        angles = imu.getAngularOrientation().toAxesReference(AxesReference.INTRINSIC).toAxesOrder(AxesOrder.ZYX);
+        return angleToHeading(formatAngle(angles.angleUnit, angles.firstAngle));
+    }
 
-    String formatAngle(AngleUnit angleUnit, double angle) {
-        return formatDegrees(AngleUnit.DEGREES.fromUnit(angleUnit, angle));
+    //for adafruit IMU
+    private Double formatAngle(AngleUnit angleUnit, double angle) {
+        return AngleUnit.DEGREES.fromUnit(angleUnit, angle);
     }
 
     String formatDegrees(double degrees){
         return String.format(Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
+    }
+    //for adafruit IMU as it returns z angle only
+    private double angleToHeading(double z) {
+        double angle = -z + imuStartCorrectionVar + imuMountCorrectionVar;
+        if (angle < 0)
+            return angle + 360;
+        else if (angle > 360)
+            return angle - 360;
+        else
+            return angle;
     }
 }

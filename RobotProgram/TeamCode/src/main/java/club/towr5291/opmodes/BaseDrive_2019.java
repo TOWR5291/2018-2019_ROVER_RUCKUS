@@ -34,7 +34,7 @@ import club.towr5291.robotconfig.HardwareSensorsRoverRuckus;
 
 /*
     made by Wyatt Ashley on 8/2/2018
- */
+*/
 @TeleOp(name = "Base Drive 2019", group = "Base drive")
 public class BaseDrive_2019 extends OpMode {
 
@@ -92,7 +92,7 @@ public class BaseDrive_2019 extends OpMode {
         parametersAdafruitImu.loggingTag            = "IMU";
         parametersAdafruitImu.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
 
-        imu = hardwareMap.get(BNO055IMU.class, "imu");
+        imu = hardwareMap.get(BNO055IMU.class, "imu2");
         imu.initialize(parametersAdafruitImu);
 
         ourRobotConfig = new robotConfig();
@@ -102,7 +102,7 @@ public class BaseDrive_2019 extends OpMode {
         ourRobotConfig.setTeamNumber(sharedPreferences.getString("club.towr5291.Autonomous.TeamNumber", "0000"));
         ourRobotConfig.setAllianceStartPosition(sharedPreferences.getString("club.towr5291.Autonomous.Position", "Left"));
         ourRobotConfig.setDelay(Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Delay", "0")));
-        ourRobotConfig.setRobotConfigBase(sharedPreferences.getString("club.towr5291.Autonomous.RobotConfig", "TileRunner-2x40"));
+        ourRobotConfig.setRobotConfigBase(sharedPreferences.getString("club.towr5291.Autonomous.RobotConfigBase", "TileRunner-2x40"));
 
         fileLogger = new FileLogger(runtime, Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Debug", "1")), true);// initializing FileLogger
         fileLogger.open();// Opening FileLogger
@@ -200,7 +200,7 @@ public class BaseDrive_2019 extends OpMode {
                 Arms.angleMotor1.setPower(-game2.left_stick_y);
                 Arms.liftMotor.setPower(game2.right_stick_y);
                 Arms.liftMotor2.setPower(game2.right_stick_y);
-                if (game2.left_trigger > 0){ 
+                if (game2.left_trigger > 0){
                     Arms.AdvancedOptionsForArms(game2, 5);
                     if (game2.b){
                         if (game2 == gamepad2){
@@ -284,11 +284,20 @@ public class BaseDrive_2019 extends OpMode {
             case 4:
                 dashboard.displayPrintf(1, "Controller Mecanum Drive New 2018-19");
                 fileLogger.writeEvent("Controller Mode", "Mecanum Drive New 2018-19");
-                Robot.baseMotor1.setPower(game1.left_stick_x + -game1.left_stick_y + game1.right_stick_x);
-                Robot.baseMotor2.setPower(-game1.left_stick_x + -game1.left_stick_y + game1.right_stick_x);
-                Robot.baseMotor3.setPower(-game1.left_stick_x + -game1.left_stick_y + -game1.right_stick_x);
-                Robot.baseMotor4.setPower(-game1.left_stick_x + -game1.left_stick_y + -game1.right_stick_x);
+                Robot.baseMotor1.setPower((game1.left_stick_x + -game1.left_stick_y + game1.right_stick_x));
+                Robot.baseMotor2.setPower((-game1.left_stick_x + -game1.left_stick_y + game1.right_stick_x));
+                Robot.baseMotor3.setPower((-game1.left_stick_x + -game1.left_stick_y + -game1.right_stick_x));
+                Robot.baseMotor4.setPower((-game1.left_stick_x + -game1.left_stick_y + -game1.right_stick_x));
 
+                break;
+            //last years driving mode, prefered not to use
+            case 5:
+                dashboard.displayPrintf(7, "Controller Mecanum Drive Relic Recovery");
+                fileLogger.writeEvent(3,"Controller Mode", "Mecanum Drive Relic Recovery");
+                Robot.baseMotor1.setPower(Range.clip(-gamepad1.left_stick_y - gamepad1.left_stick_x - gamepad1.right_stick_x, -1, 1));
+                Robot.baseMotor2.setPower(Range.clip(-gamepad1.left_stick_y + gamepad1.left_stick_x - gamepad1.right_stick_x, -1, 1));
+                Robot.baseMotor3.setPower(Range.clip(-gamepad1.left_stick_y + gamepad1.left_stick_x + gamepad1.right_stick_x, -1, 1));
+                Robot.baseMotor4.setPower(Range.clip(-gamepad1.left_stick_y - gamepad1.left_stick_x + gamepad1.right_stick_x, -1, 1));
                 break;
         }
 
@@ -327,7 +336,7 @@ public class BaseDrive_2019 extends OpMode {
             case TileRunner2x40: controllerA.setTickMax(2); break;
             case TileRunner2x60: controllerA.setTickMax(2); break;
             case TileRunnerOrbital2x20: controllerA.setTickMax(2); break;
-            case TileRunnerMecanumOrbital2x20: controllerA.setTickMax(4); break;
+            case TileRunnerMecanumOrbital2x20: controllerA.setTickMax(5); break;
             case TankTread2x40Custom: controllerA.setTickMax(2); break;
             case TileRunnerMecanum2x20: controllerA.setTickMax(3); break;
             case TileRunnerMecanum2x40: controllerA.setTickMax(3); break;

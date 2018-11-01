@@ -2,6 +2,7 @@ package club.towr5291.Concepts;
 
 import android.widget.TextView;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -44,7 +45,7 @@ import club.towr5291.opmodes.OpModeMasterLinear;
  */
 
 @TeleOp(name = "Concept EYEs", group = "5291Concept")
-//@Disabled
+@Disabled
 public class ConceptEYEs extends OpModeMasterLinear {
 
     //set up the variables for the logger

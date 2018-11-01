@@ -99,6 +99,32 @@ public class HardwareDriveMotors
         setHardwareDriveRunUsingEncoders();
     }
 
+    public void init(FileLogger fileloggerhandle, HardwareMap ahwMap, String motor1, String motor2, String motor3, String motor4) {
+        // Save reference to Hardware map
+        hwMap = ahwMap;
+
+        this.fileLogger = fileloggerhandle;
+
+        // Define and Initialize Motors
+        if (motor1 != null)
+            baseMotor1  = hwMap.dcMotor.get(motor1);
+        if (motor2 != null)
+            baseMotor2  = hwMap.dcMotor.get(motor2);
+        if (motor3 != null)
+            baseMotor3  = hwMap.dcMotor.get(motor3);
+        if (motor4 != null)
+            baseMotor4  = hwMap.dcMotor.get(motor4);
+
+        // Set all motors to zero power
+        setHardwareDrivePower(0);
+
+        // Set all motors to run without encoders.
+        // May want to use RUN_USING_ENCODERS if encoders are installed.
+        setHardwareDriveResetEncoders();
+
+        setHardwareDriveRunUsingEncoders();
+    }
+
     /* Initialize standard Hardware interfaces */
     public void init(FileLogger fileloggerhandle, HardwareMap ahwMap, robotConfigSettings.robotConfigChoice baseConfig) {
         // Save reference to Hardware map
@@ -106,7 +132,7 @@ public class HardwareDriveMotors
 
         this.fileLogger = fileloggerhandle;
 
-        initMotorDefaults();
+        initMotorDefaults(baseConfig);
 
         setHardwareDriveDirections(baseConfig);
     }
@@ -137,10 +163,26 @@ public class HardwareDriveMotors
 
     }
 
+    private void initMotorDefaults (robotConfigSettings.robotConfigChoice baseConfig) {
+
+        // Define and Initialize Motors
+        baseMotor1  = hwMap.dcMotor.get(robotConfig.motors.leftMotor1.toString());
+        baseMotor2  = hwMap.dcMotor.get(robotConfig.motors.leftMotor2.toString());
+        baseMotor3  = hwMap.dcMotor.get(robotConfig.motors.rightMotor1.toString());
+        baseMotor4  = hwMap.dcMotor.get(robotConfig.motors.rightMotor2.toString());
+        // Set all motors to zero power
+        setHardwareDrivePower(0);
+        // Set all motors to run without encoders.
+        // May want to use RUN_USING_ENCODERS if encoders are installed.
+        setHardwareDriveResetEncoders();
+        setHardwareDriveRunUsingEncoders();
+
+    }
+
+
     public void setHardwareDriveDirections(robotConfigSettings.robotConfigChoice baseConfig){
 
         switch (baseConfig) {
-            case TileRunnerOrbital2x20:
             case TileRunner2x20:
             case TileRunner2x40:
             case TileRunner2x60:
@@ -153,7 +195,6 @@ public class HardwareDriveMotors
                 if (baseMotor4 != null)
                     baseMotor4.setDirection(DcMotor.Direction.FORWARD);
                 break;
-            case TileRunnerMecanumOrbital2x20:
             case TileRunnerMecanum2x40:
                 //TOWR5291 Tilrunner has 2 motors running from belts to the wheel, 2 motors running on gears
                 if (baseMotor1 != null)
@@ -165,7 +206,6 @@ public class HardwareDriveMotors
                 if (baseMotor4 != null)
                     baseMotor4.setDirection(DcMotor.Direction.FORWARD);
                 break;
-            case TileRunnerMecanumOrbital2x20:
             case TileRunnerMecanum2x20:
                 //TOWR5291 Tilrunner has 2 motors running from belts to the wheel, 2 motors running on gears
                 if (baseMotor1 != null)
@@ -176,6 +216,17 @@ public class HardwareDriveMotors
                     baseMotor3.setDirection(DcMotor.Direction.REVERSE);
                 if (baseMotor4 != null)
                     baseMotor4.setDirection(DcMotor.Direction.FORWARD);
+                break;
+            case TileRunnerMecanumOrbital2x20:
+                //TOWR5291 Tilrunner has 2 motors running from belts to the wheel, 2 motors running on gears
+                if (baseMotor1 != null)
+                    baseMotor1.setDirection(DcMotor.Direction.REVERSE);
+                if (baseMotor2 != null)
+                    baseMotor2.setDirection(DcMotor.Direction.FORWARD);
+                if (baseMotor3 != null)
+                    baseMotor3.setDirection(DcMotor.Direction.FORWARD);
+                if (baseMotor4 != null)
+                    baseMotor4.setDirection(DcMotor.Direction.REVERSE);
                 break;
             default:
                 if (baseMotor1 != null)
@@ -238,6 +289,8 @@ public class HardwareDriveMotors
     }
 
     public void allMotorsStop(){
+        fileLogger.writeEvent(4,"HardwareDriveMotors", "allMotorsStop()");
+
         baseMotor1.setPower(0);
         baseMotor2.setPower(0);
         baseMotor3.setPower(0);
@@ -245,6 +298,8 @@ public class HardwareDriveMotors
     }
 
     public void setTarget(int moveCounts){
+
+        fileLogger.writeEvent(4,"HardwareDriveMotors", "setTarget() " + moveCounts);
         baseMotor1.setTargetPosition(baseMotor1.getCurrentPosition() + moveCounts);
         baseMotor2.setTargetPosition(baseMotor2.getCurrentPosition() + moveCounts);
         baseMotor3.setTargetPosition(baseMotor3.getCurrentPosition() + moveCounts);
@@ -323,6 +378,7 @@ public class HardwareDriveMotors
     }
 
     public void setHardwareDriveResetEncoders() {
+        fileLogger.writeEvent(4,"HardwareDriveMotors", "setHardwareDriveResetEncoders()");
         if (baseMotor1 != null)
             baseMotor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         if (baseMotor2 != null)
@@ -334,11 +390,13 @@ public class HardwareDriveMotors
     }
 
     public void setHardwareDriveRunUsingEncoders() {
+        fileLogger.writeEvent(4,"HardwareDriveMotors", "setHardwareDriveRunUsingEncoders()");
         setHardwareDriveLeftRunUsingEncoders();
         setHardwareDriveRightRunUsingEncoders();
     }
 
     public void setHardwareDriveLeftRunUsingEncoders() {
+        fileLogger.writeEvent(4,"HardwareDriveMotors", "setHardwareDriveLeftRunUsingEncoders()");
         if (baseMotor1 != null)
             baseMotor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         if (baseMotor2 != null)
@@ -346,6 +404,7 @@ public class HardwareDriveMotors
     }
 
     public void setHardwareDriveRightRunUsingEncoders() {
+        fileLogger.writeEvent(4,"HardwareDriveMotors", "setHardwareDriveRightRunUsingEncoders()");
         if (baseMotor3 != null)
             baseMotor3.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         if (baseMotor4 != null)
@@ -353,6 +412,7 @@ public class HardwareDriveMotors
     }
 
     public void setHardwareDriveRunWithoutEncoders() {
+        fileLogger.writeEvent(4,"HardwareDriveMotors", "setHardwareDriveRunWithoutEncoders()");
         if (baseMotor1 != null)
             baseMotor1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         if (baseMotor2 != null)
@@ -364,6 +424,7 @@ public class HardwareDriveMotors
     }
 
     public void setHardwareDriveRunToPosition() {
+        fileLogger.writeEvent(4,"HardwareDriveMotors", "setHardwareDriveRunToPosition()");
         setHardwareDriveLeftRunToPosition();
         setHardwareDriveRightRunToPosition();
     }
@@ -386,6 +447,7 @@ public class HardwareDriveMotors
     }
 
     public void setHardwareDriveLeftRunToPosition() {
+        fileLogger.writeEvent(4,"HardwareDriveMotors", "setHardwareDriveLeftRunToPosition()");
         if (baseMotor1 != null)
             baseMotor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         if (baseMotor2 != null)
@@ -408,6 +470,8 @@ public class HardwareDriveMotors
      * @param rightBack set the power of right 1 motor.
      */
     public void setHardwareDrivePower (double leftFront, double leftBack, double rightFront, double rightBack) {
+
+        fileLogger.writeEvent(4,"HardwareDriveMotors", "setHardwareDrivePower(): -" +leftFront + ", " + leftBack + ", " +rightFront + ", " + rightBack );
         if (baseMotor1 != null)
             baseMotor1.setPower(checkMotorMaxPower(leftFront));
         if (baseMotor2 != null)
@@ -424,6 +488,7 @@ public class HardwareDriveMotors
      * @param power set the power of all the motors on the base.
      */
     public void setHardwareDrivePower (double power) {
+        fileLogger.writeEvent(4,"HardwareDriveMotors", "setHardwareDrivePower() " + power);
         setHardwareDriveLeftMotorPower(power);
         setHardwareDriveRightMotorPower(power);
     }
@@ -434,6 +499,7 @@ public class HardwareDriveMotors
      * @param power set the power of left motors.
      */
     public void setHardwareDriveLeftMotorPower (double power) {
+        fileLogger.writeEvent(4,"HardwareDriveMotors", "setHardwareDriveLeftMotorPower() " + power);
         setHardwareDriveLeft1MotorPower(power);
         setHardwareDriveLeft2MotorPower(power);
     }
@@ -444,6 +510,7 @@ public class HardwareDriveMotors
      * @param power set the power of right motors.
      */
     public void setHardwareDriveRightMotorPower (double power) {
+        fileLogger.writeEvent(4,"HardwareDriveMotors", "setHardwareDriveRightMotorPower() " + power);
         setHardwareDriveRight1MotorPower(power);
         setHardwareDriveRight2MotorPower(power);
     }
@@ -466,6 +533,7 @@ public class HardwareDriveMotors
      * @param power set the power of left 1 motor.
      */
     public void setHardwareDriveLeft1MotorPower (double power) {
+        fileLogger.writeEvent(4,"HardwareDriveMotors", "setHardwareDriveLeft1MotorPower() " + power);
         if (baseMotor1 != null)
             baseMotor1.setPower(checkMotorMaxPower(power));
     }
@@ -476,6 +544,7 @@ public class HardwareDriveMotors
      * @param power set the power of left 2 motor.
      */
     public void setHardwareDriveLeft2MotorPower (double power) {
+        fileLogger.writeEvent(4,"HardwareDriveMotors", "setHardwareDriveLeft2MotorPower() " + power);
         if (baseMotor2 != null)
             baseMotor2.setPower(checkMotorMaxPower(power));
     }
@@ -486,6 +555,7 @@ public class HardwareDriveMotors
      * @param power set the power of right 1 motor.
      */
     public void setHardwareDriveRight1MotorPower (double power) {
+        fileLogger.writeEvent(4,"HardwareDriveMotors", "setHardwareDriveRight1MotorPower() " + power);
         if (baseMotor3 != null)
             baseMotor3.setPower(checkMotorMaxPower(power));
     }
@@ -496,6 +566,7 @@ public class HardwareDriveMotors
      * @param power set the power of right 2 motor.
      */
     public void setHardwareDriveRight2MotorPower (double power) {
+        fileLogger.writeEvent(4,"HardwareDriveMotors", "setHardwareDriveRight2MotorPower() " + power);
         if (baseMotor4 != null)
             baseMotor4.setPower(checkMotorMaxPower(power));
     }
