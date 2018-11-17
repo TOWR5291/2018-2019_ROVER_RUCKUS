@@ -71,6 +71,11 @@ public class HardwareArmMotorsRoverRuckus
         tiltMotor1.setDirection(DcMotor.Direction.FORWARD);
     }
 
+    public void setHardwareArmDirections(DcMotor.Direction direction){
+        liftMotor1.setDirection(direction);
+        liftMotor2.setDirection(direction);
+    }
+
     public void setHardwareLiftPower(double power){
         liftMotor1.setPower(power);
         liftMotor2.setPower(power);
@@ -98,6 +103,18 @@ public class HardwareArmMotorsRoverRuckus
         } else {
             tiltMotor1.setPower(0);
         }
+    }
+
+    public int getTiltLiftEncoder() {
+        return tiltMotor1.getCurrentPosition();
+    }
+
+    public int getLiftMotor1Encoder() {
+        return liftMotor1.getCurrentPosition();
+    }
+
+    public int getLiftMotor2Encoder() {
+        return liftMotor2.getCurrentPosition();
     }
 
     public void AdvancedOptionsForArms (Gamepad gamepad, int lineDisplay){

@@ -9,6 +9,8 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
@@ -26,6 +28,7 @@ import club.towr5291.functions.Constants;
 import club.towr5291.functions.FileLogger;
 import club.towr5291.functions.TOWR5291PID;
 import club.towr5291.functions.TOWR5291Tick;
+import club.towr5291.functions.TOWR5291Toggle;
 import club.towr5291.libraries.TOWR5291LEDControl;
 import club.towr5291.libraries.TOWRDashBoard;
 import club.towr5291.libraries.robotConfig;
@@ -62,7 +65,7 @@ Written by Wyatt Ashley October 2018
                         - Fixed Reference to LEDs
 */
 @TeleOp(name="TeleOp Rover Ruckus V2", group="5291")
-//@Disabled
+@Disabled
 public class BaseDrive_2019_V2 extends OpModeMasterLinear {
 
     /* Hardware Set Up */
@@ -104,7 +107,6 @@ public class BaseDrive_2019_V2 extends OpModeMasterLinear {
     private double startDrivePower = 0.6666666666666666;
     //Controller A has 4 modes of operation
     private double controllerAModes = 5;
-    private double controllerAModeValue;
     private int debug;
 
     private static TOWRDashBoard dashboard = null;
@@ -159,6 +161,8 @@ public class BaseDrive_2019_V2 extends OpModeMasterLinear {
         fileLogger.writeEvent(2,"Sensors Init");
         LEDs = new TOWR5291LEDControl(hardwareMap);
         LEDs.setLEDControlDemoMode(true);
+        LEDs.setLEDControlAlliance(ourRobotConfig.getAllianceColor());
+
         fileLogger.writeEvent(2,"LEDs Init");
 
         switch (ourRobotConfig.getAllianceStartPosition()){
@@ -178,6 +182,12 @@ public class BaseDrive_2019_V2 extends OpModeMasterLinear {
 
         driftRotateAngle = new TOWR5291PID(runtime,0,0,4.5,0,0);
 
+        TOWR5291Toggle toggleGamePad2A = new TOWR5291Toggle(gamepad1.x);
+        toggleGamePad2A.setDebounce(500);
+        TOWR5291Toggle toggleGamePad1X = new TOWR5291Toggle(gamepad1.x);
+        toggleGamePad1X.setDebounce(500);
+
+
         // All The Specification of the robot and controller
         fileLogger.writeEvent(1,"Alliance Color", ourRobotConfig.getAllianceColor());
         fileLogger.writeEvent(1,"Alliance Start Position", ourRobotConfig.getAllianceStartPosition());
@@ -195,7 +205,7 @@ public class BaseDrive_2019_V2 extends OpModeMasterLinear {
         dashboard.displayPrintf(1, "Waiting for Start");
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
-        dashboard.displayPrintf(1, "Start Pressed");
+        dashboard.clearDisplay();
 
         fileLogger.writeEvent("Starting Loop");
         imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
@@ -203,15 +213,16 @@ public class BaseDrive_2019_V2 extends OpModeMasterLinear {
 
         //dashboard.clearDisplay();
 
-        dashboard.displayPrintf(2, "Entering Loop");
+        dashboard.displayPrintf(1, "Controller A Options");
+        dashboard.displayPrintf(2, "--------------------");
+        dashboard.displayPrintf(6, "Controller B Options");
+        dashboard.displayPrintf(7, "--------------------");
 
         //the main loop.  this is where the action happens
         while (opModeIsActive()) {
             fileLogger.writeEvent(1,"In Main Loop");
-            dashboard.displayPrintf(3, "In Main Loop");
             //change LED state every cycle
             LEDStatus = LEDs.LEDControlUpdate(LEDStatus);
-            dashboard.displayPrintf(4, "LEDs Done");
 
             //adjust the robot power using the dpad on the game controller
             robotPowerMultiplier.incrementTick(game1.dpad_up);
@@ -220,16 +231,19 @@ public class BaseDrive_2019_V2 extends OpModeMasterLinear {
             //adjust the intake direction, toggle forward, backward
             intakeDirection.incrementTick(game2.left_bumper);
 
-            dashboard.displayPrintf(5, "Checking Controller A Mode  " + (int)controllerAMode.getTickCurrValue());
+            controllerAMode.incrementTick(game1.start);
+            controllerBMode.incrementTick(game2.start);
 
-            dashboard.displayPrintf(6, "Power Multiplier " + robotPowerMultiplier.getTickCurrValue());
+            dashboard.displayPrintf(3, "Power Multiplier:  " + robotPowerMultiplier.getTickCurrValue());
+            dashboard.displayPrintf(4, "Controller A Mode: " + (int)controllerAMode.getTickCurrValue());
+            dashboard.displayPrintf(8, "Controller B Mode: " + (int)controllerBMode.getTickCurrValue());
 
             //drivers controller, operation based on the mode selection
-            switch ((int)controllerAModeValue)
+            switch ((int)controllerAMode.getTickCurrValue())
             {
                 case 1:
                     fileLogger.writeEvent(debug,"Controller Mode", "POV");
-                    dashboard.displayPrintf(7, "Controller POV");
+                    dashboard.displayPrintf(4, "Controller POV:");
                     /*
                      * Case 1 is the controller type POV
                      * POV uses both joy sticks to drive
@@ -249,7 +263,7 @@ public class BaseDrive_2019_V2 extends OpModeMasterLinear {
                      * The left joy stick is for the left wheel speed
                      * The right joy stick is for the right wheel speed
                      */
-                    dashboard.displayPrintf(7, "Controller Tank");
+                    dashboard.displayPrintf(4, "Controller Tank");
                     fileLogger.writeEvent("Controller Mode", "Tank");
                     Robot.setHardwareDriveLeftMotorPower(-game1.left_stick_y * robotPowerMultiplier.getTickCurrValue());
                     Robot.setHardwareDriveRightMotorPower(-game1.right_stick_y * robotPowerMultiplier.getTickCurrValue());
@@ -260,7 +274,7 @@ public class BaseDrive_2019_V2 extends OpModeMasterLinear {
                      * Mecanum Drive is for Mecanum bases ONLY
                      * If You Need help ask some one to explain it to you
                      */
-                    dashboard.displayPrintf(7, "Controller Mecanum Drive");
+                    dashboard.displayPrintf(4, "Mecanum Drive (IMU)");
                     fileLogger.writeEvent("Controller Mode", "Mecanum Drive");
                     if (game1.left_stick_x != 0 || game1.left_stick_y != 0) {
                         correction = driftRotateAngle.PIDCorrection(runtime,Math.sin(getAdafruitHeading() * (Math.PI / 180.0)), lastposition);
@@ -273,7 +287,7 @@ public class BaseDrive_2019_V2 extends OpModeMasterLinear {
                     break;
 
                 case 4:
-                    dashboard.displayPrintf(7, "Controller Mecanum Drive New 2018-19");
+                    dashboard.displayPrintf(4, "Mecanum Drive New 2018-19");
                     fileLogger.writeEvent(debug,"Controller Mode", "Mecanum Drive New 2018-19");
                     Robot.baseMotor1.setPower(game1.left_stick_x + -game1.left_stick_y + game1.right_stick_x);
                     Robot.baseMotor2.setPower(-game1.left_stick_x + -game1.left_stick_y + game1.right_stick_x);
@@ -283,7 +297,7 @@ public class BaseDrive_2019_V2 extends OpModeMasterLinear {
                     break;
                 //last years driving mode, prefered not to use
                 case 5:
-                    dashboard.displayPrintf(7, "Controller Mecanum Drive Relic Recovery");
+                    dashboard.displayPrintf(4, "Mecanum Drive Relic Recovery");
                     fileLogger.writeEvent(debug,"Controller Mode", "Mecanum Drive Relic Recovery");
                     Robot.baseMotor1.setPower(Range.clip(-gamepad1.left_stick_y - gamepad1.left_stick_x - gamepad1.right_stick_x, -1, 1));
                     Robot.baseMotor2.setPower(Range.clip(-gamepad1.left_stick_y + gamepad1.left_stick_x - gamepad1.right_stick_x, -1, 1));
@@ -291,17 +305,19 @@ public class BaseDrive_2019_V2 extends OpModeMasterLinear {
                     Robot.baseMotor4.setPower(Range.clip(-gamepad1.left_stick_y - gamepad1.left_stick_x + gamepad1.right_stick_x, -1, 1));
                     break;
             } //Switch ControllerA
-/*
 
             //controller 2 functions, arms and intakes, depends on which mode selected
-            switch ((int) controllerBMode.getTickCurrValue()){
+
+            dashboard.displayPrintf(10, "Lift Motor 1 Enc: " + Arms.getLiftMotor1Encoder());
+            dashboard.displayPrintf(11, "Lift Motor 2 Enc: " + Arms.getLiftMotor2Encoder());
+            dashboard.displayPrintf(12, "Tilt Motor Enc  : " + Arms.getTiltLiftEncoder());
+            switch ((int)controllerBMode.getTickCurrValue()){
                 case 1:
-                    dashboard.displayPrintf(7, "Controller B Standard");
+                    dashboard.displayPrintf(9, "Controller B Standard");
                     fileLogger.writeEvent(debug,"Controller B Mode", "Standard");
 
-                    Arms.angleMotor1.setPower(-game2.left_stick_y);
-                    Arms.liftMotor.setPower(game2.right_stick_y);
-                    Arms.liftMotor2.setPower(game2.right_stick_y);
+                    Arms.tiltMotor1.setPower(-game2.left_stick_y);
+                    Arms.setHardwareLiftPower(game2.right_stick_y);
                     if (game2.left_trigger > 0){
                         Arms.AdvancedOptionsForArms(game2, 5);
                         if (game2.b){
@@ -311,16 +327,12 @@ public class BaseDrive_2019_V2 extends OpModeMasterLinear {
                                 game2 = gamepad2;
                             }
                         }
-                        if (game2.x){
-                            DisplayEncoderVaule = !DisplayEncoderVaule;
-                            if (!DisplayEncoderVaule) {
-                                dashboard.clearDisplay();
-                            }
-                        }
-                    } else{
-                        dashboard.displayPrintf(5, "");
-                        dashboard.displayPrintf(6, "");
-                        dashboard.displayPrintf(7, "");
+                    }
+
+                    if (toggleGamePad2A.toggleState(gamepad1.a)) {
+                        Arms.setHardwareArmDirections(DcMotor.Direction.REVERSE);
+                    } else {
+                        Arms.setHardwareArmDirections(DcMotor.Direction.FORWARD);
                     }
 
                     switch ((int) intakeDirection.getTickCurrValue()){
@@ -333,19 +345,17 @@ public class BaseDrive_2019_V2 extends OpModeMasterLinear {
                         case 3:
                             Arms.intakeServo.setPosition(.9);
                             break;
-                    }
+                    } //switch intake direction
 
                     //Arms.teamMarkerServo.setPosition(teamMarkerServoPosition.getTickCurrValue());
                     break;
             } //Switch ControllerB
 
-*/
-
         }  //while (OpModeIsActive)
 
         //stop the logging
         if (fileLogger != null) {
-            fileLogger.writeEvent(1, "Step FINISHED - FINISHED");
+            fileLogger.writeEvent(1, "TeleOP FINISHED - FINISHED");
             fileLogger.writeEvent(1, "Stopped");
             fileLogger.close();
             fileLogger = null;
@@ -369,10 +379,13 @@ public class BaseDrive_2019_V2 extends OpModeMasterLinear {
         controllerAMode.setTickMin(1);
         controllerAMode.setTickIncrement(1);
         controllerAMode.setTickMax(controllerAModes);
+        controllerAMode.setTickValue(5);
         fileLogger.writeEvent(debug, "initFunctions" ,  "ControllerAMode End");
 
         fileLogger.writeEvent(debug, "initFunctions" ,  "ControllerBMode Start");
         controllerBMode.setRollOver(true);
+        controllerBMode.setTickValue(1);
+        controllerBMode.setTickMin(1);
         controllerBMode.setTickMax(1);
         controllerBMode.setTickIncrement(1);
         fileLogger.writeEvent(debug, "initFunctions" ,  "ControllerBMode End");

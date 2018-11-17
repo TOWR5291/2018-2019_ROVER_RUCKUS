@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -42,7 +43,7 @@ import android.app.Activity;
 //import club.towr5291.robotconfig.HardwareArmMotorsRR;
 
 @TeleOp(name="RR Mecanum Test IAN", group="RRTest")
-//@Disabled
+@Disabled
 public class RRMecanumTestIan extends OpModeMasterLinear
 {
 

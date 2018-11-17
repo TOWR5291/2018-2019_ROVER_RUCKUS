@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -32,7 +33,7 @@ import club.towr5291.robotconfig.HardwareDriveMotors;
 //import club.towr5291.robotconfig.HardwareArmMotorsRR;
 
 @TeleOp(name="IAN Mecanum Test 2019", group="OpModes5291")
-//@Disabled
+@Disabled
 public class MecanumBaseDrive_2019 extends OpModeMasterLinear
 {
 

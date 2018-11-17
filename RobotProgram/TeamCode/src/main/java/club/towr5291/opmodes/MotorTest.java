@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.widget.TextView;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
@@ -25,6 +26,7 @@ import club.towr5291.robotconfig.HardwareSensorsRoverRuckus;
     made by Wyatt Ashley on 8/2/2018
  */
 @TeleOp(name = "Motor Test", group = "Test")
+@Disabled
 public class MotorTest extends OpMode {
 
     private HardwareDriveMotors Robot = new HardwareDriveMotors();

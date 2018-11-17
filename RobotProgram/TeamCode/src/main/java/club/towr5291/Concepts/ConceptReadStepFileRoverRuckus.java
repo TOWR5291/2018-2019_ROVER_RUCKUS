@@ -41,7 +41,7 @@ import club.towr5291.libraries.robotConfig;
 ***/
 
 @TeleOp(name = "Concept Read Steps Rover Ruckus", group = "5291Concept")
-//@Disabled
+@Disabled
 public class ConceptReadStepFileRoverRuckus extends LinearOpMode {
 
     private String teamNumber;

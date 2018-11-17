@@ -9,6 +9,7 @@ import android.preference.PreferenceManager;
 import android.widget.TextView;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
@@ -29,7 +30,7 @@ import club.towr5291.robotconfig.HardwareDriveMotors;
 //import club.towr5291.robotconfig.HardwareArmMotorsRR;
 
 @TeleOp(name="Mecanum FANUC", group="RRTest")
-//@Disabled
+@Disabled
 public class RRMecanumTestIanFanuc extends OpModeMasterLinear
 {
 

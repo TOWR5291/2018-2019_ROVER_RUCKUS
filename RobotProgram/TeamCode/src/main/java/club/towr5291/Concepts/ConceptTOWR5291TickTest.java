@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.widget.TextView;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -31,7 +32,7 @@ import club.towr5291.robotconfig.HardwareDriveMotors;
 
 
 @TeleOp(name="Concept: Tick", group="5291Concept")
-//@Disabled
+@Disabled
 public class ConceptTOWR5291TickTest extends OpModeMasterLinear
 {
     //set up the variables for the logger

@@ -70,6 +70,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import org.firstinspires.ftc.robotcore.internal.opmode.OpModeManagerImpl;
+import org.firstinspires.ftc.robotcore.internal.usb.exception.RobotUsbUnspecifiedException;
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -180,11 +181,15 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
     private Constants.stepState mintCurrentStateMecanumStrafe;                  // Current State of mecanum strafe
     private Constants.stepState mintCurrentStepDelay;                           // Current State of Delay (robot doing nothing)
     private Constants.stepState mintCurrentStateMoveLift;                       // Current State of the Move lift
+    private Constants.stepState mintCurrentStateTiltMotor;                      // Current State of the Tilt Motor
     private Constants.stepState mintCurrentStateFindGold;                       // Current State of Finding Gold
     private Constants.stepState mintCurrentStateTeamMarker;                     // Current State of releaseing the team marker
 
     private int mintFindGoldLoop = 0;                                           //there can only be 3 positions so count how many times we try
     private boolean mboolFoundGold = false;
+
+    private double mdblTeamMarkerDrop = .8;
+    private double mdblTeamMarkerHome = 0;
 
     private HashMap<String, Integer> mintActiveSteps = new HashMap<>();
     private HashMap<String, Integer> mintActiveStepsCopy = new HashMap<>();
@@ -419,12 +424,14 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         robotArms.init(hardwareMap , dashboard);
         robotArms.setHardwareLiftMotorResetEncoders();
         robotArms.setHardwareLiftMotorRunUsingEncoders();
+        robotArms.setHardwareArmDirections();
         //robotArms.init(fileLogger, hardwareMap, robotConfig.armMotorsROVERRUCKUS.Motor1.toString(),
         //        robotConfig.armMotorsROVERRUCKUS.Motor2.toString(),
         //        robotConfig.armMotorsROVERRUCKUS.Motor3.toString(),
         //        robotConfig.armMotorsROVERRUCKUS.Motor4.toString());
         //robotArms.setHardwareDriveResetEncoders();
         //robotArms.setHardwareDriveRunUsingEncoders();
+        robotArms.teamMarkerServo.setPosition(mdblTeamMarkerHome);
 
         fileLogger.writeEvent(3, "Configuring Arm Motors - Finish");
         dashboard.displayPrintf(9, "Configuring Arm Motors - Finish");
@@ -473,7 +480,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         fileLogger.setEventTag("opModeIsActive()");
         dashboard.clearDisplay();
 
-        imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
+        imu.startAccelerationIntegration(new Position(), new Velocity(), 500);
 
         //the main loop.  this is where the action happens
         while (opModeIsActive()) {
@@ -662,8 +669,8 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         }
 
         //switch opmode to teleop
-        opModeManager = (OpModeManagerImpl) onStop.internalOpModeServices;
-        opModeManager.initActiveOpMode(TeleOpMode);
+        //opModeManager = (OpModeManagerImpl) onStop.internalOpModeServices;
+        //opModeManager.initActiveOpMode(TeleOpMode);
         //opmode not active anymore
     }
 
@@ -745,8 +752,11 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
             case "VTE":  // Turn the Robot using information from Vuforia and Pythag
                 VuforiaTurn();
                 break;
-            case "LFT":    // Moves the lift up and down for the 2018-19 game
+            case "LIFT":    // Moves the lift up and down for the 2018-19 game
                 moveLiftUpDown();
+                break;
+            case "TILT":
+                tiltMotor();
                 break;
             case "FINDGOLD":
                 findGold();
@@ -813,8 +823,11 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
             case "EYE":  // Special Function, 5291 Move forward until line is found
                 mintCurrentStateEyes5291            = Constants.stepState.STATE_INIT;
                 break;
-            case "LFT":
+            case "LIFT":
                 mintCurrentStateMoveLift            = Constants.stepState.STATE_INIT;
+                break;
+            case "TILT":
+                mintCurrentStateTiltMotor           = Constants.stepState.STATE_INIT;
                 break;
             case "FINDGOLD":
                 mintCurrentStateFindGold            = Constants.stepState.STATE_INIT;
@@ -1835,31 +1848,101 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
     }
 
     private void moveLiftUpDown(){
+
+
+        double dblDistanceToMoveLift1;
+        double dblDistanceToMoveLift2;
+
+        fileLogger.setEventTag("moveLiftUpDown()");
+
         switch (mintCurrentStateMoveLift){
             case STATE_INIT:
+                fileLogger.writeEvent(2, "Initialised");
+                robotArms.setHardwareLiftMotorRunUsingEncoders();
                 robotArms.setHardwareLiftMotorResetEncoders();
+
+                dblDistanceToMoveLift1 = robotArms.getLiftMotor1Encoder() + (mdblStepDistance * ourRobotConfig.getLIFTMAIN_COUNTS_PER_INCH());
+                dblDistanceToMoveLift2 = robotArms.getLiftMotor2Encoder() + (mdblStepDistance * ourRobotConfig.getLIFTMAIN_COUNTS_PER_INCH());
+
+                robotArms.liftMotor1.setTargetPosition((int)dblDistanceToMoveLift1);
+                robotArms.liftMotor2.setTargetPosition((int)dblDistanceToMoveLift2);
+
+                robotArms.setHardwareLiftPower(mdblStepSpeed);
+
+                robotArms.setHardwareLiftMotorRunToPosition();
+
                 mintCurrentStateMoveLift = Constants.stepState.STATE_RUNNING;
                 break;
             case STATE_RUNNING:
-                robotArms.baseMotor1.setPower(.5);
-                robotArms.baseMotor2.setPower(.5);
+                fileLogger.writeEvent(2, "Running");
 
-                if (robotArms.baseMotor1.getCurrentPosition() >= mdblRobotParm1 - 5 && robotArms.baseMotor2.getCurrentPosition() >= mdblRobotParm1 - 5){
+                robotArms.setHardwareLiftPower(mdblStepSpeed);
+                fileLogger.writeEvent(2, "Motor Speed Set: Busy 1 " + robotArms.liftMotor1.isBusy() + " Busy 2 " + robotArms.liftMotor2.isBusy());
+
+                if ((!(robotArms.liftMotor1.isBusy())) || (!(robotArms.liftMotor2.isBusy()))){
+                    fileLogger.writeEvent(2, "Motor 1 is not busy");
+                    fileLogger.writeEvent(2, "Motor 2 is not busy");
+                    robotArms.setHardwareLiftPower(0);
+                    fileLogger.writeEvent(2, "Finished");
                     mintCurrentStateMoveLift = Constants.stepState.STATE_COMPLETE;
-                    robotArms.baseMotor1.setPower(0);
-                    robotArms.baseMotor2.setPower(0);
+                    deleteParallelStep();
                 }
                 //check timeout value
                 if (mStateTime.seconds() > mdblStepTimeout) {
+                    robotArms.setHardwareLiftPower(0);
                     fileLogger.writeEvent(1,"Timeout:- " + mStateTime.seconds());
                     //  Transition to a new state.
                     mintCurrentStateMoveLift = Constants.stepState.STATE_COMPLETE;
                     deleteParallelStep();
                 }
                 break;
-            case STATE_COMPLETE:
-                armDrive.baseMotor1.setPower(0);
-                armDrive.baseMotor1.setPower(0);
+        }
+    }
+
+    private void tiltMotor(){
+
+
+        double dblDistanceToMoveTilt;
+
+        fileLogger.setEventTag("moveLiftUpDown()");
+
+        switch (mintCurrentStateTiltMotor){
+            case STATE_INIT:
+                fileLogger.writeEvent(2, "Initialised");
+                robotArms.tiltMotor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                robotArms.tiltMotor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+                dblDistanceToMoveTilt = robotArms.tiltMotor1.getCurrentPosition() + (mdblStepDistance * ourRobotConfig.getLIFTMAIN_COUNTS_PER_INCH());
+
+                robotArms.tiltMotor1.setTargetPosition((int)dblDistanceToMoveTilt);
+
+                robotArms.tiltMotor1.setPower(mdblStepSpeed);
+
+                robotArms.tiltMotor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+                mintCurrentStateTiltMotor = Constants.stepState.STATE_RUNNING;
+                break;
+            case STATE_RUNNING:
+                fileLogger.writeEvent(2, "Running");
+
+                robotArms.tiltMotor1.setPower(mdblStepSpeed);
+                fileLogger.writeEvent(2, "Motor Speed Set: Busy 1 " + robotArms.tiltMotor1.isBusy());
+
+                if (!(robotArms.tiltMotor1.isBusy())){
+                    fileLogger.writeEvent(2, "Motor 1 is not busy");
+                    robotArms.tiltMotor1.setPower(0);
+                    fileLogger.writeEvent(2, "Finished");
+                    mintCurrentStateTiltMotor = Constants.stepState.STATE_COMPLETE;
+                    deleteParallelStep();
+                }
+                //check timeout value
+                if (mStateTime.seconds() > mdblStepTimeout) {
+                    robotArms.tiltMotor1.setPower(0);
+                    fileLogger.writeEvent(1,"Timeout:- " + mStateTime.seconds());
+                    //  Transition to a new state.
+                    mintCurrentStateTiltMotor = Constants.stepState.STATE_COMPLETE;
+                    deleteParallelStep();
+                }
                 break;
         }
     }
@@ -1870,7 +1953,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
 
         switch (mintCurrentStateFindGold){
             case STATE_INIT:
-                fileLogger.writeEvent(2, "Initialised");
+                fileLogger.writeEvent(3, "Initialised");
                 mintFindGoldLoop = (int)mdblRobotParm6;
                 mboolFoundGold = false;
                 mblnDisableVisionProcessing     = false;    //enable vision processing
@@ -1881,7 +1964,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 mintCurrentStateFindGold = Constants.stepState.STATE_RUNNING;
                 break;
             case STATE_RUNNING:
-                fileLogger.writeEvent(2, "Running");
+                fileLogger.writeEvent(3, "Running");
                 mblnDisableVisionProcessing     = false;    //enable vision processing
                 mblnReadyToCapture              = true;     //let OpenCV start doing its thing
                 //check to see if we found
@@ -1951,17 +2034,30 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         switch (mintCurrentStateTeamMarker){
             case STATE_INIT:
                 fileLogger.writeEvent(2, "Initialised");
-                Arms.teamMarkerServo.setPosition
+                robotArms.teamMarkerServo.setPosition(mdblTeamMarkerDrop);
+
+                if (mdblRobotParm1 == 1){
+                    robotArms.teamMarkerServo.setPosition(mdblTeamMarkerDrop);
+                } else if (mdblRobotParm1 == 0){
+                    robotArms.teamMarkerServo.setPosition(mdblTeamMarkerHome);
+                }
 
                 mintCurrentStateTeamMarker = Constants.stepState.STATE_RUNNING;
+
                 break;
             case STATE_RUNNING:
                 fileLogger.writeEvent(2, "Running");
 
+                fileLogger.writeEvent(2, "Open for " + mdblRobotParm1 + "ms, now closing");
+                //  Transition to a new state.
+                mintCurrentStateTeamMarker = Constants.stepState.STATE_COMPLETE;
+                deleteParallelStep();
 
 
                 //check timeout value
                 if (mStateTime.seconds() > mdblStepTimeout) {
+
+                    robotArms.teamMarkerServo.setPosition(mdblTeamMarkerHome);
                     mblnDisableVisionProcessing     = true;  //disable vision processing
                     mblnReadyToCapture              = false; //stop OpenCV from doing its thing
                     fileLogger.writeEvent(1,"Timeout:- " + mStateTime.seconds());
@@ -2327,6 +2423,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 (mintCurrentStateTankTurnGyroHeading    == Constants.stepState.STATE_COMPLETE) &&
                 (mintCurrentStateMecanumStrafe          == Constants.stepState.STATE_COMPLETE) &&
                 (mintCurrentStateMoveLift               == Constants.stepState.STATE_COMPLETE) &&
+                (mintCurrentStateTiltMotor              == Constants.stepState.STATE_COMPLETE) &&
                 (mintCurrentStateFindGold               == Constants.stepState.STATE_COMPLETE) &&
                 (mintCurrentStateTeamMarker             == Constants.stepState.STATE_COMPLETE) &&
                 (mintCurrentStateRadiusTurn             == Constants.stepState.STATE_COMPLETE)) {
@@ -2351,6 +2448,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         mintCurrentStateGyroTurnEncoder5291 = Constants.stepState.STATE_COMPLETE;
         mintCurrentStateFindGold            = Constants.stepState.STATE_COMPLETE;
         mintCurrentStateMoveLift            = Constants.stepState.STATE_COMPLETE;
+        mintCurrentStateTiltMotor           = Constants.stepState.STATE_COMPLETE;
         mintCurrentStateTeamMarker          = Constants.stepState.STATE_COMPLETE;
     }
 

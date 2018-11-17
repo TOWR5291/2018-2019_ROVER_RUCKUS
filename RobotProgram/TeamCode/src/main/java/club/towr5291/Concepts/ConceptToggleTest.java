@@ -23,7 +23,7 @@ import club.towr5291.opmodes.OpModeMasterLinear;
  */
 
 @TeleOp(name="Concept: Toggle", group="5291Concept")
-//@Disabled
+@Disabled
 public class ConceptToggleTest extends OpModeMasterLinear
 {
     //set up the variables for the logger
@@ -59,6 +59,10 @@ public class ConceptToggleTest extends OpModeMasterLinear
 
         dashboard.displayPrintf(1, "initRobot");
         fileLogger.writeEvent(3, "FileLogger Started");
+        TOWR5291Toggle togglex = new TOWR5291Toggle(gamepad1.x);
+        togglex.setDebounce(250);
+        TOWR5291Toggle toggley = new TOWR5291Toggle(gamepad1.y);
+        toggley.setDebounce(1000);
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
@@ -66,10 +70,6 @@ public class ConceptToggleTest extends OpModeMasterLinear
         dashboard.clearDisplay();
         dashboard.displayPrintf(0, LABEL_WIDTH, "Text: ", "*** Robot Data ***");
 
-        TOWR5291Toggle togglex = new TOWR5291Toggle(gamepad1.x);
-        togglex.setDebounce(250);
-        TOWR5291Toggle toggley = new TOWR5291Toggle(gamepad1.y);
-        toggley.setDebounce(1000);
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {

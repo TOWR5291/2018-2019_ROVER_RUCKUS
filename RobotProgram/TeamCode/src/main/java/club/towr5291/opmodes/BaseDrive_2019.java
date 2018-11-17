@@ -6,8 +6,8 @@ import android.widget.TextView;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
@@ -21,9 +21,11 @@ import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 
 import club.towr5291.R;
+import club.towr5291.functions.Constants;
 import club.towr5291.functions.FileLogger;
 import club.towr5291.functions.TOWR5291PID;
 import club.towr5291.functions.TOWR5291Tick;
+import club.towr5291.functions.TOWR5291Toggle;
 import club.towr5291.libraries.TOWR5291LEDControl;
 import club.towr5291.libraries.TOWRDashBoard;
 import club.towr5291.libraries.robotConfig;
@@ -35,32 +37,34 @@ import club.towr5291.robotconfig.HardwareSensorsRoverRuckus;
 /*
     made by Wyatt Ashley on 8/2/2018
 */
-@TeleOp(name = "Base Drive 2019", group = "Base drive")
-public class BaseDrive_2019 extends OpMode {
+@TeleOp(name = "Base Drive 2019", group = "5291")
+public class BaseDrive_2019 extends OpModeMasterLinear {
 
     /* Hardware Set Up */
     private HardwareDriveMotors Robot               = new HardwareDriveMotors();
     private HardwareArmMotorsRoverRuckus Arms       = new HardwareArmMotorsRoverRuckus();
     private HardwareSensorsRoverRuckus Sensors      = new HardwareSensorsRoverRuckus();
     private TOWR5291LEDControl LEDs;
+    private Constants.LEDState LEDStatus = Constants.LEDState.STATE_ERROR;
 
     //Settings from the sharepreferences
     private SharedPreferences sharedPreferences;
     double correction = 0;
     double lastposition;
     boolean DisplayEncoderVaule = false;
-    int StartCorrectionVar = 0;
+    private int imuStartCorrectionVar = 0;
+    private int imuMountCorrectionVar = 90;
 
     private FileLogger fileLogger;
-    final String TAG = "Concept Logging";
+    final String TAG = "RR TeleOp";
     private ElapsedTime runtime = new ElapsedTime();
     private club.towr5291.libraries.robotConfig ourRobotConfig;
 
     /* TOWR TICK FUNCTION */
-    private TOWR5291Tick robotTick                  = new TOWR5291Tick();
-    private TOWR5291Tick controllerA                = new TOWR5291Tick();
-    private TOWR5291Tick controllerB                = new TOWR5291Tick();
-    private TOWR5291Tick IntakeDirection            = new TOWR5291Tick();
+    private TOWR5291Tick robotPowerMultiplier       = new TOWR5291Tick();
+    private TOWR5291Tick controllerAMode            = new TOWR5291Tick();
+    private TOWR5291Tick controllerBMode            = new TOWR5291Tick();
+    private TOWR5291Tick intakeDirection            = new TOWR5291Tick();
     private TOWR5291Tick teamMarkerServoPosition    = new TOWR5291Tick();
 
     private Gamepad game2 = gamepad2;
@@ -69,6 +73,14 @@ public class BaseDrive_2019 extends OpMode {
     private TOWR5291PID driftRotateAngle;
     private BNO055IMU imu;
 
+    private double maxDrivePower = 1;
+    private double minDrivePower = 0.3333333333333;
+    private double incrementDrivePower = 0.333333333333;
+    private double startDrivePower = 0.6666666666666666;
+    //Controller A has 4 modes of operation
+    private double controllerAModes = 5;
+    private int debug;
+
     private static TOWRDashBoard dashboard = null;
     public static TOWRDashBoard getDashboard()
     {
@@ -76,7 +88,7 @@ public class BaseDrive_2019 extends OpMode {
     }
 
     @Override
-    public void init() {
+    public void runOpMode() throws InterruptedException {
         dashboard = TOWRDashBoard.createInstance(telemetry);
 
         FtcRobotControllerActivity act = (FtcRobotControllerActivity)(hardwareMap.appContext);
@@ -92,8 +104,9 @@ public class BaseDrive_2019 extends OpMode {
         parametersAdafruitImu.loggingTag            = "IMU";
         parametersAdafruitImu.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
 
-        imu = hardwareMap.get(BNO055IMU.class, "imu2");
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parametersAdafruitImu);
+
 
         ourRobotConfig = new robotConfig();
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(hardwareMap.appContext);
@@ -103,213 +116,269 @@ public class BaseDrive_2019 extends OpMode {
         ourRobotConfig.setAllianceStartPosition(sharedPreferences.getString("club.towr5291.Autonomous.Position", "Left"));
         ourRobotConfig.setDelay(Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Delay", "0")));
         ourRobotConfig.setRobotConfigBase(sharedPreferences.getString("club.towr5291.Autonomous.RobotConfigBase", "TileRunner-2x40"));
+        debug = Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Debug", "1"));
 
         fileLogger = new FileLogger(runtime, Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Debug", "1")), true);// initializing FileLogger
         fileLogger.open();// Opening FileLogger
         fileLogger.writeEvent(TAG, "Log Started");// First Line Add To Log
 
         Robot.init(fileLogger, hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(ourRobotConfig.getRobotConfigBase()));// Starting robot Hardware map
-        Robot.logEncoderCounts(fileLogger);// Logging The Encoder Counts
         Robot.allMotorsStop();
 
         Arms.init(hardwareMap, dashboard);
+        fileLogger.writeEvent(2,"Arms Init");
+
         Sensors.init(fileLogger, hardwareMap);
+
+        fileLogger.writeEvent(2,"Sensors Init");
         LEDs = new TOWR5291LEDControl(hardwareMap);
         LEDs.setLEDControlDemoMode(true);
+        LEDs.setLEDControlAlliance(ourRobotConfig.getAllianceColor());
+
+        fileLogger.writeEvent(2,"LEDs Init");
 
         switch (ourRobotConfig.getAllianceStartPosition()){
             case "Left":
-                StartCorrectionVar = -45;
+                imuStartCorrectionVar = -45;
                 break;
             default:
-                StartCorrectionVar = 45;
+                imuStartCorrectionVar = 45;
                 break;
         }
-        robotTick.setRollOver(true);
-        robotTick.setTickMax(1);
-        robotTick.setTickMin(0.2);
-        robotTick.setTickIncrement(0.4);
-        robotTick.setTickValue(.5);
 
-        controllerA.setRollOver(true);
-        controllerA.setTickMin(1);
-        controllerA.setTickIncrement(1);
+        fileLogger.writeEvent(2,"IMU Offset " + imuStartCorrectionVar);
 
-        controllerB.setRollOver(true);
-        controllerB.setTickMin(1);
-        controllerB.setTickMax(1);
-        controllerB.setTickIncrement(1);
+        //init all the values for the counters etc
+        initFunction();
+        fileLogger.writeEvent(2,"Init Function Done ");
 
+        driftRotateAngle = new TOWR5291PID(runtime,0,0,4.5,0,0);
+
+        TOWR5291Toggle toggleGamePad2A = new TOWR5291Toggle(gamepad1.x);
+        toggleGamePad2A.setDebounce(500);
+        TOWR5291Toggle toggleGamePad1X = new TOWR5291Toggle(gamepad1.x);
+        toggleGamePad1X.setDebounce(500);
+
+
+        // All The Specification of the robot and controller
+        fileLogger.writeEvent(1,"Alliance Color", ourRobotConfig.getAllianceColor());
+        fileLogger.writeEvent(1,"Alliance Start Position", ourRobotConfig.getAllianceStartPosition());
+        fileLogger.writeEvent(1,"Delay", String.valueOf(ourRobotConfig.getDelay()));
+        fileLogger.writeEvent(1,"Robot Base Config", ourRobotConfig.getRobotConfigBase());
+        fileLogger.writeEvent(1,"Team Number", ourRobotConfig.getTeamNumber());
+        fileLogger.writeEvent(1,"Robot Controller Min Tick", String.valueOf(controllerAMode.getTickMin()));
+        fileLogger.writeEvent(1,"Robot Controller Max Tick", String.valueOf(controllerAMode.getTickMax()));
+
+        game2 = gamepad2;
+        game1 = gamepad1;
+
+        fileLogger.writeEvent(1,"","Wait For Start ");
+
+        dashboard.displayPrintf(1, "Waiting for Start");
+        // Wait for the game to start (driver presses PLAY)
+        waitForStart();
+        dashboard.clearDisplay();
+
+        fileLogger.writeEvent("Starting Loop");
+        imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
+        lastposition = getAdafruitHeading();
+
+        //dashboard.clearDisplay();
+
+        dashboard.displayPrintf(1, "Controller A Options");
+        dashboard.displayPrintf(2, "--------------------");
+        dashboard.displayPrintf(6, "Controller B Options");
+        dashboard.displayPrintf(7, "--------------------");
+
+        //the main loop.  this is where the action happens
+        while (opModeIsActive()) {
+            fileLogger.writeEvent(1,"In Main Loop");
+            //change LED state every cycle
+            LEDStatus = LEDs.LEDControlUpdate(LEDStatus);
+
+            //adjust the robot power using the dpad on the game controller
+            robotPowerMultiplier.incrementTick(game1.dpad_up);
+            robotPowerMultiplier.decrementTick(game1.dpad_down);
+
+            //adjust the intake direction, toggle forward, backward
+            intakeDirection.incrementTick(game2.left_bumper);
+
+            controllerAMode.incrementTick(game1.start);
+            controllerBMode.incrementTick(game2.start);
+
+            dashboard.displayPrintf(3, "Power Multiplier:  " + robotPowerMultiplier.getTickCurrValue());
+            dashboard.displayPrintf(4, "Controller A Mode: " + (int)controllerAMode.getTickCurrValue());
+            dashboard.displayPrintf(8, "Controller B Mode: " + (int)controllerBMode.getTickCurrValue());
+
+            //drivers controller, operation based on the mode selection
+            switch ((int)controllerAMode.getTickCurrValue())
+            {
+                case 1:
+                    fileLogger.writeEvent(debug,"Controller Mode", "POV");
+                    dashboard.displayPrintf(5, "Controller POV:");
+                    /*
+                     * Case 1 is the controller type POV
+                     * POV uses both joy sticks to drive
+                     * The left joy stick is for forward and back
+                     * The right joystick is for turning left and right
+                     */
+                    fileLogger.writeEvent(debug,"Controller Mode", "Robot Multiplier: -" + robotPowerMultiplier.getTickCurrValue());
+                    Robot.setHardwareDriveLeftMotorPower(Range.clip(-game1.left_stick_y + game1.right_stick_x, -1.0, 1.0) * robotPowerMultiplier.getTickCurrValue());
+                    Robot.setHardwareDriveRightMotorPower(Range.clip(-game1.left_stick_y - game1.right_stick_x, -1.0, 1.0) * robotPowerMultiplier.getTickCurrValue());
+                    fileLogger.writeEvent(debug,"SetPowers Done");
+                    break;
+
+                case 2:
+                    /*
+                     * Case 2 is the controller type Tank drive
+                     * Tank uses both joy sticks to drive
+                     * The left joy stick is for the left wheel speed
+                     * The right joy stick is for the right wheel speed
+                     */
+                    dashboard.displayPrintf(5, "Controller Tank");
+                    fileLogger.writeEvent("Controller Mode", "Tank");
+                    Robot.setHardwareDriveLeftMotorPower(-game1.left_stick_y * robotPowerMultiplier.getTickCurrValue());
+                    Robot.setHardwareDriveRightMotorPower(-game1.right_stick_y * robotPowerMultiplier.getTickCurrValue());
+                    break;
+
+                case 3:
+                    /*
+                     * Mecanum Drive is for Mecanum bases ONLY
+                     * If You Need help ask some one to explain it to you
+                     */
+                    dashboard.displayPrintf(5, "Mecanum Drive (IMU)");
+                    fileLogger.writeEvent("Controller Mode", "Mecanum Drive");
+                    if (game1.left_stick_x != 0 || game1.left_stick_y != 0) {
+                        correction = driftRotateAngle.PIDCorrection(runtime,Math.sin(getAdafruitHeading() * (Math.PI / 180.0)), lastposition);
+                    } else {
+                        correction = 0;
+                        lastposition = Math.sin(getAdafruitHeading() * (Math.PI / 180.0));
+                    }
+
+                    Robot.mecanumDrive_Cartesian(game1.left_stick_x, game1.left_stick_y, game1.right_stick_x - correction, getAdafruitHeading() + imuStartCorrectionVar, robotPowerMultiplier.getTickCurrValue());
+                    break;
+
+                case 4:
+                    dashboard.displayPrintf(5, "Mecanum Drive New 2018-19");
+                    fileLogger.writeEvent(debug,"Controller Mode", "Mecanum Drive New 2018-19");
+                    Robot.baseMotor1.setPower(game1.left_stick_x + -game1.left_stick_y + game1.right_stick_x);
+                    Robot.baseMotor2.setPower(-game1.left_stick_x + -game1.left_stick_y + game1.right_stick_x);
+                    Robot.baseMotor3.setPower(-game1.left_stick_x + -game1.left_stick_y + -game1.right_stick_x);
+                    Robot.baseMotor4.setPower(-game1.left_stick_x + -game1.left_stick_y + -game1.right_stick_x);
+
+                    break;
+                //last years driving mode, prefered not to use
+                case 5:
+                    dashboard.displayPrintf(5, "Mecanum Drive Relic Recovery");
+                    fileLogger.writeEvent(debug,"Controller Mode", "Mecanum Drive Relic Recovery");
+                    Robot.baseMotor1.setPower(Range.clip(-gamepad1.left_stick_y + gamepad1.left_stick_x - gamepad1.right_stick_x, -1, 1));
+                    Robot.baseMotor2.setPower(Range.clip(-gamepad1.left_stick_y - gamepad1.left_stick_x - gamepad1.right_stick_x, -1, 1));
+                    Robot.baseMotor3.setPower(Range.clip(-gamepad1.left_stick_y - gamepad1.left_stick_x + gamepad1.right_stick_x, -1, 1));
+                    Robot.baseMotor4.setPower(Range.clip(-gamepad1.left_stick_y + gamepad1.left_stick_x + gamepad1.right_stick_x, -1, 1));
+                    break;
+            } //Switch ControllerA
+
+            //controller 2 functions, arms and intakes, depends on which mode selected
+
+            dashboard.displayPrintf(10, "Lift Motor 1 Enc: " + Arms.getLiftMotor1Encoder());
+            dashboard.displayPrintf(11, "Lift Motor 2 Enc: " + Arms.getLiftMotor2Encoder());
+            dashboard.displayPrintf(12, "Tilt Motor Enc  : " + Arms.getTiltLiftEncoder());
+            switch ((int)controllerBMode.getTickCurrValue()){
+                case 1:
+                    dashboard.displayPrintf(9, "Controller B Standard");
+                    fileLogger.writeEvent(debug,"Controller B Mode", "Standard");
+
+                    Arms.tiltMotor1.setPower(-game2.left_stick_y);
+                    Arms.setHardwareLiftPower(game2.right_stick_y);
+                    if (game2.left_trigger > 0){
+                        Arms.AdvancedOptionsForArms(game2, 5);
+                        if (game2.b){
+                            if (game2 == gamepad2){
+                                game2 = gamepad1;
+                            } else if (game2 == gamepad1) {
+                                game2 = gamepad2;
+                            }
+                        }
+                    }
+
+                    if (toggleGamePad2A.toggleState(gamepad1.a)) {
+                        Arms.setHardwareArmDirections(DcMotor.Direction.REVERSE);
+                    } else {
+                        Arms.setHardwareArmDirections(DcMotor.Direction.FORWARD);
+                    }
+
+                    switch ((int) intakeDirection.getTickCurrValue()){
+                        case 1:
+                            Arms.intakeServo.setPosition(.1);
+                            break;
+                        case 2:
+                            Arms.intakeServo.setPosition(.5);
+                            break;
+                        case 3:
+                            Arms.intakeServo.setPosition(.9);
+                            break;
+                    } //switch intake direction
+
+                    //Arms.teamMarkerServo.setPosition(teamMarkerServoPosition.getTickCurrValue());
+                    break;
+            } //Switch ControllerB
+
+        }  //while (OpModeIsActive)
+
+        //stop the logging
+        if (fileLogger != null) {
+            fileLogger.writeEvent(1, "TeleOP FINISHED - FINISHED");
+            fileLogger.writeEvent(1, "Stopped");
+            fileLogger.close();
+            fileLogger = null;
+        }
+    } //RunOpMode
+
+    private void initFunction() {
+        fileLogger.writeEvent(debug, "initFunctions" ,  "Started");
+
+        fileLogger.writeEvent(debug, "initFunctions" ,  "Robot Power Multiplier Start");
+
+        robotPowerMultiplier.setRollOver(true);
+        robotPowerMultiplier.setTickMax(maxDrivePower);
+        robotPowerMultiplier.setTickMin(minDrivePower);
+        robotPowerMultiplier.setTickIncrement(incrementDrivePower);
+        robotPowerMultiplier.setTickValue(startDrivePower);
+        fileLogger.writeEvent(debug, "initFunctions" ,  "Robot Power Multiplier End");
+
+        fileLogger.writeEvent(debug, "initFunctions" ,  "ControllerAMode Start");
+        controllerAMode.setRollOver(true);
+        controllerAMode.setTickMin(1);
+        controllerAMode.setTickIncrement(1);
+        controllerAMode.setTickMax(controllerAModes);
+        controllerAMode.setTickValue(5);
+        fileLogger.writeEvent(debug, "initFunctions" ,  "ControllerAMode End");
+
+        fileLogger.writeEvent(debug, "initFunctions" ,  "ControllerBMode Start");
+        controllerBMode.setRollOver(true);
+        controllerBMode.setTickValue(1);
+        controllerBMode.setTickMin(1);
+        controllerBMode.setTickMax(1);
+        controllerBMode.setTickIncrement(1);
+        fileLogger.writeEvent(debug, "initFunctions" ,  "ControllerBMode End");
+
+        fileLogger.writeEvent(debug, "initFunctions" ,  "teamMarkerServoPosition Start");
         teamMarkerServoPosition.setRollOver(true);
         teamMarkerServoPosition.setTickMax(1);
         teamMarkerServoPosition.setTickMin(0);
         teamMarkerServoPosition.setTickIncrement(.25);
         teamMarkerServoPosition.setDebounceTime(1000);
+        fileLogger.writeEvent(debug, "initFunctions" ,  "teamMarkerServoPosition End");
 
-        IntakeDirection.setRollOver(true);
-        IntakeDirection.setTickMax(3);
-        IntakeDirection.setTickMin(1);
-        IntakeDirection.setTickIncrement(1);
-        IntakeDirection.setTickValue(2);
+        fileLogger.writeEvent(debug, "initFunctions" ,  "intakeDirection Start");
+        intakeDirection.setRollOver(true);
+        intakeDirection.setTickMax(3);
+        intakeDirection.setTickMin(1);
+        intakeDirection.setTickIncrement(1);
+        intakeDirection.setTickValue(2);
+        fileLogger.writeEvent(debug, "initFunctions" ,  "intakeDirection End");
+        fileLogger.writeEvent(debug, "initFunctions" ,  "Finished");
 
-        driftRotateAngle = new TOWR5291PID(runtime,0,0,4.5,0,0);
-
-        // All The Specification of the robot and controller
-        fileLogger.writeEvent("Alliance Color", ourRobotConfig.getAllianceColor());
-        fileLogger.writeEvent("Alliance Start Position", ourRobotConfig.getAllianceStartPosition());
-        fileLogger.writeEvent("Delay", String.valueOf(ourRobotConfig.getDelay()));
-        fileLogger.writeEvent("Robot Base Config", ourRobotConfig.getRobotConfigBase());
-        fileLogger.writeEvent("Team Number", ourRobotConfig.getTeamNumber());
-        fileLogger.writeEvent("Robot Controller Max Tick", String.valueOf(controllerA.getTickMax()));
-        fileLogger.writeEvent("Robot Controller Min Tick", String.valueOf(controllerA.getTickMin()));
-    }
-
-    @Override
-    public void start(){
-        fileLogger.writeEvent("Starting Loop");
-        imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
-        lastposition = getAdafruitHeading();
-
-        game2 = gamepad2;
-        game1 = gamepad1;
-    }
-
-
-    @Override
-    public void loop() {
-        Robot.setHardwareDriveDirections(robotConfigSettings.robotConfigChoice.valueOf(ourRobotConfig.getRobotConfigBase()));
-
-        setControllerMaxTick(robotConfigSettings.robotConfigChoice.valueOf(ourRobotConfig.getRobotConfigBase()));
-
-        robotTick.incrementTick(game1.dpad_up);
-        robotTick.decrementTick(game1.dpad_down);
-
-        IntakeDirection.incrementTick(game2.left_bumper);
-
-        controllerA.incrementTick(game1.start);
-        controllerB.incrementTick(game2.start);
-        teamMarkerServoPosition.incrementTick(game2.a);
-
-        dashboard.displayPrintf(0, "Current Tick" + robotTick.getTickCurrValue());
-
-        switch ((int) controllerB.getTickCurrValue()){
-            case 1:
-                dashboard.displayPrintf(2, "Controller B Standard");
-                fileLogger.writeEvent(1,"Controller B Mode", "Standard");
-
-                Arms.angleMotor1.setPower(-game2.left_stick_y);
-                Arms.liftMotor.setPower(game2.right_stick_y);
-                Arms.liftMotor2.setPower(game2.right_stick_y);
-                if (game2.left_trigger > 0){
-                    Arms.AdvancedOptionsForArms(game2, 5);
-                    if (game2.b){
-                        if (game2 == gamepad2){
-                            game2 = gamepad1;
-                        } else if (game2 == gamepad1) {
-                            game2 = gamepad2;
-                        }
-                    }
-                    if (game2.x){
-                        DisplayEncoderVaule = !DisplayEncoderVaule;
-                        if (!DisplayEncoderVaule) {
-                            dashboard.clearDisplay();
-                        }
-                    }
-                } else{
-                    dashboard.displayPrintf(5, "");
-                    dashboard.displayPrintf(6, "");
-                    dashboard.displayPrintf(7, "");
-                }
-
-                switch ((int) IntakeDirection.getTickCurrValue()){
-                    case 1:
-                        Arms.intakeServo.setPosition(.1);
-                        break;
-                    case 2:
-                        Arms.intakeServo.setPosition(.5);
-                        break;
-                    case 3:
-                        Arms.intakeServo.setPosition(.9);
-                        break;
-                }
-
-                Arms.teamMarkerServo.setPosition(teamMarkerServoPosition.getTickCurrValue());
-                break;
-        }
-
-        switch ((int) controllerA.getTickCurrValue()){
-            case 1:
-                /*
-                 * Case 1 is the controller type POV
-                 * POV uses both joy sticks to drive
-                 * The left joy stick is for forward and back
-                 * The right joy sstick is for turning left and right
-                 */
-                dashboard.displayPrintf(1, "Controller POV");
-                fileLogger.writeEvent(1,"Controller Mode", "POV");
-                Robot.setHardwareDriveLeftMotorPower(Range.clip(-game1.left_stick_y + game1.right_stick_x, -1.0, 1.0) * robotTick.getTickCurrValue());
-                Robot.setHardwareDriveRightMotorPower(Range.clip(-game1.left_stick_y - game1.right_stick_x, -1.0, 1.0) * robotTick.getTickCurrValue());
-                break;
-
-            case 2:
-                /*
-                 * Case 2 is the controller type Tank drive
-                 * Tank uses both joy sticks to drive
-                 * The left joy stick is for the left wheel speed
-                 * The right joy stick is for the right wheel speed
-                 */
-                dashboard.displayPrintf(1, "Controller Tank");
-                fileLogger.writeEvent("Controller Mode", "Tank");
-                Robot.setHardwareDriveLeftMotorPower(-game1.left_stick_y * robotTick.getTickCurrValue());
-                Robot.setHardwareDriveRightMotorPower(-game1.right_stick_y * robotTick.getTickCurrValue());
-                break;
-
-            case 3:
-                /*
-                 * Mecanum Drive is for Mecanum bases ONLY
-                 * If You Need help ask some one to explain it to you
-                 */
-                dashboard.displayPrintf(1, "Controller Mecanum Drive");
-                fileLogger.writeEvent("Controller Mode", "Mecanum Drive");
-                if (game1.left_stick_x != 0 || game1.left_stick_y != 0) {
-                    correction = driftRotateAngle.PIDCorrection(runtime,Math.sin(getAdafruitHeading() * (Math.PI / 180.0)), lastposition);
-                } else {
-                    correction = 0;
-                    lastposition = Math.sin(getAdafruitHeading() * (Math.PI / 180.0));
-                }
-
-                Robot.mecanumDrive_Cartesian(game1.left_stick_x, game1.left_stick_y, game1.right_stick_x - correction, getAdafruitHeading() + StartCorrectionVar, robotTick.getTickCurrValue());
-                break;
-
-            case 4:
-                dashboard.displayPrintf(1, "Controller Mecanum Drive New 2018-19");
-                fileLogger.writeEvent("Controller Mode", "Mecanum Drive New 2018-19");
-                Robot.baseMotor1.setPower((game1.left_stick_x + -game1.left_stick_y + game1.right_stick_x));
-                Robot.baseMotor2.setPower((-game1.left_stick_x + -game1.left_stick_y + game1.right_stick_x));
-                Robot.baseMotor3.setPower((-game1.left_stick_x + -game1.left_stick_y + -game1.right_stick_x));
-                Robot.baseMotor4.setPower((-game1.left_stick_x + -game1.left_stick_y + -game1.right_stick_x));
-
-                break;
-            //last years driving mode, prefered not to use
-            case 5:
-                dashboard.displayPrintf(7, "Controller Mecanum Drive Relic Recovery");
-                fileLogger.writeEvent(3,"Controller Mode", "Mecanum Drive Relic Recovery");
-                Robot.baseMotor1.setPower(Range.clip(-gamepad1.left_stick_y - gamepad1.left_stick_x - gamepad1.right_stick_x, -1, 1));
-                Robot.baseMotor2.setPower(Range.clip(-gamepad1.left_stick_y + gamepad1.left_stick_x - gamepad1.right_stick_x, -1, 1));
-                Robot.baseMotor3.setPower(Range.clip(-gamepad1.left_stick_y + gamepad1.left_stick_x + gamepad1.right_stick_x, -1, 1));
-                Robot.baseMotor4.setPower(Range.clip(-gamepad1.left_stick_y - gamepad1.left_stick_x + gamepad1.right_stick_x, -1, 1));
-                break;
-        }
-
-        if (DisplayEncoderVaule){
-            dashboard.displayPrintf(8, "baseMotor1" + Robot.baseMotor1.getCurrentPosition());
-            dashboard.displayPrintf(9, "baseMotor2" + Robot.baseMotor2.getCurrentPosition());
-            dashboard.displayPrintf(10, "baseMotor3" + Robot.baseMotor3.getCurrentPosition());
-            dashboard.displayPrintf(11, "baseMotor4" + Robot.baseMotor4.getCurrentPosition());
-            dashboard.displayPrintf(12, "LiftMotor1" + Arms.liftMotor.getCurrentPosition());
-            dashboard.displayPrintf(13, "LiftMotor2" + Arms.liftMotor2.getCurrentPosition());
-            dashboard.displayPrintf(14, "AngleMotor1" + Arms.angleMotor1.getCurrentPosition());
-        }
     }
 
     private Double getAdafruitHeading () {
@@ -317,12 +386,15 @@ public class BaseDrive_2019 extends OpMode {
         angles = imu.getAngularOrientation().toAxesReference(AxesReference.INTRINSIC).toAxesOrder(AxesOrder.ZYX);
         return angleToHeading(formatAngle(angles.angleUnit, angles.firstAngle));
     }
+
     private Double formatAngle(AngleUnit angleUnit, double angle) {
         fileLogger.writeEvent(4,"Formating Angle For Gyro");
         return AngleUnit.DEGREES.fromUnit(angleUnit, angle);
     }
+
+    //for adafruit IMU as it returns z angle only
     private double angleToHeading(double z) {
-        double angle = -z;
+        double angle = -z + imuStartCorrectionVar + imuMountCorrectionVar;
         if (angle < 0)
             return angle + 360;
         else if (angle > 360)
@@ -330,33 +402,5 @@ public class BaseDrive_2019 extends OpMode {
         else
             return angle;
     }
-    private void setControllerMaxTick(robotConfigSettings.robotConfigChoice choice){
-        switch (choice){
-            case TileRunner2x20: controllerA.setTickMax(2); break;
-            case TileRunner2x40: controllerA.setTickMax(2); break;
-            case TileRunner2x60: controllerA.setTickMax(2); break;
-            case TileRunnerOrbital2x20: controllerA.setTickMax(2); break;
-            case TileRunnerMecanumOrbital2x20: controllerA.setTickMax(5); break;
-            case TankTread2x40Custom: controllerA.setTickMax(2); break;
-            case TileRunnerMecanum2x20: controllerA.setTickMax(3); break;
-            case TileRunnerMecanum2x40: controllerA.setTickMax(3); break;
-            case TileRunnerMecanum2x60: controllerA.setTickMax(3); break;
-        }
-        fileLogger.writeEvent(4,"Setting Controller Max Tick");
-    }
-    private boolean isMecanum (robotConfigSettings.robotConfigChoice choice){
-        switch (choice){
-            case TileRunner2x20: return false;
-            case TileRunner2x40: return false;
-            case TileRunner2x60: return false;
-            case TileRunnerOrbital2x20: return false;
-            case TileRunnerMecanumOrbital2x20: return true;
-            case TileRunnerMecanum2x20: return true;
-            case TileRunnerMecanum2x40: return true;
-            case TileRunnerMecanum2x60: return true;
-            case Custom_11231_2016: return false;
-            case TankTread2x40Custom: return false;
-            default: return false;
-        }
-    }
+
 }

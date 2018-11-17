@@ -3,6 +3,7 @@ package club.towr5291.opmodes;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -21,7 +22,7 @@ import club.towr5291.robotconfig.HardwareDriveMotorsBaseConfig;
  * Created by kids on 11/4/2016 at 7:54 PM.
  */
 @TeleOp(name = "Base Drive", group = "5291")
-//@Disabled
+@Disabled
 public class BaseDriveWorking extends OpMode {
 
     // Declare OpMode members.
