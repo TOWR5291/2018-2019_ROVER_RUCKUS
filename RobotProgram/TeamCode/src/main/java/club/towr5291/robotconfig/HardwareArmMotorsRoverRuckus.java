@@ -32,8 +32,8 @@ public class HardwareArmMotorsRoverRuckus
     public DcMotor  liftMotor1      = null;
     public DcMotor  liftMotor2      = null;
     public DcMotor  tiltMotor1      = null;
+    public DcMotor intakeMotor        = null;
     public Servo teamMarkerServo    = null;
-    public Servo intakeServo        = null;
 
     /* local OpMode members. */
     HardwareMap hwMap               =  null;
@@ -54,8 +54,8 @@ public class HardwareArmMotorsRoverRuckus
         this.liftMotor1         = hwMap.dcMotor.get("liftMotor1");
         this.liftMotor2         = hwMap.dcMotor.get("liftMotor2");
         this.tiltMotor1         = hwMap.dcMotor.get("tiltMotor1");
+        this.intakeMotor        = hwMap.dcMotor.get("intakeMotor");
         this.teamMarkerServo    = hwMap.servo.get("teamMarkerServo");
-        this.intakeServo        = hwMap.servo.get("intakeServo");
         setHardwareArmDirections();
 
         liftMotor1.setPower(0);
@@ -69,6 +69,7 @@ public class HardwareArmMotorsRoverRuckus
         liftMotor1.setDirection(DcMotor.Direction.REVERSE);
         liftMotor2.setDirection(DcMotor.Direction.REVERSE);
         tiltMotor1.setDirection(DcMotor.Direction.FORWARD);
+        intakeMotor.setDirection(DcMotor.Direction.FORWARD);
     }
 
     public void setHardwareArmDirections(DcMotor.Direction direction){

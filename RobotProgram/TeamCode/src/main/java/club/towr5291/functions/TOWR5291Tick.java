@@ -32,7 +32,7 @@ import club.towr5291.functions.TOWR5291Utils;
  * Modification history
  * Edited by:
  * Wyatt Ashley 07/20/2018 ->  Initial creation
- * Ian Haden 07/22/2018 -> Added comments and removed soem unneed steps, renamed some variables so they represent their respective functions
+ * Ian Haden 07/22/2018 -> Added comments and removed some unneed steps, renamed some variables so they represent their respective functions
  */
 public class TOWR5291Tick {
 

@@ -197,6 +197,10 @@ public class TOWR5291LEDControl {
     public Constants.LEDState LEDControlUpdate(Constants.LEDState LEDStatus) {
 
         switch (LEDStatus) {
+            case STATE_UPDATE:
+                LedStateLeft(this.mLEDLeftColour);
+                LedStateRight(this.mLEDRightColour);
+                break;
             case STATE_NULL:
                 if ((!mblnLEDON) && (mStateTime.milliseconds() > (mdblLastOff + flashOnTime))) {
                     mdblLastOn = mStateTime.milliseconds();

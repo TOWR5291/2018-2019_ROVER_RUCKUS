@@ -64,7 +64,6 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
     private TOWR5291Tick robotPowerMultiplier       = new TOWR5291Tick();
     private TOWR5291Tick controllerAMode            = new TOWR5291Tick();
     private TOWR5291Tick controllerBMode            = new TOWR5291Tick();
-    private TOWR5291Tick intakeDirection            = new TOWR5291Tick();
     private TOWR5291Tick teamMarkerServoPosition    = new TOWR5291Tick();
 
     private Gamepad game2 = gamepad2;
@@ -200,9 +199,6 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
             robotPowerMultiplier.incrementTick(game1.dpad_up);
             robotPowerMultiplier.decrementTick(game1.dpad_down);
 
-            //adjust the intake direction, toggle forward, backward
-            intakeDirection.incrementTick(game2.left_bumper);
-
             controllerAMode.incrementTick(game1.start);
             controllerBMode.incrementTick(game2.start);
 
@@ -307,19 +303,8 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
                         Arms.setHardwareArmDirections(DcMotor.Direction.FORWARD);
                     }
 
-                    switch ((int) intakeDirection.getTickCurrValue()){
-                        case 1:
-                            Arms.intakeServo.setPosition(.1);
-                            break;
-                        case 2:
-                            Arms.intakeServo.setPosition(.5);
-                            break;
-                        case 3:
-                            Arms.intakeServo.setPosition(.9);
-                            break;
-                    } //switch intake direction
+                    Arms.intakeMotor.setPower(game2.right_trigger - game2.left_trigger);
 
-                    //Arms.teamMarkerServo.setPosition(teamMarkerServoPosition.getTickCurrValue());
                     break;
             } //Switch ControllerB
 
@@ -369,14 +354,6 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
         teamMarkerServoPosition.setTickIncrement(.25);
         teamMarkerServoPosition.setDebounceTime(1000);
         fileLogger.writeEvent(debug, "initFunctions" ,  "teamMarkerServoPosition End");
-
-        fileLogger.writeEvent(debug, "initFunctions" ,  "intakeDirection Start");
-        intakeDirection.setRollOver(true);
-        intakeDirection.setTickMax(3);
-        intakeDirection.setTickMin(1);
-        intakeDirection.setTickIncrement(1);
-        intakeDirection.setTickValue(2);
-        fileLogger.writeEvent(debug, "initFunctions" ,  "intakeDirection End");
         fileLogger.writeEvent(debug, "initFunctions" ,  "Finished");
 
     }

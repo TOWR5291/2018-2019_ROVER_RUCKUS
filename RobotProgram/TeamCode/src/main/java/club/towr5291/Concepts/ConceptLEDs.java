@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import club.towr5291.functions.Constants;
 import club.towr5291.functions.FileLogger;
+import club.towr5291.functions.TOWR5291Tick;
 import club.towr5291.libraries.TOWR5291LEDControl;
 import club.towr5291.opmodes.OpModeMasterLinear;
 
@@ -52,7 +53,9 @@ public class ConceptLEDs extends OpModeMasterLinear {
     private int loop = 0;
     private TOWR5291LEDControl LEDs;
     private Constants.LEDState LEDStatus = Constants.LEDState.STATE_NULL;
-
+    boolean TestWithController = true;
+    private TOWR5291Tick TickForLeftLED = new TOWR5291Tick();
+    private TOWR5291Tick TickForRightLED = new TOWR5291Tick();
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -68,16 +71,84 @@ public class ConceptLEDs extends OpModeMasterLinear {
         LEDs.setLEDControlDemoMode(false);
         LEDs.setLEDColour(Constants.LEDColours.LED_MAGENTA);
         LEDStatus = Constants.LEDState.STATE_FLASHC_COLOUR;
+
+        TickForLeftLED.setTickIncrement(1);
+        TickForLeftLED.setTickMax(5);
+        TickForLeftLED.setTickMin(1);
+        TickForLeftLED.setTickValue(0);
+        TickForLeftLED.setRollOver(true);
+        TickForLeftLED.setDebounceTime(500);
+
+        TickForRightLED.setTickIncrement(1);
+        TickForRightLED.setTickMax(5);
+        TickForRightLED.setTickMin(1);
+        TickForRightLED.setTickValue(0);
+        TickForRightLED.setRollOver(true);
+        TickForRightLED.setDebounceTime(500);
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
         //the main loop.  this is where the action happens
         while (opModeIsActive()) {
-            LEDStatus = LEDs.LEDControlUpdate(LEDStatus);
+
             //this will log only when debug is at level 3 or above
             fileLogger.writeEvent(3, TAG, "Runtime " + runtime + " - LEDStatus " + LEDStatus);
             telemetry.addLine("runtime " + runtime + " - LEDStatus " + LEDStatus);
             telemetry.update();
+
+            if (TestWithController){
+                TickForLeftLED.incrementTick(gamepad1.left_bumper);
+                TickForRightLED.incrementTick(gamepad1.right_bumper);
+
+                switch ((int) TickForLeftLED.getTickCurrValue()){
+                    case 1:
+                        LEDs.setLEDLeftColour(Constants.LEDColours.LED_RED);
+                        telemetry.addLine("LEFT LED = " + "RED");
+                        break;
+                    case 2:
+                        LEDs.setLEDLeftColour(Constants.LEDColours.LED_BLUE);
+                        telemetry.addLine("LEFT LED = " + "BLUE");
+                        break;
+                    case 3:
+                        LEDs.setLEDLeftColour(Constants.LEDColours.LED_GREEN);
+                        telemetry.addLine("LEFT LED = " + "GREEN");
+                        break;
+                    case 4:
+                        LEDs.setLEDLeftColour(Constants.LEDColours.LED_OFF);
+                        telemetry.addLine("LEFT LED = " + "OFF");
+                        break;
+                    default:
+                        LEDs.setLEDLeftColour(Constants.LEDColours.LED_OFF);
+                        telemetry.addLine("LEFT LED = " + "DEFULT");
+                        break;
+                }
+
+                switch ((int) TickForRightLED.getTickCurrValue()){
+                    case 1:
+                        LEDs.setLEDRightColour(Constants.LEDColours.LED_RED);
+                        telemetry.addLine("RIGHT LED = " + "RED");
+                        break;
+                    case 2:
+                        LEDs.setLEDRightColour(Constants.LEDColours.LED_BLUE);
+                        telemetry.addLine("RIGHT LED = " + "BLUE");
+                        break;
+                    case 3:
+                        LEDs.setLEDRightColour(Constants.LEDColours.LED_GREEN);
+                        telemetry.addLine("RIGHT LED = " + "GREEN");
+                        break;
+                    case 4:
+                        LEDs.setLEDRightColour(Constants.LEDColours.LED_OFF);
+                        telemetry.addLine("RIGHT LED = " + "OFF");
+                        break;
+                    default:
+                        LEDs.setLEDRightColour(Constants.LEDColours.LED_OFF);
+                        telemetry.addLine("RIGHT LED = " + "DEFULT");
+                        break;
+                }
+            }
+
+            LEDStatus = LEDs.LEDControlUpdate(Constants.LEDState.STATE_UPDATE);
+
         }
         //stop the log
         if (fileLogger != null) {

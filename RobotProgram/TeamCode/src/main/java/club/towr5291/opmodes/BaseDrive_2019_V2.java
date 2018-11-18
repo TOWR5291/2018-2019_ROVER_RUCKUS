@@ -337,13 +337,13 @@ public class BaseDrive_2019_V2 extends OpModeMasterLinear {
 
                     switch ((int) intakeDirection.getTickCurrValue()){
                         case 1:
-                            Arms.intakeServo.setPosition(.1);
+                            //Arms.intakeServo.setPosition(.1);
                             break;
                         case 2:
-                            Arms.intakeServo.setPosition(.5);
+                            //Arms.intakeServo.setPosition(.5);
                             break;
                         case 3:
-                            Arms.intakeServo.setPosition(.9);
+                            //Arms.intakeServo.setPosition(.9);
                             break;
                     } //switch intake direction
 

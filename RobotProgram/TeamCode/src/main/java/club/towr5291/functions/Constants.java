@@ -94,6 +94,7 @@ public abstract class Constants {
     }
 
     public enum LEDState {
+        STATE_UPDATE ("STATE_UPDATE"),
         STATE_NULL ("STATE_NULL"),
         STATE_ERROR ("STATE_ERROR"),
         STATE_TEAM ("STATE_TEAM"),

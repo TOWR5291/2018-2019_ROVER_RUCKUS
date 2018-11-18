@@ -459,7 +459,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         //if (vuforiaWebcam) {
         //    RoverRuckusTrackables = RoverRuckusVuforia.LibraryVuforiaRoverRuckus(hardwareMap, ourRobotConfig, robotWebcam);
         //} else{
-            RoverRuckusTrackables = RoverRuckusVuforia.LibraryVuforiaRoverRuckus(hardwareMap, ourRobotConfig);
+        RoverRuckusTrackables = RoverRuckusVuforia.LibraryVuforiaRoverRuckus(hardwareMap, ourRobotConfig);
         //}
         fileLogger.writeEvent(3,"MAIN","Configured Vuforia - About to Activate");
         dashboard.displayPrintf(9, "Configured Vuforia - About to Activate");

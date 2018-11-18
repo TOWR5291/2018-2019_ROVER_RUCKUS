@@ -82,17 +82,17 @@ public class LibraryStateSegAutoRoverRuckus {
 
     public void setmRobotParm4(double mRobotParm4)
     {
-        this.mRobotParm3 = mRobotParm4;
+        this.mRobotParm4 = mRobotParm4;
     }
 
-    public void setmRobotParm5(double mRobotParm3)
+    public void setmRobotParm5(double mRobotParm5)
     {
-        this.mRobotParm3 = mRobotParm5;
+        this.mRobotParm5 = mRobotParm5;
     }
 
-    public void setmRobotParm6(double mRobotParm4)
+    public void setmRobotParm6(double mRobotParm6)
     {
-        this.mRobotParm3 = mRobotParm6;
+        this.mRobotParm6 = mRobotParm6;
     }
 
     public void setmRobotSpeed(double mRobotSpeed)
