@@ -181,6 +181,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
     private Constants.stepState mintCurrentStateMecanumStrafe;                  // Current State of mecanum strafe
     private Constants.stepState mintCurrentStepDelay;                           // Current State of Delay (robot doing nothing)
     private Constants.stepState mintCurrentStateMoveLift;                       // Current State of the Move lift
+    private Constants.stepState mintCurrentStateInTake;                       // Current State of the Move lift
     private Constants.stepState mintCurrentStateTiltMotor;                      // Current State of the Tilt Motor
     private Constants.stepState mintCurrentStateFindGold;                       // Current State of Finding Gold
     private Constants.stepState mintCurrentStateTeamMarker;                     // Current State of releaseing the team marker
@@ -755,6 +756,8 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
             case "LIFT":    // Moves the lift up and down for the 2018-19 game
                 moveLiftUpDown();
                 break;
+            case "INTAKE":
+                TurnIntakePower();
             case "TILT":
                 tiltMotor();
                 break;
@@ -826,6 +829,8 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
             case "LIFT":
                 mintCurrentStateMoveLift            = Constants.stepState.STATE_INIT;
                 break;
+            case "INTAKE":
+                mintCurrentStateInTake              = Constants.stepState.STATE_INIT;
             case "TILT":
                 mintCurrentStateTiltMotor           = Constants.stepState.STATE_INIT;
                 break;
@@ -1899,6 +1904,18 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         }
     }
 
+    private void TurnIntakePower(){
+        fileLogger.setEventTag("TurnIntakePower()");
+
+        switch (mintCurrentStateInTake){
+            case STATE_INIT:
+                fileLogger.writeEvent("Power: " + String.valueOf(mdblPowerBoost));
+                robotArms.intakeMotor.setPower(mdblPowerBoost);
+                mintCurrentStateInTake = Constants.stepState.STATE_COMPLETE;
+                break;
+        }
+    }
+
     private void tiltMotor(){
 
 
@@ -2423,6 +2440,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 (mintCurrentStateTankTurnGyroHeading    == Constants.stepState.STATE_COMPLETE) &&
                 (mintCurrentStateMecanumStrafe          == Constants.stepState.STATE_COMPLETE) &&
                 (mintCurrentStateMoveLift               == Constants.stepState.STATE_COMPLETE) &&
+                (mintCurrentStateInTake                 == Constants.stepState.STATE_COMPLETE) &&
                 (mintCurrentStateTiltMotor              == Constants.stepState.STATE_COMPLETE) &&
                 (mintCurrentStateFindGold               == Constants.stepState.STATE_COMPLETE) &&
                 (mintCurrentStateTeamMarker             == Constants.stepState.STATE_COMPLETE) &&
@@ -2448,6 +2466,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         mintCurrentStateGyroTurnEncoder5291 = Constants.stepState.STATE_COMPLETE;
         mintCurrentStateFindGold            = Constants.stepState.STATE_COMPLETE;
         mintCurrentStateMoveLift            = Constants.stepState.STATE_COMPLETE;
+        mintCurrentStateInTake              = Constants.stepState.STATE_COMPLETE;
         mintCurrentStateTiltMotor           = Constants.stepState.STATE_COMPLETE;
         mintCurrentStateTeamMarker          = Constants.stepState.STATE_COMPLETE;
     }

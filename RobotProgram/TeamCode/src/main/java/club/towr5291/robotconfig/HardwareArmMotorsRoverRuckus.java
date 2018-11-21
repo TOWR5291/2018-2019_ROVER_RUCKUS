@@ -9,9 +9,12 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.Const;
 import org.firstinspires.ftc.robotcore.external.function.Function;
 
+import club.towr5291.functions.Constants;
 import club.towr5291.functions.FileLogger;
+import club.towr5291.libraries.TOWR5291LEDControl;
 import club.towr5291.libraries.TOWRDashBoard;
 import club.towr5291.libraries.robotConfigSettings;
 
@@ -28,6 +31,8 @@ import club.towr5291.libraries.robotConfigSettings;
  */
 public class HardwareArmMotorsRoverRuckus
 {
+    public ElapsedTime elapse = new ElapsedTime();
+    public boolean gameDance = false;
     /* Public OpMode members. */
     public DcMotor  liftMotor1      = null;
     public DcMotor  liftMotor2      = null;
@@ -41,7 +46,7 @@ public class HardwareArmMotorsRoverRuckus
 
     /* Constructor */
     public HardwareArmMotorsRoverRuckus(){
-
+        elapse.startTime();
     }
 
     /* Initialize standard Hardware interfaces */
@@ -118,10 +123,45 @@ public class HardwareArmMotorsRoverRuckus
         return liftMotor2.getCurrentPosition();
     }
 
-    public void AdvancedOptionsForArms (Gamepad gamepad, int lineDisplay){
+    public void AdvancedOptionsForArms (Gamepad gamepad, int lineDisplay, TOWR5291LEDControl towrled){
         dashBoard.displayPrintf(lineDisplay, "GamePad B Advanced Options");
         if (gamepad.a){
             dashBoard.displayPrintf(lineDisplay + 1, "RESETING LIFT STOP MOVING NOW!!!");
+        }
+        if (gamepad.b){
+            gameDance = !gameDance;
+        }
+
+        if (gameDance){
+            if (elapse.seconds() == .5){
+                towrled.setLEDLeftColour(Constants.LEDColours.LED_BLUE);
+                towrled.setLEDRightColour(Constants.LEDColours.LED_GREEN);
+            } else if (elapse.seconds() == 1){
+                towrled.setLEDLeftColour(Constants.LEDColours.LED_GREEN);
+                towrled.setLEDRightColour(Constants.LEDColours.LED_BLUE);
+            } else if (elapse.seconds() == 1.5){
+                towrled.setLEDLeftColour(Constants.LEDColours.LED_RED);
+                towrled.setLEDRightColour(Constants.LEDColours.LED_RED);
+            } else if (elapse.seconds() == 2){
+                towrled.setLEDLeftColour(Constants.LEDColours.LED_BLUE);
+                towrled.setLEDRightColour(Constants.LEDColours.LED_RED);
+            } else if (elapse.seconds() == 2.5){
+                towrled.setLEDLeftColour(Constants.LEDColours.LED_RED);
+                towrled.setLEDRightColour(Constants.LEDColours.LED_BLUE);
+            } else if (elapse.seconds() == 3){
+                towrled.setLEDLeftColour(Constants.LEDColours.LED_GREEN);
+                towrled.setLEDRightColour(Constants.LEDColours.LED_RED);
+            } else if (elapse.seconds() == 3.5){
+                towrled.setLEDLeftColour(Constants.LEDColours.LED_RED);
+                towrled.setLEDRightColour(Constants.LEDColours.LED_GREEN);
+            } else if (elapse.seconds() == 4){
+                towrled.setLEDLeftColour(Constants.LEDColours.LED_BLUE);
+                towrled.setLEDRightColour(Constants.LEDColours.LED_BLUE);
+                elapse.reset();
+            } else {
+                towrled.setLEDLeftColour(Constants.LEDColours.LED_WHITE);
+                towrled.setLEDRightColour(Constants.LEDColours.LED_WHITE);
+            }
         }
     }
 

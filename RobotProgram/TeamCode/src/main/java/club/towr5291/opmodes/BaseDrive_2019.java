@@ -75,7 +75,7 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
     private double maxDrivePower = 1;
     private double minDrivePower = 0.3333333333333;
     private double incrementDrivePower = 0.333333333333;
-    private double startDrivePower = 0.6666666666666666;
+    private double startDrivePower = 1;
     //Controller A has 4 modes of operation
     private double controllerAModes = 5;
     private int debug;
@@ -193,7 +193,9 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
         while (opModeIsActive()) {
             fileLogger.writeEvent(1,"In Main Loop");
             //change LED state every cycle
-            LEDStatus = LEDs.LEDControlUpdate(LEDStatus);
+            if (!Arms.gameDance) {
+                LEDStatus = LEDs.LEDControlUpdate(LEDStatus);
+            }
 
             //adjust the robot power using the dpad on the game controller
             robotPowerMultiplier.incrementTick(game1.dpad_up);
@@ -285,9 +287,9 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
                     fileLogger.writeEvent(debug,"Controller B Mode", "Standard");
 
                     Arms.tiltMotor1.setPower(-game2.left_stick_y);
-                    Arms.setHardwareLiftPower(game2.right_stick_y);
+                    Arms.setHardwareLiftPower(-game2.right_stick_y);
                     if (game2.left_trigger > 0){
-                        Arms.AdvancedOptionsForArms(game2, 5);
+                        Arms.AdvancedOptionsForArms(game2, 5, LEDs);
                         if (game2.b){
                             if (game2 == gamepad2){
                                 game2 = gamepad1;
@@ -297,7 +299,7 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
                         }
                     }
 
-                    if (toggleGamePad2A.toggleState(gamepad1.a)) {
+                    if (toggleGamePad2A.toggleState(gamepad2.a)) {
                         Arms.setHardwareArmDirections(DcMotor.Direction.REVERSE);
                     } else {
                         Arms.setHardwareArmDirections(DcMotor.Direction.FORWARD);
