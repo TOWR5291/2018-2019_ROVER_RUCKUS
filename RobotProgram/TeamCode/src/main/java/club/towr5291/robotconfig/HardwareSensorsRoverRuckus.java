@@ -16,10 +16,9 @@ import club.towr5291.libraries.robotConfigSettings;
 public class HardwareSensorsRoverRuckus {
 
     public DigitalChannel limitSwitch1AngleMotor;
-    public DigitalChannel Green1, Green2;
-    public DigitalChannel Blue1, Blue2;
-    public DigitalChannel Red1, Red2;
-
+    public DigitalChannel limitSwitch2AngleMotor;
+    public DigitalChannel limitSwitch3AngleMotor;
+    public DigitalChannel limitSwitch4AngleMotor;
     /* local OpMode members. */
     HardwareMap hwMap            = null;
     //set up the variables for the logger
@@ -37,34 +36,34 @@ public class HardwareSensorsRoverRuckus {
 
         this.fileLogger = fileloggerhandle;
 
-        Green1 = hwMap.get(DigitalChannel.class, "green1");
-        Green2 = hwMap.get(DigitalChannel.class, "green2");
-        Red1 = hwMap.get(DigitalChannel.class, "red1");
-        Red2 = hwMap.get(DigitalChannel.class, "red2");
-        Blue1 = hwMap.get(DigitalChannel.class, "blue1");
-        Blue2 = hwMap.get(DigitalChannel.class, "blue2");
-
-        Green1.setMode(DigitalChannel.Mode.OUTPUT);
-        Green2.setMode(DigitalChannel.Mode.OUTPUT);
-        Red1.setMode(DigitalChannel.Mode.OUTPUT);
-        Red2.setMode(DigitalChannel.Mode.OUTPUT);
-        Blue1.setMode(DigitalChannel.Mode.OUTPUT);
-        Blue2.setMode(DigitalChannel.Mode.OUTPUT);
-
         limitSwitch1AngleMotor = hwMap.get(DigitalChannel.class, "limitSwitch1");
+        limitSwitch2AngleMotor = hwMap.get(DigitalChannel.class, "limitSwitch2");
+        limitSwitch3AngleMotor = hwMap.get(DigitalChannel.class, "limitSwitch3");
+        limitSwitch4AngleMotor = hwMap.get(DigitalChannel.class, "limitSwitch4");
+
         limitSwitch1AngleMotor.setMode(DigitalChannel.Mode.INPUT);
+        limitSwitch2AngleMotor.setMode(DigitalChannel.Mode.INPUT);
+        limitSwitch3AngleMotor.setMode(DigitalChannel.Mode.INPUT);
+        limitSwitch4AngleMotor.setMode(DigitalChannel.Mode.INPUT);
 
     }
 
-    public boolean getLimit1State(){return limitSwitch1AngleMotor.getState();}
 
-    public void LedState (boolean greenLED1, boolean redLED1, boolean blueLED1, boolean greenLED2, boolean redLED2, boolean blueLED2) {
-        Red1.setState(redLED1);//R
-        Green1.setState(greenLED1);//G
-        Blue1.setState(blueLED1);//B
-        Red2.setState(redLED2);//R
-        Green2.setState(greenLED2);//G
-        Blue2.setState(blueLED2);//B
+    public boolean getLimitSwitch1AngleMotorState() {
+        return limitSwitch1AngleMotor.getState();
     }
+
+    public boolean getLimitSwitch2AngleMotorState() {
+        return limitSwitch2AngleMotor.getState();
+    }
+
+    public boolean getLimitSwitch3AngleMotorState() {
+        return limitSwitch3AngleMotor.getState();
+    }
+
+    public boolean getLimitSwitch4AngleMotorState() {
+        return limitSwitch4AngleMotor.getState();
+    }
+
 }
 
