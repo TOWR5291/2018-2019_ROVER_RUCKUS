@@ -89,29 +89,10 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
         return dashboard;
     }
 
-    /**
-     * This is for the lift and the tracking the angle
-     */
-    private LimitSwitches lastLimitSwitchPassed = LimitSwitches.LIMITSWITCH1;
-    private Constants.stepState autoTiltToMovingPosition = Constants.stepState.STATE_COMPLETE;
-    private boolean mblnTiltToMovingPositionStage1  = true;
-
-    private enum LimitSwitches{
-        LIMITSWITCH1 ("LIMIT1"),
-        LIMITSWITCH2 ("LIMIT2"),
-        LIMITSWITCH3 ("LIMIT3"),
-        LIMITSWITCH4 ("LIMIT4");
-
-        private final String name;
-
-        LimitSwitches (String name) {
-            this.name = name;
-        }
-
-        public String toString() {
-            return name;
-        }
-    }
+    //set state
+    private Constants.stepState StateMovingLift     = Constants.stepState.STATE_COMPLETE;
+    private Constants.stepState StateMovingTilt     = Constants.stepState.STATE_COMPLETE;
+    private int mintCurrentLimitSwitch              = 0;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -132,7 +113,6 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
 
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parametersAdafruitImu);
-
 
         ourRobotConfig = new robotConfig();
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(hardwareMap.appContext);
@@ -182,11 +162,8 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
 
         driftRotateAngle = new TOWR5291PID(runtime,0,0,4.5,0,0);
 
-        TOWR5291Toggle toggleGamePad2A = new TOWR5291Toggle(gamepad1.x);
-        toggleGamePad2A.setDebounce(500);
         TOWR5291Toggle toggleGamePad1X = new TOWR5291Toggle(gamepad1.x);
         toggleGamePad1X.setDebounce(500);
-
 
         // All The Specification of the robot and controller
         fileLogger.writeEvent(1,"Alliance Color", ourRobotConfig.getAllianceColor());
@@ -221,6 +198,7 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
         //the main loop.  this is where the action happens
         while (opModeIsActive()) {
             fileLogger.writeEvent(1,"In Main Loop");
+
             //change LED state every cycle
             if (!Arms.gameDance) {
                 LEDStatus = LEDs.LEDControlUpdate(LEDStatus);
@@ -315,9 +293,9 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
                     dashboard.displayPrintf(9, "Controller B Standard");
                     fileLogger.writeEvent(debug,"Controller B Mode", "Standard");
 
-                    Arms.setHardwareLiftPower(-game2.right_stick_y);
+                    //Arms.tiltMotor1.setPower(-game2.left_stick_y);
+                    //Arms.setHardwareLiftPower(-game2.right_stick_y);
                     if (game2.left_trigger > 0){
-                        Arms.AdvancedOptionsForArms(game2, 5, LEDs);
                         if (game2.b){
                             if (game2 == gamepad2){
                                 game2 = gamepad1;
@@ -327,18 +305,19 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
                         }
                     }
 
-                    if (toggleGamePad2A.toggleState(gamepad2.a)) {
-                        Arms.setHardwareArmDirections(DcMotor.Direction.REVERSE);
-                    } else {
-                        Arms.setHardwareArmDirections(DcMotor.Direction.FORWARD);
-                    }
-
                     Arms.intakeMotor.setPower(game2.right_trigger - game2.left_trigger);
 
-                    if (leftBumperToggle.toggleState(game2.left_bumper) && autoTiltToMovingPosition == Constants.stepState.STATE_COMPLETE) autoTiltToMovingPosition = Constants.stepState.STATE_INIT;
+                    if (Sensors.getLimitSwitch1AngleMotorState()){
+                        mintCurrentLimitSwitch = 1;
+                    } else if (Sensors.getLimitSwitch2AngleMotorState()){
+                        mintCurrentLimitSwitch = 2;
+                    } else if (Sensors.getLimitSwitch3AngleMotorState()){
+                        mintCurrentLimitSwitch = 3;
+                    } else if (Sensors.getLimitSwitch4AngleMotorState()){
+                        mintCurrentLimitSwitch = 4;
+                    }
 
-                    if (checkLimitSwitches() != null) lastLimitSwitchPassed = checkLimitSwitches();
-
+                    MovingLiftSwitch();
                     break;
             } //Switch ControllerB
 
@@ -418,74 +397,32 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
             return angle;
     }
 
-    private LimitSwitches checkLimitSwitches(){
-        if (Sensors.getLimitSwitch1AngleMotorState()){
-            return LimitSwitches.LIMITSWITCH1;
-        } else if (Sensors.getLimitSwitch2AngleMotorState()){
-            return LimitSwitches.LIMITSWITCH2;
-        } else if (Sensors.getLimitSwitch3AngleMotorState()){
-            return LimitSwitches.LIMITSWITCH3;
-        } else if (Sensors.getLimitSwitch4AngleMotorState()){
-            return LimitSwitches.LIMITSWITCH4;
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * There is a lot going on in this function
-     * There not much to do in the init the only thing that is in there is the if statement that
-     * decides on what side the lift is compared to the second limit switch and from there says if
-     * it needs to move up or down.
-     *
-     * The RUNNING state has the most going on in it. The first thing that it does is to check if
-     * it has passed the first limit switch or the second. If it has then we are going to set the
-     * target position of the motor this is so it can be calibrated. In the paradises you will see
-     * ? this is a small if statement and the : is the else statement. this is to make the code
-     * simpler then if the if is true it will add the calibration number to the current position
-     * then that is the set as the target position. Then the power is set. The motors then are told
-     * to move to their target position. Then so this is not repeated it set is to stage 2. In the
-     * stage 2 the only thing it is doing is waiting for the motor to stop and then but it in state
-     * complete
-     *
-     * In the complete function the drive now has control again until the left bumper is hit then
-     * it loops around and does this again and the drive has no control during this time. Then the
-     * driver gets control once it stops then this loop keeps going.
-     **/
-    public void switchForAutoTiltToMovingPosition(){
-        switch (autoTiltToMovingPosition){
+    private void MovingLiftSwitch(){
+        switch (StateMovingLift){
             case STATE_INIT:
-                Arms.tiltMotor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                mblnTiltToMovingPositionStage1 = true;
+                Arms.liftMotor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                Arms.liftMotor2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-                if (lastLimitSwitchPassed == LimitSwitches.LIMITSWITCH1) {
-                    mdblTiltMotorPower = -1;
-                } else {
-                    mdblTiltMotorPower = 1;
-                }
+                Arms.liftMotor1.setTargetPosition((ourRobotConfig.getLIFTMAIN_COUNTS_PER_INCH() * 30) - Arms.liftMotor1.getCurrentPosition());
+                Arms.liftMotor2.setTargetPosition((ourRobotConfig.getLIFTMAIN_COUNTS_PER_INCH() * 30) - Arms.liftMotor2.getCurrentPosition());
 
-                autoTiltToMovingPosition = Constants.stepState.STATE_RUNNING;
+                Arms.liftMotor1.setPower(1);
+                Arms.liftMotor2.setPower(1);
+
+                Arms.liftMotor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                Arms.liftMotor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 break;
             case STATE_RUNNING:
-                if (mblnTiltToMovingPositionStage1) {
-                    if (checkLimitSwitches() == LimitSwitches.LIMITSWITCH2 || checkLimitSwitches() == LimitSwitches.LIMITSWITCH1) {
-                        Arms.tiltMotor1.setTargetPosition(Arms.tiltMotor1.getCurrentPosition() + (lastLimitSwitchPassed == LimitSwitches.LIMITSWITCH2 ? 10 : 0));// Tuning Variable
-                        Arms.tiltMotor1.setPower(.5);
-                        Arms.tiltMotor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        mblnTiltToMovingPositionStage1 = false;
-                    } else {
-                        Arms.tiltMotor1.setPower(mdblTiltMotorPower);
-                    }
-                } else {
-                    if (!Arms.tiltMotor1.isBusy()){
-                        Arms.tiltMotor1.setPower(0);
-                        autoTiltToMovingPosition = Constants.stepState.STATE_COMPLETE;
-                    }
+                if (!Arms.liftMotor1.isBusy() && !Arms.liftMotor2.isBusy()){
+                    StateMovingLift = Constants.stepState.STATE_COMPLETE;
+                    Arms.liftMotor1.setPower(0);
+                    Arms.liftMotor2.setPower(0);
+                    Arms.liftMotor1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    Arms.liftMotor2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 }
-
                 break;
             case STATE_COMPLETE:
-                Arms.tiltMotor1.setPower(-game2.left_stick_y);
+                Arms.setHardwareLiftPower(-game2.right_stick_y);
                 break;
         }
     }

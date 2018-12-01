@@ -317,9 +317,9 @@ public class BaseDrive_2019_V2 extends OpModeMasterLinear {
                     fileLogger.writeEvent(debug,"Controller B Mode", "Standard");
 
                     Arms.tiltMotor1.setPower(-game2.left_stick_y);
-                    Arms.setHardwareLiftPower(game2.right_stick_y);
+                    Arms.setHardwareLiftPower(-game2.right_stick_y);
                     if (game2.left_trigger > 0){
-                        Arms.AdvancedOptionsForArms(game2, 5);
+                        Arms.AdvancedOptionsForArms(LEDs);
                         if (game2.b){
                             if (game2 == gamepad2){
                                 game2 = gamepad1;

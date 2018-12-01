@@ -71,8 +71,8 @@ public class HardwareArmMotorsRoverRuckus
     }
 
     public void setHardwareArmDirections(){
-        liftMotor1.setDirection(DcMotor.Direction.REVERSE);
-        liftMotor2.setDirection(DcMotor.Direction.REVERSE);
+        liftMotor1.setDirection(DcMotor.Direction.FORWARD);
+        liftMotor2.setDirection(DcMotor.Direction.FORWARD);
         tiltMotor1.setDirection(DcMotor.Direction.FORWARD);
         intakeMotor.setDirection(DcMotor.Direction.FORWARD);
     }
@@ -123,46 +123,8 @@ public class HardwareArmMotorsRoverRuckus
         return liftMotor2.getCurrentPosition();
     }
 
-    public void AdvancedOptionsForArms (Gamepad gamepad, int lineDisplay, TOWR5291LEDControl towrled){
-        dashBoard.displayPrintf(lineDisplay, "GamePad B Advanced Options");
-        if (gamepad.a){
-            dashBoard.displayPrintf(lineDisplay + 1, "RESETING LIFT STOP MOVING NOW!!!");
-        }
-        if (gamepad.b){
-            gameDance = !gameDance;
-        }
+    public void AdvancedOptionsForArms (TOWR5291LEDControl towrled){
 
-        if (gameDance){
-            if (elapse.seconds() == .5){
-                towrled.setLEDLeftColour(Constants.LEDColours.LED_BLUE);
-                towrled.setLEDRightColour(Constants.LEDColours.LED_GREEN);
-            } else if (elapse.seconds() == 1){
-                towrled.setLEDLeftColour(Constants.LEDColours.LED_GREEN);
-                towrled.setLEDRightColour(Constants.LEDColours.LED_BLUE);
-            } else if (elapse.seconds() == 1.5){
-                towrled.setLEDLeftColour(Constants.LEDColours.LED_RED);
-                towrled.setLEDRightColour(Constants.LEDColours.LED_RED);
-            } else if (elapse.seconds() == 2){
-                towrled.setLEDLeftColour(Constants.LEDColours.LED_BLUE);
-                towrled.setLEDRightColour(Constants.LEDColours.LED_RED);
-            } else if (elapse.seconds() == 2.5){
-                towrled.setLEDLeftColour(Constants.LEDColours.LED_RED);
-                towrled.setLEDRightColour(Constants.LEDColours.LED_BLUE);
-            } else if (elapse.seconds() == 3){
-                towrled.setLEDLeftColour(Constants.LEDColours.LED_GREEN);
-                towrled.setLEDRightColour(Constants.LEDColours.LED_RED);
-            } else if (elapse.seconds() == 3.5){
-                towrled.setLEDLeftColour(Constants.LEDColours.LED_RED);
-                towrled.setLEDRightColour(Constants.LEDColours.LED_GREEN);
-            } else if (elapse.seconds() == 4){
-                towrled.setLEDLeftColour(Constants.LEDColours.LED_BLUE);
-                towrled.setLEDRightColour(Constants.LEDColours.LED_BLUE);
-                elapse.reset();
-            } else {
-                towrled.setLEDLeftColour(Constants.LEDColours.LED_WHITE);
-                towrled.setLEDRightColour(Constants.LEDColours.LED_WHITE);
-            }
-        }
     }
 
 }

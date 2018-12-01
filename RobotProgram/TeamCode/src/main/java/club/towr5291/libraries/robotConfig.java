@@ -121,8 +121,8 @@ public class robotConfig {
     public enum armMotorsROVERRUCKUS {
         Motor1 ("liftMotor1", 1),
         Motor2 ("liftMotor2", 2),
-        Motor3 ("angleMotor1", 4),
-        Motor4 (null, 8);
+        Motor3 ("tiltMotor1", 4),
+        Motor4 ("intakeMotor", 8);
 
         private final String name;
         private final int value;
