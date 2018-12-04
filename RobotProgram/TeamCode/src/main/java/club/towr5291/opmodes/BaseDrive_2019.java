@@ -34,6 +34,9 @@ import club.towr5291.robotconfig.HardwareArmMotorsRoverRuckus;
 import club.towr5291.robotconfig.HardwareDriveMotors;
 import club.towr5291.robotconfig.HardwareSensorsRoverRuckus;
 
+import static club.towr5291.functions.Constants.stepState.STATE_INIT;
+import static club.towr5291.functions.Constants.stepState.STATE_RUNNING;
+
 /*
     made by Wyatt Ashley on 8/2/2018
 */
@@ -124,6 +127,9 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
         ourRobotConfig.setRobotConfigBase(sharedPreferences.getString("club.towr5291.Autonomous.RobotConfigBase", "TileRunner-2x40"));
         debug = Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Debug", "1"));
 
+        //now we have loaded the config from sharedpreferences we can setup the robot
+        ourRobotConfig.initConfig();
+
         fileLogger = new FileLogger(runtime, Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Debug", "1")), true);// initializing FileLogger
         fileLogger.open();// Opening FileLogger
         fileLogger.writeEvent(TAG, "Log Started");// First Line Add To Log
@@ -132,6 +138,7 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
         Robot.allMotorsStop();
 
         Arms.init(hardwareMap, dashboard);
+        Arms.setHardwareArmDirections();
         Arms.tiltMotor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Arms.tiltMotor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         fileLogger.writeEvent(2,"Arms Init");
@@ -317,7 +324,13 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
                         mintCurrentLimitSwitch = 4;
                     }
 
-                    MovingLiftSwitch();
+                    if (game2.a){
+                        StateMovingLift = STATE_INIT;
+                        StateMovingTilt = STATE_INIT;
+                    }
+
+                    moveLiftUpDown();
+                    tiltMotor();
                     break;
             } //Switch ControllerB
 
@@ -397,32 +410,94 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
             return angle;
     }
 
-    private void MovingLiftSwitch(){
+
+    private void moveLiftUpDown(){
+
+        double dblDistanceToMoveLift1;
+        double dblDistanceToMoveLift2;
+
+        fileLogger.setEventTag("moveLiftUpDown()");
+
         switch (StateMovingLift){
             case STATE_INIT:
-                Arms.liftMotor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                Arms.liftMotor2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                fileLogger.writeEvent(2, "Initialised");
+                Arms.setHardwareLiftMotorRunUsingEncoders();
+                //Arms.setHardwareLiftMotorResetEncoders();
 
-                Arms.liftMotor1.setTargetPosition((ourRobotConfig.getLIFTMAIN_COUNTS_PER_INCH() * 30) - Arms.liftMotor1.getCurrentPosition());
-                Arms.liftMotor2.setTargetPosition((ourRobotConfig.getLIFTMAIN_COUNTS_PER_INCH() * 30) - Arms.liftMotor2.getCurrentPosition());
+                dblDistanceToMoveLift1 = Arms.getLiftMotor1Encoder() + (5 * ourRobotConfig.getLIFTMAIN_COUNTS_PER_INCH());
+                dblDistanceToMoveLift2 = Arms.getLiftMotor2Encoder() + (5 * ourRobotConfig.getLIFTMAIN_COUNTS_PER_INCH());
 
-                Arms.liftMotor1.setPower(1);
-                Arms.liftMotor2.setPower(1);
+                Arms.liftMotor1.setTargetPosition((int)dblDistanceToMoveLift1);
+                Arms.liftMotor2.setTargetPosition((int)dblDistanceToMoveLift2);
 
-                Arms.liftMotor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                Arms.liftMotor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                fileLogger.writeEvent(2, "Move position 1 " + dblDistanceToMoveLift1);
+                fileLogger.writeEvent(2, "Move position 2 " + dblDistanceToMoveLift2);
+
+                fileLogger.writeEvent(2, "Motor 1 Position " + Arms.getLiftMotor1Encoder());
+                fileLogger.writeEvent(2, "Motor 2 Position " + Arms.getLiftMotor2Encoder());
+
+                Arms.setHardwareLiftPower(1);
+                Arms.setHardwareLiftMotorRunToPosition();
+
+                StateMovingLift = STATE_RUNNING;
                 break;
             case STATE_RUNNING:
-                if (!Arms.liftMotor1.isBusy() && !Arms.liftMotor2.isBusy()){
+                fileLogger.writeEvent(2, "Running");
+
+                Arms.setHardwareLiftPower(1);
+                fileLogger.writeEvent(2, "Motor Speed Set: Busy 1 " + Arms.liftMotor1.isBusy() + " Busy 2 " + Arms.liftMotor2.isBusy());
+
+                fileLogger.writeEvent(2, "Motor 1 Position " + Arms.getLiftMotor1Encoder());
+                fileLogger.writeEvent(2, "Motor 2 Position " + Arms.getLiftMotor2Encoder());
+
+                if ((!(Arms.liftMotor1.isBusy())) || (!(Arms.liftMotor2.isBusy()))){
+                    fileLogger.writeEvent(2, "Motor 1 is not busy");
+                    fileLogger.writeEvent(2, "Motor 2 is not busy");
+                    Arms.setHardwareLiftPower(0);
+                    fileLogger.writeEvent(2, "Finished");
                     StateMovingLift = Constants.stepState.STATE_COMPLETE;
-                    Arms.liftMotor1.setPower(0);
-                    Arms.liftMotor2.setPower(0);
-                    Arms.liftMotor1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    Arms.liftMotor2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 }
                 break;
             case STATE_COMPLETE:
                 Arms.setHardwareLiftPower(-game2.right_stick_y);
+                break;
+        }
+    }
+
+    private void tiltMotor(){
+
+
+        double dblDistanceToMoveTilt;
+
+        fileLogger.setEventTag("moveLiftUpDown()");
+
+        switch (StateMovingTilt){
+            case STATE_INIT:
+                fileLogger.writeEvent(2, "Initialised");
+
+                if (mintCurrentLimitSwitch == 1) {
+                    Arms.tiltMotor1.setPower(-1);
+                } else {
+                    Arms.tiltMotor1.setPower(1);
+                }
+
+                StateMovingTilt = Constants.stepState.STATE_RUNNING;
+                break;
+            case STATE_RUNNING:
+                fileLogger.writeEvent(2, "Running");
+
+                fileLogger.writeEvent(2, "Motor Speed Set: Busy 1 " + Arms.tiltMotor1.isBusy());
+
+                if (mintCurrentLimitSwitch == 2){
+                    fileLogger.writeEvent(2, "Motor 1 is not busy");
+                    Arms.tiltMotor1.setPower(0);
+                    fileLogger.writeEvent(2, "Finished");
+                    StateMovingTilt = Constants.stepState.STATE_COMPLETE;
+                }
+
+                break;
+            case STATE_COMPLETE:
+                Arms.tiltMotor1.setPower(-game2.left_stick_y);
                 break;
         }
     }
