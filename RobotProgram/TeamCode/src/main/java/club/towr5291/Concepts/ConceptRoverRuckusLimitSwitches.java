@@ -8,6 +8,7 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
@@ -41,7 +42,7 @@ import static club.towr5291.functions.Constants.stepState.STATE_RUNNING;
 /*
     made by Wyatt Ashley on 8/2/2018
 */
-@TeleOp(name = "Base Drive 2019", group = "5291")
+@TeleOp(name = "Limit Test", group = "concept")
 public class ConceptRoverRuckusLimitSwitches extends OpModeMasterLinear {
 
     /* Hardware Set Up */
@@ -99,6 +100,11 @@ public class ConceptRoverRuckusLimitSwitches extends OpModeMasterLinear {
 
         Sensors.init(fileLogger, hardwareMap);
 
+        Sensors.limitSwitch1AngleMotor.setMode(DigitalChannel.Mode.INPUT);
+        Sensors.limitSwitch2AngleMotor.setMode(DigitalChannel.Mode.INPUT);
+        Sensors.limitSwitch3AngleMotor.setMode(DigitalChannel.Mode.INPUT);
+        Sensors.limitSwitch4AngleMotor.setMode(DigitalChannel.Mode.INPUT);
+
         // All The Specification of the robot and controller
         fileLogger.writeEvent(1,"Alliance Color", ourRobotConfig.getAllianceColor());
         fileLogger.writeEvent(1,"Alliance Start Position", ourRobotConfig.getAllianceStartPosition());
@@ -121,15 +127,10 @@ public class ConceptRoverRuckusLimitSwitches extends OpModeMasterLinear {
 
             Arms.tiltMotor1.setPower(-gamepad2.left_stick_y);
 
-            dashboard.displayPrintf(6, "Limit 1 Mode", Sensors.limitSwitch1AngleMotor.getMode());
-            dashboard.displayPrintf(7, "Limit 2 Mode", Sensors.limitSwitch2AngleMotor.getMode());
-            dashboard.displayPrintf(8, "Limit 3 Mode", Sensors.limitSwitch3AngleMotor.getMode());
-            dashboard.displayPrintf(9, "Limit 4 Mode", Sensors.limitSwitch4AngleMotor.getMode());
-
-            dashboard.displayPrintf(1, "Limit 1" + Sensors.getLimitSwitch1AngleMotorState());
-            dashboard.displayPrintf(2, "Limit 2" + Sensors.getLimitSwitch2AngleMotorState());
-            dashboard.displayPrintf(3, "Limit 3" + Sensors.getLimitSwitch3AngleMotorState());
-            dashboard.displayPrintf(4, "Limit 4" + Sensors.getLimitSwitch4AngleMotorState());
+            dashboard.displayPrintf(1, "Limit 1" + Sensors.limitSwitch1AngleMotor.getState());
+            dashboard.displayPrintf(2, "Limit 2" + Sensors.limitSwitch2AngleMotor.getState());
+            dashboard.displayPrintf(3, "Limit 3" + Sensors.limitSwitch3AngleMotor.getState());
+            dashboard.displayPrintf(4, "Limit 4" + Sensors.limitSwitch4AngleMotor.getState());
         }  //while (OpModeIsActive)
 
         //stop the logging

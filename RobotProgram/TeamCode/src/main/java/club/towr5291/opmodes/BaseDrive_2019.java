@@ -106,18 +106,21 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
         dashboard.setTextView((TextView)act.findViewById(R.id.textOpMode));
         dashboard.displayPrintf(0, "Starting Menu System");
 
-        BNO055IMU.Parameters parametersAdafruitImu  = new BNO055IMU.Parameters();
-        parametersAdafruitImu.angleUnit             = BNO055IMU.AngleUnit.DEGREES;
-        parametersAdafruitImu.accelUnit             = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parametersAdafruitImu.calibrationDataFile   = "AdafruitIMUCalibration.json"; // see the calibration sample opmode
-        parametersAdafruitImu.loggingEnabled        = true;
-        parametersAdafruitImu.loggingTag            = "IMU";
-        parametersAdafruitImu.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+//        BNO055IMU.Parameters parametersAdafruitImu  = new BNO055IMU.Parameters();
+//        parametersAdafruitImu.angleUnit             = BNO055IMU.AngleUnit.DEGREES;
+//        parametersAdafruitImu.accelUnit             = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+//        parametersAdafruitImu.calibrationDataFile   = "AdafruitIMUCalibration.json"; // see the calibration sample opmode
+//        parametersAdafruitImu.loggingEnabled        = true;
+//        parametersAdafruitImu.loggingTag            = "IMU";
+//        parametersAdafruitImu.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
 
-        imu = hardwareMap.get(BNO055IMU.class, "imu");
-        imu.initialize(parametersAdafruitImu);
+        dashboard.displayPrintf(0, "IMU Parameters Loaded");
+        //imu = hardwareMap.get(BNO055IMU.class, "imu");
+        //imu.initialize(parametersAdafruitImu);
+        dashboard.displayPrintf(0, "IMU Loaded");
 
         ourRobotConfig = new robotConfig();
+
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(hardwareMap.appContext);
 
         ourRobotConfig.setAllianceColor(sharedPreferences.getString("club.towr5291.Autonomous.Color", "Red"));// Using a Function to Store The Robot Specification
@@ -129,6 +132,7 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
 
         //now we have loaded the config from sharedpreferences we can setup the robot
         ourRobotConfig.initConfig();
+        dashboard.displayPrintf(0, "Robot Config Loaded");
 
         fileLogger = new FileLogger(runtime, Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Debug", "1")), true);// initializing FileLogger
         fileLogger.open();// Opening FileLogger
@@ -136,19 +140,25 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
 
         Robot.init(fileLogger, hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(ourRobotConfig.getRobotConfigBase()));// Starting robot Hardware map
         Robot.allMotorsStop();
+        dashboard.displayPrintf(0, "Robot Base Loaded");
 
         Arms.init(hardwareMap, dashboard);
         Arms.setHardwareArmDirections();
         Arms.tiltMotor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Arms.tiltMotor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         fileLogger.writeEvent(2,"Arms Init");
+        dashboard.displayPrintf(0, "Arms Loaded");
 
+        fileLogger.writeEvent("Starting init for sensors ", String.valueOf(runtime));
         Sensors.init(fileLogger, hardwareMap);
+        fileLogger.writeEvent("end init for sensors ", String.valueOf(runtime));
+        dashboard.displayPrintf(0, "Sensors Loaded");
 
         fileLogger.writeEvent(2,"Sensors Init");
         LEDs = new TOWR5291LEDControl(hardwareMap);
         LEDs.setLEDControlDemoMode(true);
         LEDs.setLEDControlAlliance(ourRobotConfig.getAllianceColor());
+        dashboard.displayPrintf(0, "LEDs Loaded");
 
         fileLogger.writeEvent(2,"LEDs Init");
 
@@ -192,8 +202,8 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
         dashboard.clearDisplay();
 
         fileLogger.writeEvent("Starting Loop");
-        imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
-        lastposition = getAdafruitHeading();
+        //imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
+        //lastposition = getAdafruitHeading();
 
         //dashboard.clearDisplay();
 
@@ -261,13 +271,13 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
                     dashboard.displayPrintf(5, "Mecanum Drive (IMU)");
                     fileLogger.writeEvent("Controller Mode", "Mecanum Drive");
                     if (game1.left_stick_x != 0 || game1.left_stick_y != 0) {
-                        correction = driftRotateAngle.PIDCorrection(runtime,Math.sin(getAdafruitHeading() * (Math.PI / 180.0)), lastposition);
+                        //correction = driftRotateAngle.PIDCorrection(runtime,Math.sin(getAdafruitHeading() * (Math.PI / 180.0)), lastposition);
                     } else {
                         correction = 0;
-                        lastposition = Math.sin(getAdafruitHeading() * (Math.PI / 180.0));
+                        //lastposition = Math.sin(getAdafruitHeading() * (Math.PI / 180.0));
                     }
 
-                    Robot.mecanumDrive_Cartesian(game1.left_stick_x, game1.left_stick_y, game1.right_stick_x - correction, getAdafruitHeading() + imuStartCorrectionVar, robotPowerMultiplier.getTickCurrValue());
+                    //Robot.mecanumDrive_Cartesian(game1.left_stick_x, game1.left_stick_y, game1.right_stick_x - correction, getAdafruitHeading() + imuStartCorrectionVar, robotPowerMultiplier.getTickCurrValue());
                     break;
 
                 case 4:
@@ -465,8 +475,6 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
     }
 
     private void tiltMotor(){
-
-
         double dblDistanceToMoveTilt;
 
         fileLogger.setEventTag("moveLiftUpDown()");
