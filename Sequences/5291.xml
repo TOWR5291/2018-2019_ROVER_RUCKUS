@@ -7,20 +7,24 @@
             <NeveRest20Gearmotor name="rightMotor1" port="2" />
             <NeveRest20Gearmotor name="rightMotor2" port="3" />
             <Servo name="teamMarkerServo" port="0" />
+            <DigitalDevice name="limitSwitch3" port="0" />
+            <DigitalDevice name="limitSwitch4" port="1" />
             <LynxEmbeddedIMU name="imu2" port="0" bus="0" />
         </LynxModule>
         <LynxModule name="Expansion Hub 2" port="2">
             <Motor name="liftMotor1" port="0" />
             <Motor name="liftMotor2" port="1" />
             <Motor name="tiltMotor1" port="2" />
+            <Motor name="intakeMotor" port="3" />
             <Servo name="intakeServo" port="0" />
-            <DigitalDevice name="green1" port="0" />
-            <DigitalDevice name="green2" port="1" />
+            <DigitalDevice name="blue1" port="0" />
+            <DigitalDevice name="red1" port="1" />
             <DigitalDevice name="blue2" port="2" />
             <DigitalDevice name="red2" port="3" />
-            <DigitalDevice name="blue1" port="4" />
-            <DigitalDevice name="red1" port="5" />
+            <DigitalDevice name="green1" port="4" />
+            <DigitalDevice name="green2" port="5" />
             <DigitalDevice name="limitSwitch1" port="6" />
+            <DigitalDevice name="limitSwitch2" port="7" />
             <LynxEmbeddedIMU name="imu" port="0" bus="0" />
         </LynxModule>
     </LynxUsbDevice>
