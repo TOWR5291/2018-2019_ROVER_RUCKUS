@@ -379,7 +379,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         autonomousStepsFile.ReadStepFile(ourRobotConfig);
 
         //need to load initial step of a delay based on user input
-        autonomousStepsFile.insertSteps(ourRobotConfig.getDelay() + 1, "DELAY", ourRobotConfig.getDelay() * 1000, 0, false, false,0, 0, 0, 0, 0, 0, 1);
+        autonomousStepsFile.insertSteps(ourRobotConfig.getDelay() + 1, "DELAY", 0, 0, false, false,ourRobotConfig.getDelay() * 1000, 0, 0, 0, 0, 0, 1);
 
         dashboard.displayPrintf(9, "initRobot STEPS LOADED");
 
@@ -757,7 +757,8 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 moveLiftUpDown();
                 break;
             case "INTAKE":
-                TurnIntakePower();
+                SetIntake();
+                break;
             case "TILT":
                 tiltMotor();
                 break;
@@ -831,6 +832,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 break;
             case "INTAKE":
                 mintCurrentStateInTake              = Constants.stepState.STATE_INIT;
+                break;
             case "TILT":
                 mintCurrentStateTiltMotor           = Constants.stepState.STATE_INIT;
                 break;
@@ -1700,9 +1702,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         switch (mintCurrentStateTankTurnGyroHeading) {
             case STATE_INIT: {
                 double adafruitIMUHeading;
-
                 adafruitIMUHeading = getAdafruitHeading();
-
                 mdblPowerBoost = 0;
                 mintStableCount = 0;
                 mstrWiggleDir = "";
@@ -1711,17 +1711,13 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 fileLogger.writeEvent(3,"mdblRobotTurnAngle " + mdblRobotTurnAngle + " adafruitIMUHeading " + adafruitIMUHeading);
                 //mdblTurnAbsoluteGyro = Double.parseDouble(newAngleDirection((int) adafruitIMUHeading, (int) mdblRobotTurnAngle).substring(3));
                 mdblTurnAbsoluteGyro = TOWR5291Utils.getNewHeading((int) adafruitIMUHeading, (int) mdblRobotTurnAngle);
-
                 robotDrive.setHardwareDriveRunWithoutEncoders();
-
                 mintCurrentStateTankTurnGyroHeading = Constants.stepState.STATE_RUNNING;
             }
             break;
             case STATE_RUNNING: {
                 double adafruitIMUHeading;
-
                 adafruitIMUHeading = getAdafruitHeading();
-
                 mdblGyrozAccumulated = adafruitIMUHeading;
                 mdblGyrozAccumulated = teamAngleAdjust(mdblGyrozAccumulated);//Set variables to MRgyro readings
                 mdblTurnAbsoluteGyro = Double.parseDouble(newAngleDirectionGyro((int) mdblGyrozAccumulated, (int) mdblRobotTurnAngle).substring(3));
@@ -1854,7 +1850,6 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
 
     private void moveLiftUpDown(){
 
-
         double dblDistanceToMoveLift1;
         double dblDistanceToMoveLift2;
 
@@ -1904,44 +1899,61 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         }
     }
 
-    private void TurnIntakePower(){
-        fileLogger.setEventTag("TurnIntakePower()");
+    private void SetIntake(){
+        fileLogger.setEventTag("SetIntake()");
 
         switch (mintCurrentStateInTake){
             case STATE_INIT:
-                fileLogger.writeEvent("Power: " + String.valueOf(mdblPowerBoost));
-                robotArms.intakeMotor.setPower(mdblPowerBoost);
-                mintCurrentStateInTake = Constants.stepState.STATE_COMPLETE;
+                fileLogger.writeEvent(2,"Initialised");
+                fileLogger.writeEvent(2,"Power: " + String.valueOf(mdblStepSpeed));
+                robotArms.intakeMotor.setPower(mdblStepSpeed);
+                mintCurrentStateInTake = Constants.stepState.STATE_RUNNING;
+                break;
+            case STATE_RUNNING:
+                fileLogger.writeEvent(2,"Running");
+                fileLogger.writeEvent(2,"Power: " + String.valueOf(mdblStepSpeed));
+                robotArms.intakeMotor.setPower(mdblStepSpeed);
+                if (mdblStepSpeed == 0) {
+                    mintCurrentStateInTake = Constants.stepState.STATE_COMPLETE;
+                    deleteParallelStep();
+                }
+                if (mStateTime.milliseconds() >= mdblRobotParm1)
+                {
+                    fileLogger.writeEvent(1,"Complete.......");
+                    robotArms.intakeMotor.setPower(0);
+                    mintCurrentStateInTake = Constants.stepState.STATE_COMPLETE;
+                    deleteParallelStep();
+                }//check timeout value
+                if (mStateTime.seconds() > mdblStepTimeout) {
+                    robotArms.intakeMotor.setPower(0);
+                    fileLogger.writeEvent(1,"Timeout:- " + mStateTime.seconds());
+                    //  Transition to a new state.
+                    mintCurrentStateInTake = Constants.stepState.STATE_COMPLETE;
+                    deleteParallelStep();
+                }
                 break;
         }
     }
 
     private void tiltMotor(){
-
-
         double dblDistanceToMoveTilt;
 
-        fileLogger.setEventTag("moveLiftUpDown()");
+        fileLogger.setEventTag("tiltMotor()");
 
         switch (mintCurrentStateTiltMotor){
             case STATE_INIT:
                 fileLogger.writeEvent(2, "Initialised");
                 robotArms.tiltMotor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 robotArms.tiltMotor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
                 dblDistanceToMoveTilt = robotArms.tiltMotor1.getCurrentPosition() + (mdblStepDistance * ourRobotConfig.getLIFTMAIN_COUNTS_PER_INCH());
-
+                fileLogger.writeEvent(2, "Distance to move = " + mdblStepDistance + ", dblDistanceToMoveTilt " + dblDistanceToMoveTilt);
                 robotArms.tiltMotor1.setTargetPosition((int)dblDistanceToMoveTilt);
-
                 robotArms.tiltMotor1.setPower(mdblStepSpeed);
-
                 robotArms.tiltMotor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
                 mintCurrentStateTiltMotor = Constants.stepState.STATE_RUNNING;
                 break;
             case STATE_RUNNING:
                 fileLogger.writeEvent(2, "Running");
-
                 robotArms.tiltMotor1.setPower(mdblStepSpeed);
                 fileLogger.writeEvent(2, "Motor Speed Set: Busy 1 " + robotArms.tiltMotor1.isBusy());
 
@@ -2046,7 +2058,6 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
     private void releaseTeamMarker(){
 
         fileLogger.setEventTag("releaseTeamMarker()");
-        fileLogger.writeEvent(2, " Looping Start");
 
         switch (mintCurrentStateTeamMarker){
             case STATE_INIT:
@@ -2070,10 +2081,8 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 mintCurrentStateTeamMarker = Constants.stepState.STATE_COMPLETE;
                 deleteParallelStep();
 
-
                 //check timeout value
                 if (mStateTime.seconds() > mdblStepTimeout) {
-
                     robotArms.teamMarkerServo.setPosition(mdblTeamMarkerHome);
                     mblnDisableVisionProcessing     = true;  //disable vision processing
                     mblnReadyToCapture              = false; //stop OpenCV from doing its thing
@@ -2084,10 +2093,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 }
                 break;
         }
-        fileLogger.writeEvent(2, " Looping End");
     }
-
-
 
     private void VuforiaMove ()
     {
@@ -2428,23 +2434,23 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
     }
 
     private boolean checkAllStatesComplete () {
-        if ((mintCurrentStepDelay                       == Constants.stepState.STATE_COMPLETE) &&
-                (mintCurStVuforiaTurn5291               == Constants.stepState.STATE_COMPLETE) &&
-                (mintCurStVuforiaMove5291               == Constants.stepState.STATE_COMPLETE) &&
-                (mintCurrentStateDrive                  == Constants.stepState.STATE_COMPLETE) &&
-                (mintCurrentStateDriveHeading           == Constants.stepState.STATE_COMPLETE) &&
-                (mintCurrentStatePivotTurn              == Constants.stepState.STATE_COMPLETE) &&
-                (mintCurrentStateTankTurn               == Constants.stepState.STATE_COMPLETE) &&
-                (mintCurrentStateEyes5291               == Constants.stepState.STATE_COMPLETE) &&
-                (mintCurrentStateGyroTurnEncoder5291    == Constants.stepState.STATE_COMPLETE) &&
-                (mintCurrentStateTankTurnGyroHeading    == Constants.stepState.STATE_COMPLETE) &&
-                (mintCurrentStateMecanumStrafe          == Constants.stepState.STATE_COMPLETE) &&
-                (mintCurrentStateMoveLift               == Constants.stepState.STATE_COMPLETE) &&
-                (mintCurrentStateInTake                 == Constants.stepState.STATE_COMPLETE) &&
-                (mintCurrentStateTiltMotor              == Constants.stepState.STATE_COMPLETE) &&
-                (mintCurrentStateFindGold               == Constants.stepState.STATE_COMPLETE) &&
-                (mintCurrentStateTeamMarker             == Constants.stepState.STATE_COMPLETE) &&
-                (mintCurrentStateRadiusTurn             == Constants.stepState.STATE_COMPLETE)) {
+        if ((mintCurrentStepDelay                   == Constants.stepState.STATE_COMPLETE) &&
+            (mintCurStVuforiaTurn5291               == Constants.stepState.STATE_COMPLETE) &&
+            (mintCurStVuforiaMove5291               == Constants.stepState.STATE_COMPLETE) &&
+            (mintCurrentStateDrive                  == Constants.stepState.STATE_COMPLETE) &&
+            (mintCurrentStateDriveHeading           == Constants.stepState.STATE_COMPLETE) &&
+            (mintCurrentStatePivotTurn              == Constants.stepState.STATE_COMPLETE) &&
+            (mintCurrentStateTankTurn               == Constants.stepState.STATE_COMPLETE) &&
+            (mintCurrentStateEyes5291               == Constants.stepState.STATE_COMPLETE) &&
+            (mintCurrentStateGyroTurnEncoder5291    == Constants.stepState.STATE_COMPLETE) &&
+            (mintCurrentStateTankTurnGyroHeading    == Constants.stepState.STATE_COMPLETE) &&
+            (mintCurrentStateMecanumStrafe          == Constants.stepState.STATE_COMPLETE) &&
+            (mintCurrentStateMoveLift               == Constants.stepState.STATE_COMPLETE) &&
+            (mintCurrentStateInTake                 == Constants.stepState.STATE_COMPLETE) &&
+            (mintCurrentStateTiltMotor              == Constants.stepState.STATE_COMPLETE) &&
+            (mintCurrentStateFindGold               == Constants.stepState.STATE_COMPLETE) &&
+            (mintCurrentStateTeamMarker             == Constants.stepState.STATE_COMPLETE) &&
+            (mintCurrentStateRadiusTurn             == Constants.stepState.STATE_COMPLETE)) {
             return true;
         }
         return false;
@@ -2452,23 +2458,23 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
 
     private void initDefaultStates() {
         mintCurrentStateStep                = Constants.stepState.STATE_INIT;
-        mintCurrentStateTankTurn            = Constants.stepState.STATE_COMPLETE;
-        mintCurrentStateDrive               = Constants.stepState.STATE_COMPLETE;
-        mintCurrentStateDriveHeading        = Constants.stepState.STATE_COMPLETE;
-        mintCurrentStatePivotTurn           = Constants.stepState.STATE_COMPLETE;
-        mintCurrentStateRadiusTurn          = Constants.stepState.STATE_COMPLETE;
         mintCurrentStepDelay                = Constants.stepState.STATE_COMPLETE;
         mintCurStVuforiaMove5291            = Constants.stepState.STATE_COMPLETE;
         mintCurStVuforiaTurn5291            = Constants.stepState.STATE_COMPLETE;
+        mintCurrentStateDrive               = Constants.stepState.STATE_COMPLETE;
+        mintCurrentStateDriveHeading        = Constants.stepState.STATE_COMPLETE;
+        mintCurrentStatePivotTurn           = Constants.stepState.STATE_COMPLETE;
+        mintCurrentStateTankTurn            = Constants.stepState.STATE_COMPLETE;
         mintCurrentStateEyes5291            = Constants.stepState.STATE_COMPLETE;
+        mintCurrentStateGyroTurnEncoder5291 = Constants.stepState.STATE_COMPLETE;
         mintCurrentStateTankTurnGyroHeading = Constants.stepState.STATE_COMPLETE;
         mintCurrentStateMecanumStrafe       = Constants.stepState.STATE_COMPLETE;
-        mintCurrentStateGyroTurnEncoder5291 = Constants.stepState.STATE_COMPLETE;
-        mintCurrentStateFindGold            = Constants.stepState.STATE_COMPLETE;
         mintCurrentStateMoveLift            = Constants.stepState.STATE_COMPLETE;
         mintCurrentStateInTake              = Constants.stepState.STATE_COMPLETE;
         mintCurrentStateTiltMotor           = Constants.stepState.STATE_COMPLETE;
+        mintCurrentStateFindGold            = Constants.stepState.STATE_COMPLETE;
         mintCurrentStateTeamMarker          = Constants.stepState.STATE_COMPLETE;
+        mintCurrentStateRadiusTurn          = Constants.stepState.STATE_COMPLETE;
     }
 
 }

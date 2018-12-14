@@ -1,1 +1,53 @@
-// Valid Commands Angle,,,,,,,,,,// DEL = Delay in Microseconds,,,,,,,,,,// RTE = Right Turn Angle - Encoder,,,,,,,,,,// LTE = Left Turn Angle - Encoder,,,,,,,,,,// LPE = Left Pivot Angle - Encoder,,,,,,,,,,// RPE = Left Pivot Angle - Encoder,,,,,,,,,,// LRE = Left turn with radius - Encoder,,,,,,,,,,// RRE = Right turn with radius - Encoder,,,,,,,,,,// FWE = Drive Forward Distance - Encoder (Parm 1 and 4, 1 = Gyro, 2 = Line Detect Stop, 3 = Range Sensor, Parm2 3 5 6 are parms for the Gyro, Range and Line Detect Stop),,,,,// REV = Drive Backward Distance - Encoder,,,,,,,,,,// ASE = AutoStar From Current Pos to X,Y - Encoder,,,,,,,,,// FNC = Special Function,,,,,,,,,,// VFL = Vuforia Localise,,,,,,,,,,// VME = Vuforia Move - Encoder,,,,,,,,,,// VTE = Vuforia Turn - Encoder  Parm 1 is the desired heading,,,,,,,,,,// ATB = Attack the Beacon,,,,,,,,,,// STB = Shoot The Ball,,,,,,,,,,// BCL = Get the beacon Colour,,,,,,,,,,//           time, comm, distance, power, paral, lastp,parm, parm, parm, parm, parm, parm//           out   and    angle                         1     2     3     4     5     6  //            s                      %//lower the robot down3,LIFT,10,.5,FALSE,FALSE,0,0,0,0,0,0//move forward X inches2,DRIVE,8,0.5,FALSE,FALSE,0,0,0,0,0,0//find the GOLD cube, this step will insert a few multiuple steps until it finds GOLD2,FINDGOLD,0,0.5,FALSE,FALSE,0,0,0,0,0,0//move forward X inches2,DRIVE,6,0.5,FALSE,FALSE,0,0,0,0,0,0//strafe sideways X inches (Right is +, Left is -)3,STRAFE,-44,.5,FALSE,FALSE,0,0,0,0,0,0//turn to face depot2,TANKTURN,45,0.5,FALSE,FALSE,0,0,0,0,0,0// Hit the wall to make the robot strigtint3,STRAFE,-10,.5,FALSE,FALSE,0,0,0,0,0,0//Drive to depot2,DRIVE,46,0.5,FALSE,FALSE,1,270,0,0,0,0//Drop the team marker, this will open the servo for param1 mseconds, also can run as a parallel step so we don't lose the param1 mseconds in time 2,TEAMMARKER,0,0,TRUE,FALSE,1,5000,0,0,0,0// Hit the wall to make the robot strigt3,STRAFE,-4,.5,FALSE,FALSE,0,0,0,0,0,02,DRIVE,-64,0.5,FALSE,FALSE,1,80,0,0,0,0//Drop the team marker, this will open the servo for param1 mseconds, also can run as a parallel step so we don't lose the param1 mseconds in time 2,TEAMMARKER,0,0,FALSE,FALSE,0,0,0,0,0,03,STRAFE,-5,.75,FALSE,FALSE,0,0,0,0,0,0//2,DRIVE,-20,0.5,FALSE,FALSE,0,0,0,0,0,02,TILT,-70,.75, FALSE,FLASE,0,0,0,0,0,0//This delay must stay there, INSERT steps doesn't work if this dummy step is not in the list a TBD for the future to fix1,DELAY,0,0,FALSE,FALSE,0,0,0,0,0,0
+// Valid Commands Angle,,,,,,,,,,
+// DEL = Delay in Microseconds,,,,,,,,,,
+// RTE = Right Turn Angle - Encoder,,,,,,,,,,
+// LTE = Left Turn Angle - Encoder,,,,,,,,,,
+// LPE = Left Pivot Angle - Encoder,,,,,,,,,,
+// RPE = Left Pivot Angle - Encoder,,,,,,,,,,
+// LRE = Left turn with radius - Encoder,,,,,,,,,,
+// RRE = Right turn with radius - Encoder,,,,,,,,,,
+// FWE = Drive Forward Distance - Encoder (Parm 1 and 4, 1 = Gyro, 2 = Line Detect Stop, 3 = Range Sensor, Parm2 3 5 6 are parms for the Gyro, Range and Line Detect Stop),,,,,
+// REV = Drive Backward Distance - Encoder,,,,,,,,,,
+// ASE = AutoStar From Current Pos to X,Y - Encoder,,,,,,,,,
+// FNC = Special Function,,,,,,,,,,
+// VFL = Vuforia Localise,,,,,,,,,,
+// VME = Vuforia Move - Encoder,,,,,,,,,,
+// VTE = Vuforia Turn - Encoder  Parm 1 is the desired heading,,,,,,,,,,
+// ATB = Attack the Beacon,,,,,,,,,,
+// STB = Shoot The Ball,,,,,,,,,,
+// BCL = Get the beacon Colour,,,,,,,,,,
+//           time, comm, distance, power, paral, lastp,parm, parm, parm, parm, parm, parm
+//           out   and    angle                         1     2     3     4     5     6  
+//            s                      %
+//lower the robot down
+3,LIFT,10,.5,FALSE,FALSE,0,0,0,0,0,0
+//move forward X inches
+2,DRIVE,11,0.5,FALSE,FALSE,0,0,0,0,0,0
+//find the GOLD cube, this step will insert a few multiple steps until it finds GOLD
+2,FINDGOLD,0,0.5,FALSE,FALSE,0,0,0,0,0,0
+//move forward X inches
+2,DRIVE,5,0.5,FALSE,FALSE,0,0,0,0,0,0
+//strafe sideways X inches (Right is +, Left is -)
+3,STRAFE,-44,.5,FALSE,FALSE,0,0,0,0,0,0
+//turn to face depot
+2,TANKTURN,45,0.5,FALSE,FALSE,0,0,0,0,0,0
+// Hit the wall to make the robot strigtint
+3,STRAFE,-10,.5,FALSE,FALSE,0,0,0,0,0,0
+//Drive to depot
+2,DRIVE,60,0.5,FALSE,FALSE,1,270,0,0,0,0
+//Drop the team marker, this will open the servo for param1 mseconds, also can run as a parallel step so we don't lose the param1 mseconds in time 
+2,TEAMMARKER,0,0,TRUE,FALSE,1,5000,0,0,0,0
+// Hit the wall to make the robot strigt
+3,STRAFE,-4,.5,FALSE,FALSE,0,0,0,0,0,0
+2,DRIVE,-64,0.5,FALSE,FALSE,1,80,0,0,0,0
+//Drop the team marker, this will open the servo for param1 mseconds, also can run as a parallel step so we don't lose the param1 mseconds in time 
+2,TEAMMARKER,0,0,FALSE,FALSE,0,0,0,0,0,0
+3,STRAFE,-5,.75,FALSE,FALSE,0,0,0,0,0,0
+2,TILT,-85,.75,FALSE,FALSE,0,0,0,0,0,0
+2,LIFT,13,0.5,TRUE,FALSE,0,0,0,0,0,0
+//TURN THE INTAKE ON FOR 4 Seconds, Param 1 is the timer
+8,INTAKE,0,1,FALSE,FALSE,7000,0,0,0,0,0
+//TURN THE INTAKE OFF FOR, Param 1 is the timer
+1,INTAKE,0,0,FALSE,FALSE,1000,0,0,0,0,0
+//This delay must stay there, INSERT steps doesn't work if this dummy step is not in the list a TBD for the future to fix
+1,DELAY,0,0,FALSE,FALSE,0,0,0,0,0,0
