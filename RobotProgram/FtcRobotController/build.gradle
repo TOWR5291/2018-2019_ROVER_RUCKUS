@@ -7,6 +7,7 @@ android {
 
     defaultConfig {
         minSdkVersion 19
+        //noinspection ExpiredTargetSdkVersion
         targetSdkVersion 19
     }
 
@@ -22,8 +23,6 @@ repositories {
     flatDir {
         dirs '../libs'
     }
-    jcenter()
-    google()
 }
 
 apply from: 'build.release.gradle'

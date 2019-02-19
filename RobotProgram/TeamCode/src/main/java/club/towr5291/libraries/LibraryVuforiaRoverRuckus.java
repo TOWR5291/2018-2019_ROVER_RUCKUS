@@ -332,6 +332,4 @@ public class LibraryVuforiaRoverRuckus {
 
         return RoverRuckus;
     }
-
-
 }

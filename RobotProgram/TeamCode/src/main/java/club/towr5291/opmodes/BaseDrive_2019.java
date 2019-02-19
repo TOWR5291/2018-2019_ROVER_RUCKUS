@@ -52,18 +52,11 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
 
     //Settings from the sharepreferences
     private SharedPreferences sharedPreferences;
-    double correction                               = 0;
-    double lastposition;
-    boolean DisplayEncoderVaule                     = false;
-    private int imuStartCorrectionVar               = 0;
-    private int imuMountCorrectionVar               = 90;
 
     private FileLogger fileLogger;
     final String TAG = "RR TeleOp";
     private ElapsedTime runtime                     = new ElapsedTime();
     private club.towr5291.libraries.robotConfig ourRobotConfig;
-
-    private double mdblTiltMotorPower               = 0;
 
     /* TOWR TICK FUNCTION */
     private TOWR5291Tick robotPowerMultiplier       = new TOWR5291Tick();
@@ -71,12 +64,6 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
     private TOWR5291Tick controllerBMode            = new TOWR5291Tick();
     private TOWR5291Tick teamMarkerServoPosition    = new TOWR5291Tick();
     private TOWR5291Toggle leftBumperToggle         = new TOWR5291Toggle();//For Moving Lift
-
-    private Gamepad game2                           = gamepad2;
-    private Gamepad game1                           = gamepad1;
-
-    private TOWR5291PID driftRotateAngle;
-    private BNO055IMU imu;
 
     private double maxDrivePower                    = 1;
     private double minDrivePower                    = 0.3333333333333;
@@ -86,16 +73,23 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
     private double controllerAModes                 = 5;
     private int debug;
 
+    private boolean blnPassedALimit = false;
+    private boolean blnRunningAutoTilt = false;
+    private boolean blnRunningAutoLift = false;
+    private double dblCurrentLiftCounts = 0;
+    private double dblStartingAngleMotorCount = 0; //This is the counts when the motor is at 0
+    private double mintCurrentLiftAngleDegrees = 0;
+    private static final double ANGLETOSCOREDEGREE = 45;
+    private static final double LIMITSWITCH1DEGREEMEASURE = 0;
+    private static final double LIMITSWITCH2DEGREEMEASURE = 0;
+    private static final double LIMITSWITCH3DEGREEMEASURE = 0;
+    private static final double LIMITSWITCH4DEGREEMEASURE = 0;
+
     private static TOWRDashBoard dashboard = null;
     public static TOWRDashBoard getDashboard()
     {
         return dashboard;
     }
-
-    //set state
-    private Constants.stepState StateMovingLift     = Constants.stepState.STATE_COMPLETE;
-    private Constants.stepState StateMovingTilt     = Constants.stepState.STATE_COMPLETE;
-    private int mintCurrentLimitSwitch              = 0;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -106,19 +100,6 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
         dashboard.setTextView((TextView)act.findViewById(R.id.textOpMode));
         dashboard.displayPrintf(0, "Starting Menu System");
 
-//        BNO055IMU.Parameters parametersAdafruitImu  = new BNO055IMU.Parameters();
-//        parametersAdafruitImu.angleUnit             = BNO055IMU.AngleUnit.DEGREES;
-//        parametersAdafruitImu.accelUnit             = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-//        parametersAdafruitImu.calibrationDataFile   = "AdafruitIMUCalibration.json"; // see the calibration sample opmode
-//        parametersAdafruitImu.loggingEnabled        = true;
-//        parametersAdafruitImu.loggingTag            = "IMU";
-//        parametersAdafruitImu.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
-
-        dashboard.displayPrintf(0, "IMU Parameters Loaded");
-        //imu = hardwareMap.get(BNO055IMU.class, "imu");
-        //imu.initialize(parametersAdafruitImu);
-        dashboard.displayPrintf(0, "IMU Loaded");
-
         ourRobotConfig = new robotConfig();
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(hardwareMap.appContext);
@@ -127,7 +108,7 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
         ourRobotConfig.setTeamNumber(sharedPreferences.getString("club.towr5291.Autonomous.TeamNumber", "0000"));
         ourRobotConfig.setAllianceStartPosition(sharedPreferences.getString("club.towr5291.Autonomous.Position", "Left"));
         ourRobotConfig.setDelay(Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Delay", "0")));
-        ourRobotConfig.setRobotConfigBase(sharedPreferences.getString("club.towr5291.Autonomous.RobotConfigBase", "TileRunner-2x40"));
+        ourRobotConfig.setRobotConfigBase(sharedPreferences.getString("club.towr5291.Autonomous.RobotConfigBase", "TileRunner2x40"));
         debug = Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Debug", "1"));
 
         //now we have loaded the config from sharedpreferences we can setup the robot
@@ -160,24 +141,9 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
         LEDs.setLEDControlAlliance(ourRobotConfig.getAllianceColor());
         dashboard.displayPrintf(0, "LEDs Loaded");
 
-        fileLogger.writeEvent(2,"LEDs Init");
-
-        switch (ourRobotConfig.getAllianceStartPosition()){
-            case "Left":
-                imuStartCorrectionVar = -45;
-                break;
-            default:
-                imuStartCorrectionVar = 45;
-                break;
-        }
-
-        fileLogger.writeEvent(2,"IMU Offset " + imuStartCorrectionVar);
-
         //init all the values for the counters etc
         initFunction();
         fileLogger.writeEvent(2,"Init Function Done ");
-
-        driftRotateAngle = new TOWR5291PID(runtime,0,0,4.5,0,0);
 
         TOWR5291Toggle toggleGamePad1X = new TOWR5291Toggle(gamepad1.x);
         toggleGamePad1X.setDebounce(500);
@@ -191,9 +157,6 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
         fileLogger.writeEvent(1,"Robot Controller Min Tick", String.valueOf(controllerAMode.getTickMin()));
         fileLogger.writeEvent(1,"Robot Controller Max Tick", String.valueOf(controllerAMode.getTickMax()));
 
-        game2 = gamepad2;
-        game1 = gamepad1;
-
         fileLogger.writeEvent(1,"","Wait For Start ");
 
         dashboard.displayPrintf(1, "Waiting for Start");
@@ -202,8 +165,6 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
         dashboard.clearDisplay();
 
         fileLogger.writeEvent("Starting Loop");
-        //imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
-        //lastposition = getAdafruitHeading();
 
         //dashboard.clearDisplay();
 
@@ -222,19 +183,18 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
             }
 
             //adjust the robot power using the dpad on the game controller
-            robotPowerMultiplier.incrementTick(game1.dpad_up);
-            robotPowerMultiplier.decrementTick(game1.dpad_down);
+            robotPowerMultiplier.incrementTick(gamepad1.dpad_up);
+            robotPowerMultiplier.decrementTick(gamepad1.dpad_down);
 
-            controllerAMode.incrementTick(game1.start);
-            controllerBMode.incrementTick(game2.start);
+            controllerAMode.incrementTick(gamepad1.start);
+            controllerBMode.incrementTick(gamepad2.start);
 
             dashboard.displayPrintf(3, "Power Multiplier:  " + robotPowerMultiplier.getTickCurrValue());
             dashboard.displayPrintf(4, "Controller A Mode: " + (int)controllerAMode.getTickCurrValue());
             dashboard.displayPrintf(8, "Controller B Mode: " + (int)controllerBMode.getTickCurrValue());
 
             //drivers controller, operation based on the mode selection
-            switch ((int)controllerAMode.getTickCurrValue())
-            {
+            switch ((int)controllerAMode.getTickCurrValue()) {
                 case 1:
                     fileLogger.writeEvent(debug,"Controller Mode", "POV");
                     dashboard.displayPrintf(5, "Controller POV:");
@@ -245,8 +205,8 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
                      * The right joystick is for turning left and right
                      */
                     fileLogger.writeEvent(debug,"Controller Mode", "Robot Multiplier: -" + robotPowerMultiplier.getTickCurrValue());
-                    Robot.setHardwareDriveLeftMotorPower(Range.clip(-game1.left_stick_y + game1.right_stick_x, -1.0, 1.0) * robotPowerMultiplier.getTickCurrValue());
-                    Robot.setHardwareDriveRightMotorPower(Range.clip(-game1.left_stick_y - game1.right_stick_x, -1.0, 1.0) * robotPowerMultiplier.getTickCurrValue());
+                    Robot.setHardwareDriveLeftMotorPower(Range.clip(-gamepad1.left_stick_y + gamepad1.right_stick_x, -1.0, 1.0) * robotPowerMultiplier.getTickCurrValue());
+                    Robot.setHardwareDriveRightMotorPower(Range.clip(-gamepad1.left_stick_y - gamepad1.right_stick_x, -1.0, 1.0) * robotPowerMultiplier.getTickCurrValue());
                     fileLogger.writeEvent(debug,"SetPowers Done");
                     break;
 
@@ -259,38 +219,21 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
                      */
                     dashboard.displayPrintf(5, "Controller Tank");
                     fileLogger.writeEvent("Controller Mode", "Tank");
-                    Robot.setHardwareDriveLeftMotorPower(-game1.left_stick_y * robotPowerMultiplier.getTickCurrValue());
-                    Robot.setHardwareDriveRightMotorPower(-game1.right_stick_y * robotPowerMultiplier.getTickCurrValue());
+                    Robot.setHardwareDriveLeftMotorPower(-gamepad1.left_stick_y * robotPowerMultiplier.getTickCurrValue());
+                    Robot.setHardwareDriveRightMotorPower(-gamepad1.right_stick_y * robotPowerMultiplier.getTickCurrValue());
                     break;
-
+                    
                 case 3:
-                    /*
-                     * Mecanum Drive is for Mecanum bases ONLY
-                     * If You Need help ask some one to explain it to you
-                     */
-                    dashboard.displayPrintf(5, "Mecanum Drive (IMU)");
-                    fileLogger.writeEvent("Controller Mode", "Mecanum Drive");
-                    if (game1.left_stick_x != 0 || game1.left_stick_y != 0) {
-                        //correction = driftRotateAngle.PIDCorrection(runtime,Math.sin(getAdafruitHeading() * (Math.PI / 180.0)), lastposition);
-                    } else {
-                        correction = 0;
-                        //lastposition = Math.sin(getAdafruitHeading() * (Math.PI / 180.0));
-                    }
-
-                    //Robot.mecanumDrive_Cartesian(game1.left_stick_x, game1.left_stick_y, game1.right_stick_x - correction, getAdafruitHeading() + imuStartCorrectionVar, robotPowerMultiplier.getTickCurrValue());
-                    break;
-
-                case 4:
                     dashboard.displayPrintf(5, "Mecanum Drive New 2018-19");
                     fileLogger.writeEvent(debug,"Controller Mode", "Mecanum Drive New 2018-19");
-                    Robot.baseMotor1.setPower(game1.left_stick_x + -game1.left_stick_y + game1.right_stick_x);
-                    Robot.baseMotor2.setPower(-game1.left_stick_x + -game1.left_stick_y + game1.right_stick_x);
-                    Robot.baseMotor3.setPower(-game1.left_stick_x + -game1.left_stick_y + -game1.right_stick_x);
-                    Robot.baseMotor4.setPower(-game1.left_stick_x + -game1.left_stick_y + -game1.right_stick_x);
+                    Robot.baseMotor1.setPower(gamepad1.left_stick_x + -gamepad1.left_stick_y + gamepad1.right_stick_x);
+                    Robot.baseMotor2.setPower(-gamepad1.left_stick_x + -gamepad1.left_stick_y + gamepad1.right_stick_x);
+                    Robot.baseMotor3.setPower(-gamepad1.left_stick_x + -gamepad1.left_stick_y + -gamepad1.right_stick_x);
+                    Robot.baseMotor4.setPower(-gamepad1.left_stick_x + -gamepad1.left_stick_y + -gamepad1.right_stick_x);
 
                     break;
                 //last years driving mode, prefered not to use
-                case 5:
+                case 4:
                     dashboard.displayPrintf(5, "Mecanum Drive Relic Recovery");
                     fileLogger.writeEvent(debug,"Controller Mode", "Mecanum Drive Relic Recovery");
                     Robot.baseMotor1.setPower(Range.clip(-gamepad1.left_stick_y + gamepad1.left_stick_x - gamepad1.right_stick_x, -1, 1));
@@ -305,46 +248,74 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
             dashboard.displayPrintf(10, "Lift Motor 1 Enc: " + Arms.getLiftMotor1Encoder());
             dashboard.displayPrintf(11, "Lift Motor 2 Enc: " + Arms.getLiftMotor2Encoder());
             dashboard.displayPrintf(12, "Tilt Motor Enc  : " + Arms.getTiltLiftEncoder());
+            
             switch ((int)controllerBMode.getTickCurrValue()){
                 case 1:
                     dashboard.displayPrintf(9, "Controller B Standard");
                     fileLogger.writeEvent(debug,"Controller B Mode", "Standard");
 
-                    //Arms.tiltMotor1.setPower(-game2.left_stick_y);
-                    //Arms.setHardwareLiftPower(-game2.right_stick_y);
-                    if (game2.left_trigger > 0){
-                        if (game2.b){
-                            if (game2 == gamepad2){
-                                game2 = gamepad1;
-                            } else if (game2 == gamepad1) {
-                                game2 = gamepad2;
-                            }
-                        }
+                    //Arms.tiltMotor1.setPower(-gamepad2.left_stick_y);
+                    //Arms.setHardwareLiftPower(-gamepad2.right_stick_y);
+
+                    if (gamepad2.dpad_up && !blnRunningAutoTilt){
+                        Arms.tiltMotor1.setTargetPosition((int) (mintCurrentLiftAngleDegrees  - ANGLETOSCOREDEGREE));
+                        fileLogger.writeEvent(4, "Setting target position to tilt motor: " + String.valueOf(mintCurrentLiftAngleDegrees  - ANGLETOSCOREDEGREE));
+                        Arms.tiltMotor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        blnRunningAutoTilt = true;
+                    }
+                    if (!blnRunningAutoTilt) {
+                        Arms.intakeMotor.setPower(gamepad2.right_trigger - gamepad2.left_trigger);
                     }
 
-                    Arms.intakeMotor.setPower(game2.right_trigger - game2.left_trigger);
-
-                    if (Sensors.getLimitSwitch1AngleMotorState()){
-                        mintCurrentLimitSwitch = 1;
-                    } else if (Sensors.getLimitSwitch2AngleMotorState()){
-                        mintCurrentLimitSwitch = 2;
-                    } else if (Sensors.getLimitSwitch3AngleMotorState()){
-                        mintCurrentLimitSwitch = 3;
-                    } else if (Sensors.getLimitSwitch4AngleMotorState()){
-                        mintCurrentLimitSwitch = 4;
-                    }
-
-                    if (game2.a){
-                        StateMovingLift = STATE_INIT;
-                        StateMovingTilt = STATE_INIT;
-                    }
-
-                    moveLiftUpDown();
-                    tiltMotor();
                     break;
-            } //Switch ControllerB
+            }
 
-        }  //while (OpModeIsActive)
+        }
+
+        /* For the auto movement on the arms to work you need to find a limit switch to know the
+           current position so non of the auto movements work until a limit is passed
+         */
+        if (!blnPassedALimit){
+            if (Sensors.getLimitSwitch1AngleMotorState()){
+                //Setting the starting counts
+                //First get the amount of count per degree
+                //Then get the degree measure of the limit
+                //Finally take the current position and subtract it by the offset set above
+                dblStartingAngleMotorCount = Arms.tiltMotor1.getCurrentPosition() - (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH1DEGREEMEASURE);
+                fileLogger.writeEvent(5, "Passing Limit Switch One For The First Time -- now Auto Functions Work");
+                fileLogger.writeEvent(3, "Starting offset is: " + String.valueOf(dblStartingAngleMotorCount));
+                blnPassedALimit = true;
+            } else if (Sensors.getLimitSwitch2AngleMotorState()){
+                dblStartingAngleMotorCount = Arms.tiltMotor1.getCurrentPosition() - (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH2DEGREEMEASURE);
+                fileLogger.writeEvent(5, "Passing Limit Switch Two For The First Time -- now Auto Functions Work");
+                fileLogger.writeEvent(3, "Starting offset is: " + String.valueOf(dblStartingAngleMotorCount));
+                blnPassedALimit = true;
+            } else if (Sensors.getLimitSwitch2AngleMotorState()){
+                dblStartingAngleMotorCount = Arms.tiltMotor1.getCurrentPosition() - (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH3DEGREEMEASURE);
+                fileLogger.writeEvent(5, "Passing Limit Switch Three For The First Time -- now Auto Functions Work");
+                fileLogger.writeEvent(3, "Starting offset is: " + String.valueOf(dblStartingAngleMotorCount));
+                blnPassedALimit = true;
+            } else if (Sensors.getLimitSwitch2AngleMotorState()){
+                dblStartingAngleMotorCount = Arms.tiltMotor1.getCurrentPosition() - (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH4DEGREEMEASURE);
+                fileLogger.writeEvent(5, "Passing Limit Switch Four For The First Time -- now Auto Functions Work");
+                fileLogger.writeEvent(3, "Starting offset is: " + String.valueOf(dblStartingAngleMotorCount));
+                blnPassedALimit = true;
+            }
+        } else{
+            /*Now the Auto Function are OK to work me know the current position*/
+            mintCurrentLiftAngleDegrees = (Arms.tiltMotor1.getCurrentPosition() - dblStartingAngleMotorCount) * ourRobotConfig.getCOUNTS_PER_DEGREE_TILT();
+            fileLogger.writeEvent("Recorded the current tilt Position: " + String.valueOf(mintCurrentLiftAngleDegrees));
+
+            if(blnRunningAutoTilt){
+                Arms.tiltMotor1.setPower(.5);
+
+                if (!Arms.tiltMotor1.isBusy()){
+                    Arms.tiltMotor1.setPower(0);
+                    blnRunningAutoTilt = false;
+                    fileLogger.writeEvent(3, "Tilt Motor is not busy so now tuning off auto tilt");
+                }
+            }
+        }
 
         //stop the logging
         if (fileLogger != null) {
@@ -396,117 +367,5 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
         leftBumperToggle.toggleState(false);
         fileLogger.writeEvent(debug, "initFunctions" ,  "Toggle for left bumper End");
 
-    }
-
-    private Double getAdafruitHeading () {
-        Orientation angles;
-        angles = imu.getAngularOrientation().toAxesReference(AxesReference.INTRINSIC).toAxesOrder(AxesOrder.ZYX);
-        return angleToHeading(formatAngle(angles.angleUnit, angles.firstAngle));
-    }
-
-    private Double formatAngle(AngleUnit angleUnit, double angle) {
-        fileLogger.writeEvent(4,"Formating Angle For Gyro");
-        return AngleUnit.DEGREES.fromUnit(angleUnit, angle);
-    }
-
-    //for adafruit IMU as it returns z angle only
-    private double angleToHeading(double z) {
-        double angle = -z + imuStartCorrectionVar + imuMountCorrectionVar;
-        if (angle < 0)
-            return angle + 360;
-        else if (angle > 360)
-            return angle - 360;
-        else
-            return angle;
-    }
-
-
-    private void moveLiftUpDown(){
-
-        double dblDistanceToMoveLift1;
-        double dblDistanceToMoveLift2;
-
-        fileLogger.setEventTag("moveLiftUpDown()");
-
-        switch (StateMovingLift){
-            case STATE_INIT:
-                fileLogger.writeEvent(2, "Initialised");
-                Arms.setHardwareLiftMotorRunUsingEncoders();
-                //Arms.setHardwareLiftMotorResetEncoders();
-
-                dblDistanceToMoveLift1 = Arms.getLiftMotor1Encoder() + (5 * ourRobotConfig.getLIFTMAIN_COUNTS_PER_INCH());
-                dblDistanceToMoveLift2 = Arms.getLiftMotor2Encoder() + (5 * ourRobotConfig.getLIFTMAIN_COUNTS_PER_INCH());
-
-                Arms.liftMotor1.setTargetPosition((int)dblDistanceToMoveLift1);
-                Arms.liftMotor2.setTargetPosition((int)dblDistanceToMoveLift2);
-
-                fileLogger.writeEvent(2, "Move position 1 " + dblDistanceToMoveLift1);
-                fileLogger.writeEvent(2, "Move position 2 " + dblDistanceToMoveLift2);
-
-                fileLogger.writeEvent(2, "Motor 1 Position " + Arms.getLiftMotor1Encoder());
-                fileLogger.writeEvent(2, "Motor 2 Position " + Arms.getLiftMotor2Encoder());
-
-                Arms.setHardwareLiftPower(1);
-                Arms.setHardwareLiftMotorRunToPosition();
-
-                StateMovingLift = STATE_RUNNING;
-                break;
-            case STATE_RUNNING:
-                fileLogger.writeEvent(2, "Running");
-
-                Arms.setHardwareLiftPower(1);
-                fileLogger.writeEvent(2, "Motor Speed Set: Busy 1 " + Arms.liftMotor1.isBusy() + " Busy 2 " + Arms.liftMotor2.isBusy());
-
-                fileLogger.writeEvent(2, "Motor 1 Position " + Arms.getLiftMotor1Encoder());
-                fileLogger.writeEvent(2, "Motor 2 Position " + Arms.getLiftMotor2Encoder());
-
-                if ((!(Arms.liftMotor1.isBusy())) || (!(Arms.liftMotor2.isBusy()))){
-                    fileLogger.writeEvent(2, "Motor 1 is not busy");
-                    fileLogger.writeEvent(2, "Motor 2 is not busy");
-                    Arms.setHardwareLiftPower(0);
-                    fileLogger.writeEvent(2, "Finished");
-                    StateMovingLift = Constants.stepState.STATE_COMPLETE;
-                }
-                break;
-            case STATE_COMPLETE:
-                Arms.setHardwareLiftPower(-game2.right_stick_y);
-                break;
-        }
-    }
-
-    private void tiltMotor(){
-        double dblDistanceToMoveTilt;
-
-        fileLogger.setEventTag("moveLiftUpDown()");
-
-        switch (StateMovingTilt){
-            case STATE_INIT:
-                fileLogger.writeEvent(2, "Initialised");
-
-                if (mintCurrentLimitSwitch == 1) {
-                    Arms.tiltMotor1.setPower(-1);
-                } else {
-                    Arms.tiltMotor1.setPower(1);
-                }
-
-                StateMovingTilt = Constants.stepState.STATE_RUNNING;
-                break;
-            case STATE_RUNNING:
-                fileLogger.writeEvent(2, "Running");
-
-                fileLogger.writeEvent(2, "Motor Speed Set: Busy 1 " + Arms.tiltMotor1.isBusy());
-
-                if (mintCurrentLimitSwitch == 2){
-                    fileLogger.writeEvent(2, "Motor 1 is not busy");
-                    Arms.tiltMotor1.setPower(0);
-                    fileLogger.writeEvent(2, "Finished");
-                    StateMovingTilt = Constants.stepState.STATE_COMPLETE;
-                }
-
-                break;
-            case STATE_COMPLETE:
-                Arms.tiltMotor1.setPower(-game2.left_stick_y);
-                break;
-        }
     }
 }
