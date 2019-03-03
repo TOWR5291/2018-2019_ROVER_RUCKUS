@@ -68,7 +68,7 @@ public class LibraryVuforiaRoverRuckus {
 
     public List<VuforiaTrackable> getAllTrackables() { return this.allTrackables; }
 
-    public VuforiaTrackables LibraryVuforiaRoverRuckus(HardwareMap hardwareMap, robotConfig robotConfiguration) {
+    public VuforiaTrackables LibraryVuforiaRoverRuckus(HardwareMap hardwareMap, robotConfig robotConfiguration, boolean ShowView) {
         //load all the vuforia stuff
 
         /*
@@ -76,7 +76,12 @@ public class LibraryVuforiaRoverRuckus {
          * If no camera monitor is desired, use the parameterless constructor instead (commented out below).
          */
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+        VuforiaLocalizer.Parameters parameters;
+        if (ShowView) {
+            parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+        } else {
+            parameters = new VuforiaLocalizer.Parameters();
+        }
         // OR...  Do Not Activate the Camera Monitor View, to save power
         // VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
 
@@ -89,6 +94,9 @@ public class LibraryVuforiaRoverRuckus {
                 break;
             case "11231":
                 parameters.vuforiaLicenseKey = "Aai2GEX/////AAAAGaIIK9GK/E5ZsiRZ/jrJzdg7wYZCIFQ7uzKqQrMx/0Hh212zumzIy4raGwDY6Mf6jABMShH2etZC/BcjIowIHeAG5ShG5lvZIZEplTO+1zK1nFSiGFTPV59iGVqH8KjLbQdgUbsCBqp4f3tI8BWYqAS27wYIPfTK697SuxdQnpEZAOhHpgz+S2VoShgGr+EElzYMBFEaj6kdA/Lq5OwQp31JPet7NWYph6nN+TNHJAxnQBkthYmQg687WlRZhYrvNJepnoEwsDO3NSyeGlFquwuQwgdoGjzq2qn527I9tvM/XVZt7KR1KyWCn3PIS/LFvADSuyoQ2lsiOFtM9C+KCuNWiqQmj7dPPlpvVeUycoDH";
+                break;
+            default:
+                parameters.vuforiaLicenseKey = "AVATY7T/////AAAAGQJxfNYzLUgGjSx0aOEU0Q0rpcfZO2h2sY1MhUZUr+Bu6RgoUMUP/nERGmD87ybv1/lM2LBFDxcBGRHkXvxtkHel4XEUCsNHFTGWYcVkMIZqctQsIrTe13MnUvSOfQj8ig7xw3iULcwDpY+xAftW61dKTJ0IAOCxx2F0QjJWqRJBxrEUR/DfQi4LyrgnciNMXCiZ8KFyBdC63XMYkQj2joTN579+2u5f8aSCe8jkAFnBLcB1slyaU9lhnlTEMcFjwrLBcWoYIFAZluvFT0LpqZRlS1/XYf45QBSJztFKHIsj1rbCgotAE36novnAQBs74ewnWsJifokJGOYWdFJveWzn3GE9OEH23Y5l7kFDu4wc";
                 break;
         }
 
@@ -225,11 +233,15 @@ public class LibraryVuforiaRoverRuckus {
         return RoverRuckus;
     }
 
-    public VuforiaTrackables LibraryVuforiaRoverRuckus(HardwareMap hardwareMap, robotConfig robotConfiguration, WebcamName webcam) {
+    public VuforiaTrackables LibraryVuforiaRoverRuckus(HardwareMap hardwareMap, robotConfig robotConfiguration, WebcamName webcam, boolean ShowView) {
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
-
+        VuforiaLocalizer.Parameters parameters;
+        if (ShowView) {
+            parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+        } else {
+            parameters = new VuforiaLocalizer.Parameters();
+        }
         switch (robotConfiguration.getTeamNumber()) {
             case "5291":
                 parameters.vuforiaLicenseKey = "AVATY7T/////AAAAGQJxfNYzLUgGjSx0aOEU0Q0rpcfZO2h2sY1MhUZUr+Bu6RgoUMUP/nERGmD87ybv1/lM2LBFDxcBGRHkXvxtkHel4XEUCsNHFTGWYcVkMIZqctQsIrTe13MnUvSOfQj8ig7xw3iULcwDpY+xAftW61dKTJ0IAOCxx2F0QjJWqRJBxrEUR/DfQi4LyrgnciNMXCiZ8KFyBdC63XMYkQj2joTN579+2u5f8aSCe8jkAFnBLcB1slyaU9lhnlTEMcFjwrLBcWoYIFAZluvFT0LpqZRlS1/XYf45QBSJztFKHIsj1rbCgotAE36novnAQBs74ewnWsJifokJGOYWdFJveWzn3GE9OEH23Y5l7kFDu4wc";
@@ -331,5 +343,9 @@ public class LibraryVuforiaRoverRuckus {
         }
 
         return RoverRuckus;
+    }
+
+    public VuforiaLocalizer getVuforiaLocalizer(){
+        return vuforia;
     }
 }

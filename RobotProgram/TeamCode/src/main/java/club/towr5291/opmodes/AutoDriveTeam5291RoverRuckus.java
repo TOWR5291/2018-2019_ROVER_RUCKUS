@@ -84,6 +84,7 @@ import club.towr5291.functions.ReadStepFileRoverRuckus;
 import club.towr5291.functions.RoverRuckusOCV;
 import club.towr5291.libraries.ImageCaptureOCV;
 import club.towr5291.libraries.LibraryStateSegAutoRoverRuckus;
+import club.towr5291.libraries.LibraryTensorFlowRoverRuckus;
 import club.towr5291.libraries.LibraryVuforiaRoverRuckus;
 import club.towr5291.libraries.TOWRDashBoard;
 import club.towr5291.libraries.TOWR5291LEDControl;
@@ -269,6 +270,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
     private RoverRuckusOCV elementColour = new RoverRuckusOCV();
 
     private ImageCaptureOCV imageCaptureOCV = new ImageCaptureOCV();
+    private LibraryTensorFlowRoverRuckus tensorFlowRoverRuckus = new LibraryTensorFlowRoverRuckus();
 
     private int mintNumberColourTries = 0;
     private Constants.ObjectColours mColour;
@@ -468,12 +470,13 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
 
         if (vuforiaWebcam) {
             robotWebcam = hardwareMap.get(WebcamName.class, "Webcam 1");
-            RoverRuckusTrackables = RoverRuckusVuforia.LibraryVuforiaRoverRuckus(hardwareMap, ourRobotConfig, robotWebcam);
+            RoverRuckusTrackables = RoverRuckusVuforia.LibraryVuforiaRoverRuckus(hardwareMap, ourRobotConfig, robotWebcam, false);
         } else{
-            RoverRuckusTrackables = RoverRuckusVuforia.LibraryVuforiaRoverRuckus(hardwareMap, ourRobotConfig);
+            RoverRuckusTrackables = RoverRuckusVuforia.LibraryVuforiaRoverRuckus(hardwareMap, ourRobotConfig, false);
         }
 
         imageCaptureOCV.initImageCaptureOCV(RoverRuckusVuforia, dashboard, fileLogger);
+        tensorFlowRoverRuckus.initTensorFlow(RoverRuckusVuforia.getVuforiaLocalizer(), hardwareMap, fileLogger, "RoverRuckus.tflite", "GOLD", "SILVER", true);
 
         fileLogger.writeEvent(3,"MAIN","Configured Vuforia - About to Activate");
         dashboard.displayPrintf(9, "Configured Vuforia - About to Activate");
@@ -637,6 +640,8 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
             fileLogger.close();
             fileLogger = null;
         }
+
+        tensorFlowRoverRuckus.shutdown();
 
         //switch opmode to teleop
         //opModeManager = (OpModeManagerImpl) onStop.internalOpModeServices;
@@ -1987,26 +1992,31 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
             case STATE_INIT:
                 fileLogger.writeEvent(2,"Initialised");
                 fileLogger.writeEvent(2,"Power: " + String.valueOf(mdblStepSpeed));
-                robotArms.intakeMotor.setPower(mdblStepSpeed);
+                robotArms.intakeServo1.setPosition(mdblStepSpeed);
+                robotArms.intakeServo2.setPosition(mdblStepSpeed);
                 mintCurrentStateInTake = Constants.stepState.STATE_RUNNING;
                 break;
             case STATE_RUNNING:
                 fileLogger.writeEvent(2,"Running");
                 fileLogger.writeEvent(2,"Power: " + String.valueOf(mdblStepSpeed));
-                robotArms.intakeMotor.setPower(mdblStepSpeed);
+                //robotArms.intakeMotor.setPower(mdblStepSpeed);
                 if (mdblStepSpeed == 0) {
                     mintCurrentStateInTake = Constants.stepState.STATE_COMPLETE;
                     deleteParallelStep();
                 }
+
                 if (mStateTime.milliseconds() >= mdblRobotParm1)
                 {
                     fileLogger.writeEvent(1,"Complete.......");
-                    robotArms.intakeMotor.setPower(0);
+                    robotArms.intakeServo1.setPosition(0);
+                    robotArms.intakeServo1.setPosition(0);
                     mintCurrentStateInTake = Constants.stepState.STATE_COMPLETE;
                     deleteParallelStep();
                 }//check timeout value
+
                 if (mStateTime.seconds() > mdblStepTimeout) {
-                    robotArms.intakeMotor.setPower(0);
+                    robotArms.intakeServo1.setPosition(0);
+                    robotArms.intakeServo2.setPosition(0);
                     fileLogger.writeEvent(1,"Timeout:- " + mStateTime.seconds());
                     //  Transition to a new state.
                     mintCurrentStateInTake = Constants.stepState.STATE_COMPLETE;
@@ -2017,7 +2027,8 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
     }
 
     private void tiltMotor(){
-        double dblDistanceToMoveTilt;
+        double dblDistanceToMoveTilt1;
+        double dblDistanceToMoveTilt2;
 
         fileLogger.setEventTag("tiltMotor()");
 
@@ -2025,22 +2036,42 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
             case STATE_INIT:
                 fileLogger.writeEvent(2, "Initialised");
                 robotArms.tiltMotor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                robotArms.tiltMotor2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
                 robotArms.tiltMotor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                dblDistanceToMoveTilt = robotArms.tiltMotor1.getCurrentPosition() + (mdblStepDistance * ourRobotConfig.getLIFTMAIN_COUNTS_PER_INCH());
-                fileLogger.writeEvent(2, "Distance to move = " + mdblStepDistance + ", dblDistanceToMoveTilt " + dblDistanceToMoveTilt);
-                robotArms.tiltMotor1.setTargetPosition((int)dblDistanceToMoveTilt);
+                robotArms.tiltMotor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+                dblDistanceToMoveTilt1 = robotArms.tiltMotor1.getCurrentPosition() + (mdblStepDistance * ourRobotConfig.getLIFTMAIN_COUNTS_PER_INCH());
+                dblDistanceToMoveTilt2 = robotArms.tiltMotor2.getCurrentPosition() + (mdblStepDistance * ourRobotConfig.getLIFTMAIN_COUNTS_PER_INCH());
+
+                fileLogger.writeEvent(2, "Distance to move = " + mdblStepDistance + ", dblDistanceToMoveTilt1 " + dblDistanceToMoveTilt1);
+                fileLogger.writeEvent(2, "Distance to move = " + mdblStepDistance + ", dblDistanceToMoveTilt2 " + dblDistanceToMoveTilt2);
+
+                robotArms.tiltMotor1.setTargetPosition((int)dblDistanceToMoveTilt1);
+                robotArms.tiltMotor2.setTargetPosition((int)dblDistanceToMoveTilt2);
+
                 robotArms.tiltMotor1.setPower(mdblStepSpeed);
+                robotArms.tiltMotor2.setPower(mdblStepSpeed);
+
                 robotArms.tiltMotor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                robotArms.tiltMotor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
                 mintCurrentStateTiltMotor = Constants.stepState.STATE_RUNNING;
                 break;
             case STATE_RUNNING:
                 fileLogger.writeEvent(2, "Running");
-                robotArms.tiltMotor1.setPower(mdblStepSpeed);
-                fileLogger.writeEvent(2, "Motor Speed Set: Busy 1 " + robotArms.tiltMotor1.isBusy());
 
-                if (!(robotArms.tiltMotor1.isBusy())){
+                robotArms.tiltMotor1.setPower(mdblStepSpeed);
+                robotArms.tiltMotor2.setPower(mdblStepSpeed);
+
+                fileLogger.writeEvent(2, "Motor Speed Set: Busy 1 " + robotArms.tiltMotor1.isBusy());
+                fileLogger.writeEvent(2, "Motor Speed Set: Busy 2 " + robotArms.tiltMotor2.isBusy());
+
+                if (!(robotArms.tiltMotor1.isBusy()) && !(robotArms.tiltMotor2.isBusy())){
                     fileLogger.writeEvent(2, "Motor 1 is not busy");
+                    fileLogger.writeEvent(2, "Motor 2 is not busy");
                     robotArms.tiltMotor1.setPower(0);
+                    robotArms.tiltMotor2.setPower(0);
                     fileLogger.writeEvent(2, "Finished");
                     mintCurrentStateTiltMotor = Constants.stepState.STATE_COMPLETE;
                     deleteParallelStep();
@@ -2048,6 +2079,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 //check timeout value
                 if (mStateTime.seconds() > mdblStepTimeout) {
                     robotArms.tiltMotor1.setPower(0);
+                    robotArms.tiltMotor2.setPower(0);
                     fileLogger.writeEvent(1,"Timeout:- " + mStateTime.seconds());
                     //  Transition to a new state.
                     mintCurrentStateTiltMotor = Constants.stepState.STATE_COMPLETE;

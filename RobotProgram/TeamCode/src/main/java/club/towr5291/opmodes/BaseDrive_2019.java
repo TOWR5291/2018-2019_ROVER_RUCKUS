@@ -73,18 +73,6 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
     private double controllerAModes                 = 5;
     private int debug;
 
-    private boolean blnPassedALimit = false;
-    private boolean blnRunningAutoTilt = false;
-    private boolean blnRunningAutoLift = false;
-    private double dblCurrentLiftCounts = 0;
-    private double dblStartingAngleMotorCount = 0; //This is the counts when the motor is at 0
-    private double mintCurrentLiftAngleDegrees = 0;
-    private static final double ANGLETOSCOREDEGREE = 45;
-    private static final double LIMITSWITCH1DEGREEMEASURE = 0;
-    private static final double LIMITSWITCH2DEGREEMEASURE = 0;
-    private static final double LIMITSWITCH3DEGREEMEASURE = 0;
-    private static final double LIMITSWITCH4DEGREEMEASURE = 0;
-
     private static TOWRDashBoard dashboard = null;
     public static TOWRDashBoard getDashboard()
     {
@@ -125,14 +113,15 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
 
         Arms.init(hardwareMap, dashboard);
         Arms.setHardwareArmDirections();
+
         Arms.tiltMotor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Arms.tiltMotor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
         Arms.tiltMotor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        fileLogger.writeEvent(2,"Arms Init");
-        dashboard.displayPrintf(0, "Arms Loaded");
+        Arms.tiltMotor2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         fileLogger.writeEvent("Starting init for sensors ", String.valueOf(runtime));
         Sensors.init(fileLogger, hardwareMap);
-        fileLogger.writeEvent("end init for sensors ", String.valueOf(runtime));
         dashboard.displayPrintf(0, "Sensors Loaded");
 
         fileLogger.writeEvent(2,"Sensors Init");
@@ -168,10 +157,10 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
 
         //dashboard.clearDisplay();
 
-        dashboard.displayPrintf(1, "Controller A Options");
-        dashboard.displayPrintf(2, "--------------------");
-        dashboard.displayPrintf(6, "Controller B Options");
-        dashboard.displayPrintf(7, "--------------------");
+        dashboard.displayPrintf(3, "Controller A Options");
+        dashboard.displayPrintf(4, "--------------------");
+        dashboard.displayPrintf(8, "Controller B Options");
+        dashboard.displayPrintf(9, "--------------------");
 
         //the main loop.  this is where the action happens
         while (opModeIsActive()) {
@@ -189,15 +178,15 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
             controllerAMode.incrementTick(gamepad1.start);
             controllerBMode.incrementTick(gamepad2.start);
 
-            dashboard.displayPrintf(3, "Power Multiplier:  " + robotPowerMultiplier.getTickCurrValue());
-            dashboard.displayPrintf(4, "Controller A Mode: " + (int)controllerAMode.getTickCurrValue());
-            dashboard.displayPrintf(8, "Controller B Mode: " + (int)controllerBMode.getTickCurrValue());
+            dashboard.displayPrintf(6, "Power Multiplier:  " + robotPowerMultiplier.getTickCurrValue());
+            dashboard.displayPrintf(7, "Controller A Mode: " + (int)controllerAMode.getTickCurrValue());
+            dashboard.displayPrintf(10, "Controller B Mode: " + (int)controllerBMode.getTickCurrValue());
 
             //drivers controller, operation based on the mode selection
             switch ((int)controllerAMode.getTickCurrValue()) {
                 case 1:
                     fileLogger.writeEvent(debug,"Controller Mode", "POV");
-                    dashboard.displayPrintf(5, "Controller POV:");
+                    dashboard.displayPrintf(5, "Controller POV");
                     /*
                      * Case 1 is the controller type POV
                      * POV uses both joy sticks to drive
@@ -247,74 +236,18 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
 
             dashboard.displayPrintf(10, "Lift Motor 1 Enc: " + Arms.getLiftMotor1Encoder());
             dashboard.displayPrintf(11, "Lift Motor 2 Enc: " + Arms.getLiftMotor2Encoder());
-            dashboard.displayPrintf(12, "Tilt Motor Enc  : " + Arms.getTiltLiftEncoder());
+            //dashboard.displayPrintf(12, "Tilt Motor Enc  : " + Arms.getTiltLiftEncoder());
             
             switch ((int)controllerBMode.getTickCurrValue()){
                 case 1:
                     dashboard.displayPrintf(9, "Controller B Standard");
                     fileLogger.writeEvent(debug,"Controller B Mode", "Standard");
 
-                    //Arms.tiltMotor1.setPower(-gamepad2.left_stick_y);
                     //Arms.setHardwareLiftPower(-gamepad2.right_stick_y);
-
-                    if (gamepad2.dpad_up && !blnRunningAutoTilt){
-                        Arms.tiltMotor1.setTargetPosition((int) (mintCurrentLiftAngleDegrees  - ANGLETOSCOREDEGREE));
-                        fileLogger.writeEvent(4, "Setting target position to tilt motor: " + String.valueOf(mintCurrentLiftAngleDegrees  - ANGLETOSCOREDEGREE));
-                        Arms.tiltMotor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        blnRunningAutoTilt = true;
-                    }
-                    if (!blnRunningAutoTilt) {
-                        Arms.intakeMotor.setPower(gamepad2.right_trigger - gamepad2.left_trigger);
-                    }
 
                     break;
             }
 
-        }
-
-        /* For the auto movement on the arms to work you need to find a limit switch to know the
-           current position so non of the auto movements work until a limit is passed
-         */
-        if (!blnPassedALimit){
-            if (Sensors.getLimitSwitch1AngleMotorState()){
-                //Setting the starting counts
-                //First get the amount of count per degree
-                //Then get the degree measure of the limit
-                //Finally take the current position and subtract it by the offset set above
-                dblStartingAngleMotorCount = Arms.tiltMotor1.getCurrentPosition() - (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH1DEGREEMEASURE);
-                fileLogger.writeEvent(5, "Passing Limit Switch One For The First Time -- now Auto Functions Work");
-                fileLogger.writeEvent(3, "Starting offset is: " + String.valueOf(dblStartingAngleMotorCount));
-                blnPassedALimit = true;
-            } else if (Sensors.getLimitSwitch2AngleMotorState()){
-                dblStartingAngleMotorCount = Arms.tiltMotor1.getCurrentPosition() - (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH2DEGREEMEASURE);
-                fileLogger.writeEvent(5, "Passing Limit Switch Two For The First Time -- now Auto Functions Work");
-                fileLogger.writeEvent(3, "Starting offset is: " + String.valueOf(dblStartingAngleMotorCount));
-                blnPassedALimit = true;
-            } else if (Sensors.getLimitSwitch2AngleMotorState()){
-                dblStartingAngleMotorCount = Arms.tiltMotor1.getCurrentPosition() - (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH3DEGREEMEASURE);
-                fileLogger.writeEvent(5, "Passing Limit Switch Three For The First Time -- now Auto Functions Work");
-                fileLogger.writeEvent(3, "Starting offset is: " + String.valueOf(dblStartingAngleMotorCount));
-                blnPassedALimit = true;
-            } else if (Sensors.getLimitSwitch2AngleMotorState()){
-                dblStartingAngleMotorCount = Arms.tiltMotor1.getCurrentPosition() - (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH4DEGREEMEASURE);
-                fileLogger.writeEvent(5, "Passing Limit Switch Four For The First Time -- now Auto Functions Work");
-                fileLogger.writeEvent(3, "Starting offset is: " + String.valueOf(dblStartingAngleMotorCount));
-                blnPassedALimit = true;
-            }
-        } else{
-            /*Now the Auto Function are OK to work me know the current position*/
-            mintCurrentLiftAngleDegrees = (Arms.tiltMotor1.getCurrentPosition() - dblStartingAngleMotorCount) * ourRobotConfig.getCOUNTS_PER_DEGREE_TILT();
-            fileLogger.writeEvent("Recorded the current tilt Position: " + String.valueOf(mintCurrentLiftAngleDegrees));
-
-            if(blnRunningAutoTilt){
-                Arms.tiltMotor1.setPower(.5);
-
-                if (!Arms.tiltMotor1.isBusy()){
-                    Arms.tiltMotor1.setPower(0);
-                    blnRunningAutoTilt = false;
-                    fileLogger.writeEvent(3, "Tilt Motor is not busy so now tuning off auto tilt");
-                }
-            }
         }
 
         //stop the logging

@@ -4,33 +4,24 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.widget.TextView;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.Gamepad;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 
 import club.towr5291.R;
+import club.towr5291.functions.Constants;
 import club.towr5291.functions.FileLogger;
 import club.towr5291.functions.TOWR5291Tick;
+import club.towr5291.libraries.TOWR5291LEDControl;
 import club.towr5291.libraries.TOWRDashBoard;
 import club.towr5291.libraries.robotConfig;
 import club.towr5291.libraries.robotConfigSettings;
-import club.towr5291.robotconfig.HardwareArmMotorsRoverRuckus;
 import club.towr5291.robotconfig.HardwareDriveMotors;
-import club.towr5291.robotconfig.HardwareSensorsRoverRuckus;
 
-/*
-    made by Wyatt Ashley on 8/2/2018
- */
-@TeleOp(name = "Motor Test", group = "Test")
-@Disabled
-public class MotorTest extends OpMode {
+public class LEDTest extends LinearOpMode {
 
-    private HardwareDriveMotors Robot = new HardwareDriveMotors();
-
+    public TOWR5291LEDControl leds;
     private SharedPreferences sharedPreferences;
 
     private FileLogger fileLogger;
@@ -38,6 +29,7 @@ public class MotorTest extends OpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private club.towr5291.libraries.robotConfig ourRobotConfig;
     private TOWR5291Tick controllerA = new TOWR5291Tick();
+    private TOWR5291Tick controllerB = new TOWR5291Tick();
 
     private static TOWRDashBoard dashboard = null;
     public static TOWRDashBoard getDashboard()
@@ -46,7 +38,7 @@ public class MotorTest extends OpMode {
     }
 
     @Override
-    public void init() {
+    public void runOpMode() throws InterruptedException {
         dashboard = TOWRDashBoard.createInstance(telemetry);
 
         FtcRobotControllerActivity act = (FtcRobotControllerActivity)(hardwareMap.appContext);
@@ -67,15 +59,24 @@ public class MotorTest extends OpMode {
         fileLogger.open();// Opening FileLogger
         fileLogger.writeEvent(TAG, "Log Started");// First Line Add To Log
 
-        Robot.init(fileLogger, hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(ourRobotConfig.getRobotConfigBase()));// Starting robot Hardware map
-
-        Robot.logEncoderCounts(fileLogger);// Logging The Encoder Counts
-        Robot.allMotorsStop();
+        // Set up the LEDS
+        leds = new TOWR5291LEDControl(hardwareMap, "green1", "red1", "blue1", "green2", "red2", "blue2");
+        leds.setLEDControlDemoMode(false);
+        leds.setLEDColour(Constants.LEDColours.LED_MAGENTA);
+        dashboard.displayPrintf(9, "initRobot LED Initiated!");
 
         controllerA.setTickMin(1);
         controllerA.setTickMax(4);
         controllerA.setRollOver(true);
         controllerA.setTickIncrement(1);
+
+        controllerB.setTickMin(1);
+        controllerB.setTickMax(4);
+        controllerB.setRollOver(true);
+        controllerB.setTickIncrement(1);
+
+        leds.setLEDLeftColour(Constants.LEDColours.LED_WHITE);
+        leds.setLEDRightColour(Constants.LEDColours.LED_WHITE);
 
         // All The Specification of the robot and controller
         fileLogger.writeEvent("Alliance Color", ourRobotConfig.getAllianceColor());
@@ -84,47 +85,53 @@ public class MotorTest extends OpMode {
         fileLogger.writeEvent("Robot Base Config", ourRobotConfig.getRobotConfigBase());
         fileLogger.writeEvent("Team Number", ourRobotConfig.getTeamNumber());
         fileLogger.writeEvent("Robot Controller Max Tick", String.valueOf(controllerA.getTickMax()));
-        fileLogger.writeEvent("Robot Controller Min Tick", String.valueOf(controllerA.getTickMin()));
-    }
+        fileLogger.writeEvent("Robot Controller Min Tick", String.valueOf(controllerB.getTickMin()));
+        waitForStart();
 
-    @Override
-    public void start(){
-        fileLogger.writeEvent("Starting Loop");
-    }
+        while(opModeIsActive()){
+            dashboard.displayText(1, "A To Change Left Color");
+            dashboard.displayText(2, "B To Change Right Color");
 
+            controllerA.incrementTick(gamepad1.a);
+            controllerB.incrementTick(gamepad1.b);
 
-    @Override
-    public void loop() {
-        Robot.setHardwareDriveDirections(robotConfigSettings.robotConfigChoice.valueOf(ourRobotConfig.getRobotConfigBase()));
+            switch ((int) controllerA.getTickCurrValue()){
+                case 1:
+                    leds.setLEDLeftColour(Constants.LEDColours.LED_RED);
+                    dashboard.displayText(3, "Current Color Left LED: RED");
+                    break;
+                case 2:
+                    leds.setLEDLeftColour(Constants.LEDColours.LED_BLUE);
+                    dashboard.displayText(3, "Current Color Left LED: BLUE");
+                    break;
+                case 3:
+                    leds.setLEDLeftColour(Constants.LEDColours.LED_GREEN);
+                    dashboard.displayText(3, "Current Color Left LED: GREEN");
+                    break;
+                case 4:
+                    leds.setLEDLeftColour(Constants.LEDColours.LED_WHITE);
+                    dashboard.displayText(3, "Current Color Left LED: WHITE");
+                    break;
+            }
 
-        controllerA.incrementTick(gamepad1.start);
-        dashboard.displayPrintf(0, String.valueOf(controllerA.getTickCurrValue()));
-
-        switch ((int) controllerA.getTickCurrValue()) {
-            case 1:
-                Robot.baseMotor4.setPower(0);
-                Robot.baseMotor2.setPower(0);
-                Robot.baseMotor3.setPower(0);
-                Robot.baseMotor1.setPower(-gamepad1.left_stick_y);
-                break;
-            case 2:
-                Robot.baseMotor1.setPower(0);
-                Robot.baseMotor3.setPower(0);
-                Robot.baseMotor4.setPower(0);
-                Robot.baseMotor2.setPower(-gamepad1.left_stick_y);
-                break;
-            case 3:
-                Robot.baseMotor1.setPower(0);
-                Robot.baseMotor2.setPower(0);
-                Robot.baseMotor4.setPower(0);
-                Robot.baseMotor3.setPower(-gamepad1.left_stick_y);
-                break;
-            case 4:
-                Robot.baseMotor1.setPower(0);
-                Robot.baseMotor2.setPower(0);
-                Robot.baseMotor3.setPower(0);
-                Robot.baseMotor4.setPower(-gamepad1.left_stick_y);
-                break;
+            switch ((int) controllerB.getTickCurrValue()){
+                case 1:
+                    leds.setLEDRightColour(Constants.LEDColours.LED_RED);
+                    dashboard.displayText(4, "Current Color Right LED: RED");
+                    break;
+                case 2:
+                    leds.setLEDRightColour(Constants.LEDColours.LED_BLUE);
+                    dashboard.displayText(4, "Current Color Right LED: BLUE");
+                    break;
+                case 3:
+                    leds.setLEDRightColour(Constants.LEDColours.LED_GREEN);
+                    dashboard.displayText(4, "Current Color Right LED: GREEN");
+                    break;
+                case 4:
+                    leds.setLEDRightColour(Constants.LEDColours.LED_WHITE);
+                    dashboard.displayText(4, "Current Color Right LED: WHITE");
+                    break;
+            }
         }
     }
 }
