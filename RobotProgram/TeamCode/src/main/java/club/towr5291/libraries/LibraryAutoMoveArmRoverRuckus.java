@@ -39,10 +39,10 @@ public class LibraryAutoMoveArmRoverRuckus {
         this.game2 = g2;
     }
 
-    public double[] checkCounts(){
+    private double[] checkTiltCounts(){
         if (sensorsRoverRuckus.getLimitSwitch1AngleMotorState()){
-            currentTiltEncoderCountMotor1 = (config.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH1DEGREEMEASURE) - startingAngleMotor1Count;
-            currentTiltEncoderCountMotor2 = (config.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH1DEGREEMEASURE) - startingAngleMotor2Count;
+            currentTiltEncoderCountMotor1 = (config.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH1DEGREEMEASURE);
+            currentTiltEncoderCountMotor2 = (config.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH1DEGREEMEASURE);
 
             if (!haveACurrentValue){
                 startingAngleMotor1Count = (config.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH1DEGREEMEASURE) - armMotorsRoverRuckus.tiltMotor1.getCurrentPosition();
@@ -51,8 +51,8 @@ public class LibraryAutoMoveArmRoverRuckus {
             }
 
         } else if (sensorsRoverRuckus.getLimitSwitch2AngleMotorState()){
-            currentTiltEncoderCountMotor1 = (config.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH2DEGREEMEASURE) - startingAngleMotor1Count;
-            currentTiltEncoderCountMotor2 = (config.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH2DEGREEMEASURE) - startingAngleMotor2Count;
+            currentTiltEncoderCountMotor1 = (config.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH2DEGREEMEASURE);
+            currentTiltEncoderCountMotor2 = (config.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH2DEGREEMEASURE);
 
             if (!haveACurrentValue){
                 startingAngleMotor1Count = (config.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH2DEGREEMEASURE) - armMotorsRoverRuckus.tiltMotor1.getCurrentPosition();
@@ -61,8 +61,8 @@ public class LibraryAutoMoveArmRoverRuckus {
             }
 
         } else if (sensorsRoverRuckus.getLimitSwitch3AngleMotorState()){
-            currentTiltEncoderCountMotor1 = (config.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH3DEGREEMEASURE) - startingAngleMotor1Count;
-            currentTiltEncoderCountMotor2 = (config.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH3DEGREEMEASURE) - startingAngleMotor2Count;
+            currentTiltEncoderCountMotor1 = (config.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH3DEGREEMEASURE);
+            currentTiltEncoderCountMotor2 = (config.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH3DEGREEMEASURE);
 
             if (!haveACurrentValue){
                 startingAngleMotor1Count = (config.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH3DEGREEMEASURE) - armMotorsRoverRuckus.tiltMotor1.getCurrentPosition();
@@ -71,8 +71,8 @@ public class LibraryAutoMoveArmRoverRuckus {
             }
 
         } else if (sensorsRoverRuckus.getLimitSwitch4AngleMotorState()){
-            currentTiltEncoderCountMotor1 = (config.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH4DEGREEMEASURE) - startingAngleMotor1Count;
-            currentTiltEncoderCountMotor2 = (config.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH4DEGREEMEASURE) - startingAngleMotor2Count;
+            currentTiltEncoderCountMotor1 = (config.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH4DEGREEMEASURE);
+            currentTiltEncoderCountMotor2 = (config.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH4DEGREEMEASURE);
 
             if (!haveACurrentValue){
                 startingAngleMotor1Count = (config.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH4DEGREEMEASURE) - armMotorsRoverRuckus.tiltMotor1.getCurrentPosition();
@@ -92,8 +92,8 @@ public class LibraryAutoMoveArmRoverRuckus {
     public void runAutoMove(){
         switch(stepState){
             case STATE_INIT:
-                armMotorsRoverRuckus.tiltMotor1.setTargetPosition((int) ((targetDegreeMoveToPosition * config.getCOUNTS_PER_DEGREE_TILT()) - checkCounts()[0]));
-                armMotorsRoverRuckus.tiltMotor2.setTargetPosition((int) ((targetDegreeMoveToPosition * config.getCOUNTS_PER_DEGREE_TILT()) - checkCounts()[1]));
+                armMotorsRoverRuckus.tiltMotor1.setTargetPosition((int) ((targetDegreeMoveToPosition * config.getCOUNTS_PER_DEGREE_TILT()) - checkTiltCounts()[0]));
+                armMotorsRoverRuckus.tiltMotor2.setTargetPosition((int) ((targetDegreeMoveToPosition * config.getCOUNTS_PER_DEGREE_TILT()) - checkTiltCounts()[1]));
 
                 armMotorsRoverRuckus.tiltMotor1.setPower(1);
                 armMotorsRoverRuckus.tiltMotor2.setPower(1);
