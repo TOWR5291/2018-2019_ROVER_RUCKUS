@@ -152,137 +152,317 @@ public class AutoSetupMenu extends OpModeMasterLinear implements FTCMenu.MenuBut
 
         delayMenu.setChildMenu(robotConfigMenu);
 
-        if (robotConfigBase.equals(robotConfigSettings.robotConfigChoice.TileRunner2x60.toString())) {
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60, true, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20, false, debugConfigMenu);
+        if (robotConfigBase.equals(robotConfigSettings.robotConfigChoice.TileRunner2x60Andy.toString())) {
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60Andy, true, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40REV.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20REV, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.Custom_11231_2016.toString(), robotConfigSettings.robotConfigChoice.Custom_11231_2016, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TankTread2x40Custom.toString(), robotConfigSettings.robotConfigChoice.TankTread2x40Custom, false, debugConfigMenu);
 
-        } else if (robotConfigBase.equals(robotConfigSettings.robotConfigChoice.TileRunner2x40.toString())) {
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40, true, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20, false, debugConfigMenu);
+        } else if (robotConfigBase.equals(robotConfigSettings.robotConfigChoice.TileRunner2x40Andy.toString())) {
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40Andy, true, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40REV.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40REV, true, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20REV, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.Custom_11231_2016.toString(), robotConfigSettings.robotConfigChoice.Custom_11231_2016, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TankTread2x40Custom.toString(), robotConfigSettings.robotConfigChoice.TankTread2x40Custom, false, debugConfigMenu);
 
-        } else if (robotConfigBase.equals(robotConfigSettings.robotConfigChoice.TileRunner2x20.toString())) {
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20, true, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20, false, debugConfigMenu);
+        } else if (robotConfigBase.equals(robotConfigSettings.robotConfigChoice.TileRunner2x40REV.toString())) {
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40REV.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40REV, true, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40Andy, true, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.Custom_11231_2016.toString(), robotConfigSettings.robotConfigChoice.Custom_11231_2016, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TankTread2x40Custom.toString(), robotConfigSettings.robotConfigChoice.TankTread2x40Custom, false, debugConfigMenu);
+
+        } else if (robotConfigBase.equals(robotConfigSettings.robotConfigChoice.TileRunner2x20Andy.toString())) {
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20Andy, true, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20REV, true, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40REV.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.Custom_11231_2016.toString(), robotConfigSettings.robotConfigChoice.Custom_11231_2016, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TankTread2x40Custom.toString(), robotConfigSettings.robotConfigChoice.TankTread2x40Custom, false, debugConfigMenu);
+
+        } else if (robotConfigBase.equals(robotConfigSettings.robotConfigChoice.TileRunner2x20REV.toString())) {
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20REV, true, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20Andy, true, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40REV.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20REV, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.Custom_11231_2016.toString(), robotConfigSettings.robotConfigChoice.Custom_11231_2016, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TankTread2x40Custom.toString(), robotConfigSettings.robotConfigChoice.TankTread2x40Custom, false, debugConfigMenu);
 
         } else if (robotConfigBase.equals(robotConfigSettings.robotConfigChoice.TankTread2x40Custom.toString())) {
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TankTread2x40Custom.toString(), robotConfigSettings.robotConfigChoice.TankTread2x40Custom, true, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40REV.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20REV, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.Custom_11231_2016.toString(), robotConfigSettings.robotConfigChoice.Custom_11231_2016, false, debugConfigMenu);
 
         } else if (robotConfigBase.equals(robotConfigSettings.robotConfigChoice.Custom_11231_2016.toString())) {
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.Custom_11231_2016.toString(), robotConfigSettings.robotConfigChoice.Custom_11231_2016, true, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TankTread2x40Custom.toString(), robotConfigSettings.robotConfigChoice.TankTread2x40Custom, false, debugConfigMenu);
-
-        } else if (robotConfigBase.equals(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20.toString())) {
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20, true, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.Custom_11231_2016.toString(), robotConfigSettings.robotConfigChoice.Custom_11231_2016, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TankTread2x40Custom.toString(), robotConfigSettings.robotConfigChoice.TankTread2x40Custom, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TankTread2x40Custom.toString(), robotConfigSettings.robotConfigChoice.TankTread2x40Custom, true, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40REV.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20REV, false, debugConfigMenu);
 
-        } else if (robotConfigBase.equals(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40.toString())) {
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40, true, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20, false, debugConfigMenu);
+        } else if (robotConfigBase.equals(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20Andy.toString())) {
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40REV.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20REV, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.Custom_11231_2016.toString(), robotConfigSettings.robotConfigChoice.Custom_11231_2016, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TankTread2x40Custom.toString(), robotConfigSettings.robotConfigChoice.TankTread2x40Custom, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TankTread2x40Custom.toString(), robotConfigSettings.robotConfigChoice.TankTread2x40Custom, true, debugConfigMenu);
 
-        }  else if (robotConfigBase.equals(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60.toString())) {
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60, true, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20, false, debugConfigMenu);
+        } else if (robotConfigBase.equals(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20REV.toString())) {
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40REV.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20REV, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.Custom_11231_2016.toString(), robotConfigSettings.robotConfigChoice.Custom_11231_2016, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TankTread2x40Custom.toString(), robotConfigSettings.robotConfigChoice.TankTread2x40Custom, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TankTread2x40Custom.toString(), robotConfigSettings.robotConfigChoice.TankTread2x40Custom, true, debugConfigMenu);
 
-        } else if (robotConfigBase.equals(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20.toString())) {
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20, true, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20, false, debugConfigMenu);
+        } else if (robotConfigBase.equals(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40Andy.toString())) {
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40REV.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20REV, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.Custom_11231_2016.toString(), robotConfigSettings.robotConfigChoice.Custom_11231_2016, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TankTread2x40Custom.toString(), robotConfigSettings.robotConfigChoice.TankTread2x40Custom, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TankTread2x40Custom.toString(), robotConfigSettings.robotConfigChoice.TankTread2x40Custom, true, debugConfigMenu);
 
-        } else if (robotConfigBase.equals(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20.toString())) {
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20, true, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60, false, debugConfigMenu);
+
+        } else if (robotConfigBase.equals(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40REV.toString())) {
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40REV.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20REV, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.Custom_11231_2016.toString(), robotConfigSettings.robotConfigChoice.Custom_11231_2016, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TankTread2x40Custom.toString(), robotConfigSettings.robotConfigChoice.TankTread2x40Custom, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TankTread2x40Custom.toString(), robotConfigSettings.robotConfigChoice.TankTread2x40Custom, true, debugConfigMenu);
+
+
+        } else if (robotConfigBase.equals(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60Andy.toString())) {
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40REV.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.Custom_11231_2016.toString(), robotConfigSettings.robotConfigChoice.Custom_11231_2016, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TankTread2x40Custom.toString(), robotConfigSettings.robotConfigChoice.TankTread2x40Custom, true, debugConfigMenu);
+
+
+        } else if (robotConfigBase.equals(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20Andy.toString())) {
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40REV.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.Custom_11231_2016.toString(), robotConfigSettings.robotConfigChoice.Custom_11231_2016, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TankTread2x40Custom.toString(), robotConfigSettings.robotConfigChoice.TankTread2x40Custom, true, debugConfigMenu);
+
+
+        } else if (robotConfigBase.equals(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20REV.toString())) {
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40REV.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.Custom_11231_2016.toString(), robotConfigSettings.robotConfigChoice.Custom_11231_2016, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TankTread2x40Custom.toString(), robotConfigSettings.robotConfigChoice.TankTread2x40Custom, true, debugConfigMenu);
+
+
+        } else if (robotConfigBase.equals(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20Andy.toString())) {
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40REV.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.Custom_11231_2016.toString(), robotConfigSettings.robotConfigChoice.Custom_11231_2016, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TankTread2x40Custom.toString(), robotConfigSettings.robotConfigChoice.TankTread2x40Custom, true, debugConfigMenu);
+
+
+        } else if (robotConfigBase.equals(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20REV.toString())) {
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40REV.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.Custom_11231_2016.toString(), robotConfigSettings.robotConfigChoice.Custom_11231_2016, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TankTread2x40Custom.toString(), robotConfigSettings.robotConfigChoice.TankTread2x40Custom, true, debugConfigMenu);
 
         } else {
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60, true, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x40REV.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x40REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunner2x60Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunner2x60Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x40REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanum2x60Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20REV, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerMecanumOrbital2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20Andy.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20Andy, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20REV.toString(), robotConfigSettings.robotConfigChoice.TileRunnerOrbital2x20REV, false, debugConfigMenu);
             robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.Custom_11231_2016.toString(), robotConfigSettings.robotConfigChoice.Custom_11231_2016, false, debugConfigMenu);
-            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TankTread2x40Custom.toString(), robotConfigSettings.robotConfigChoice.TankTread2x40Custom, false, debugConfigMenu);
+            robotConfigMenu.addChoice(robotConfigSettings.robotConfigChoice.TankTread2x40Custom.toString(), robotConfigSettings.robotConfigChoice.TankTread2x40Custom, true, debugConfigMenu);
         }
 
         switch (debug) {

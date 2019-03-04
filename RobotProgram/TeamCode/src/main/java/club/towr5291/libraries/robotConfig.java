@@ -224,7 +224,19 @@ public class robotConfig {
         boolean configLoaded = false;
 
         switch (robotConfigBase) {
-            case "TileRunner2x40":   //Velocity Vortex Competition Base
+            case "TileRunner2x60Andy":
+                REVERSE_DIRECTION = 1;                                                       // Reverse the direction without significant code changes, (using motor FORWARD REVERSE will affect the driver station as we use same robotconfig file
+                COUNTS_PER_MOTOR_REV = 1680;                                                    // eg: TETRIX = 1440 pulses, NeveRest 20 = 560 pulses, NeveRest 40 =  1120, NeveRest 60 = 1680 pulses
+                DRIVE_GEAR_REDUCTION = 0.7;                                                    // This is < 1.0 if geared UP, Tilerunner is geared up
+                WHEEL_DIAMETER_INCHES = 4.0;                                                     // For figuring circumference
+                WHEEL_ACTUAL_FUDGE = 1;                                                        // Fine tuning amount
+                COUNTS_PER_INCH = ((COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415)) * WHEEL_ACTUAL_FUDGE * REVERSE_DIRECTION;
+                ROBOT_TRACK = 16.5;                                                     //  distance between centerline of rear wheels robot will pivot on rear wheel of omni on front, 16.5 track is 103.67 inches full circle
+                WHEEL_TURN_FUDGE = 1.0;                                                        // Fine tuning amount
+                COUNTS_PER_DEGREE = (((2 * 3.1415 * ROBOT_TRACK) * COUNTS_PER_INCH) / 360) * WHEEL_TURN_FUDGE;
+                configLoaded = true;
+                break;
+            case "TileRunner2x40Andy":   //Velocity Vortex Competition Base
                 REVERSE_DIRECTION = 1;                                                       // Reverse the direction without significant code changes, (using motor FORWARD REVERSE will affect the driver station as we use same robotconfig file
                 COUNTS_PER_MOTOR_REV = 1120;                                                    // eg: TETRIX = 1440 pulses, NeveRest 20 = 560 pulses, NeveRest 40 =  1120, NeveRest 60 = 1680 pulses
                 DRIVE_GEAR_REDUCTION = 0.7;                                                    // This is < 1.0 if geared UP, Tilerunner is geared up
@@ -237,19 +249,7 @@ public class robotConfig {
                 configLoaded = true;
                 //load the power table
                 break;
-            case "TileRunner2x60":
-                REVERSE_DIRECTION = 1;                                                       // Reverse the direction without significant code changes, (using motor FORWARD REVERSE will affect the driver station as we use same robotconfig file
-                COUNTS_PER_MOTOR_REV = 1680;                                                    // eg: TETRIX = 1440 pulses, NeveRest 20 = 560 pulses, NeveRest 40 =  1120, NeveRest 60 = 1680 pulses
-                DRIVE_GEAR_REDUCTION = 0.7;                                                    // This is < 1.0 if geared UP, Tilerunner is geared up
-                WHEEL_DIAMETER_INCHES = 4.0;                                                     // For figuring circumference
-                WHEEL_ACTUAL_FUDGE = 1;                                                        // Fine tuning amount
-                COUNTS_PER_INCH = ((COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415)) * WHEEL_ACTUAL_FUDGE * REVERSE_DIRECTION;
-                ROBOT_TRACK = 16.5;                                                     //  distance between centerline of rear wheels robot will pivot on rear wheel of omni on front, 16.5 track is 103.67 inches full circle
-                WHEEL_TURN_FUDGE = 1.0;                                                        // Fine tuning amount
-                COUNTS_PER_DEGREE = (((2 * 3.1415 * ROBOT_TRACK) * COUNTS_PER_INCH) / 360) * WHEEL_TURN_FUDGE;
-                configLoaded = true;
-                break;
-            case "TileRunner2x20":
+            case "TileRunner2x20Andy":
                 REVERSE_DIRECTION = 1;                                                       // Reverse the direction without significant code changes, (using motor FORWARD REVERSE will affect the driver station as we use same robotconfig file
                 COUNTS_PER_MOTOR_REV = 560;                                                    // eg: TETRIX = 1440 pulses, NeveRest 20 = 560 pulses, NeveRest 40 =  1120, NeveRest 60 = 1680 pulses
                 DRIVE_GEAR_REDUCTION = 0.7;                                                    // This is < 1.0 if geared UP, Tilerunner is geared up
@@ -261,80 +261,7 @@ public class robotConfig {
                 COUNTS_PER_DEGREE = (((2 * 3.1415 * ROBOT_TRACK) * COUNTS_PER_INCH) / 360) * WHEEL_TURN_FUDGE;
                 configLoaded = true;
                 break;
-            case "5291 Tank Tread-2x40 Custom":   //for tank tread base
-                REVERSE_DIRECTION = 1;
-                COUNTS_PER_MOTOR_REV = 1120;                                                    // eg: TETRIX = 1440 pulses, NeveRest 20 = 560 pulses, NeveRest 40 =  1120, NeveRest 60 = 1680 pulses
-                DRIVE_GEAR_REDUCTION = 1.0;                                                     // Tank Tread is 1:1 ration
-                WHEEL_DIAMETER_INCHES = 3.75;                                                     // For figuring circumference
-                WHEEL_ACTUAL_FUDGE = 1;                                                        // Fine tuning amount
-                COUNTS_PER_INCH = ((COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415)) * WHEEL_ACTUAL_FUDGE * REVERSE_DIRECTION;
-                ROBOT_TRACK = 18;                                                     //  distance between centerline of rear wheels robot will pivot on rear wheel of omni on front, 16.5 track is 103.67 inches full circle
-                WHEEL_TURN_FUDGE = 1.12;                                                        // Fine tuning amount
-                COUNTS_PER_DEGREE = (((2 * 3.1415 * ROBOT_TRACK) * COUNTS_PER_INCH) / 360) * WHEEL_TURN_FUDGE;
-                MECANUM_TURN_OFFSET = 0;
-                configLoaded = true;                                                      //load the power table
-                break;
-            case "TileRunnerMecanum2x20":
-                REVERSE_DIRECTION = 1;                                                        // Reverse the direction without significant code changes, (using motor FORWARD REVERSE will affect the driver station as we use same robotconfig file
-                COUNTS_PER_MOTOR_REV = 560;                                                    // eg: TETRIX = 1440 pulses, NeveRest 20 = 560 pulses, NeveRest 40 =  1120, NeveRest 60 = 1680 pulses
-                DRIVE_GEAR_REDUCTION = 1.0;                                                     // This is < 1.0 if geared UP, Tilerunner is geared up
-                WHEEL_DIAMETER_INCHES = 4.0;                                                     // For figuring circumference
-                WHEEL_ACTUAL_FUDGE = 1.02;                                                     // Fine tuning amount
-                COUNTS_PER_INCH = ((COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415)) * WHEEL_ACTUAL_FUDGE * REVERSE_DIRECTION;
-                COUNTS_PER_INCH_STRAFE_FRONT_OFFSET = 1;
-                COUNTS_PER_INCH_STRAFE_REAR_OFFSET = 1;
-                COUNTS_PER_INCH_STRAFE_LEFT_OFFSET = 1;
-                COUNTS_PER_INCH_STRAFE_RIGHT_OFFSET = .85;
-                COUNTS_PER_INCH_STRAFE = COUNTS_PER_INCH * 1.65;
-                ROBOT_TRACK = 16.5;                                                     //  distance between centerline of rear wheels robot will pivot on rear wheel of omni on front, 16.5 track is 103.67 inches full circle
-                WHEEL_TURN_FUDGE = 1.0;                                                        // Fine tuning amount
-                COUNTS_PER_DEGREE = (((2 * 3.1415 * ROBOT_TRACK) * COUNTS_PER_INCH) / 360) * WHEEL_TURN_FUDGE;
-                LIFTMAIN_COUNTS_PER_INCH = 420;                                                   //number of encoder counts per inch
-                LIFTTOP_COUNTS_PER_INCH = -420;                                                   //number of encoder counts per inch
-                MECANUM_TURN_OFFSET = 1.72;
-                configLoaded = true;
-                break;
-            case "TileRunnerMecanum2x40":
-                REVERSE_DIRECTION = 1;                                                        // Reverse the direction without significant code changes, (using motor FORWARD REVERSE will affect the driver station as we use same robotconfig file
-                COUNTS_PER_MOTOR_REV = 1120;                                                    // eg: TETRIX = 1440 pulses, NeveRest 20 = 560 pulses, NeveRest 40 =  1120, NeveRest 60 = 1680 pulses
-                DRIVE_GEAR_REDUCTION = 1.0;                                                     // This is < 1.0 if geared UP, Tilerunner is geared up
-                WHEEL_DIAMETER_INCHES = 4.0;                                                     // For figuring circumference
-                WHEEL_ACTUAL_FUDGE = 1.02;                                                     // Fine tuning amount
-                COUNTS_PER_INCH = ((COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415)) * WHEEL_ACTUAL_FUDGE * REVERSE_DIRECTION;
-                COUNTS_PER_INCH_STRAFE_FRONT_OFFSET = 1;
-                COUNTS_PER_INCH_STRAFE_REAR_OFFSET = 1;
-                COUNTS_PER_INCH_STRAFE_LEFT_OFFSET = 1;
-                COUNTS_PER_INCH_STRAFE_RIGHT_OFFSET = .85;
-                COUNTS_PER_INCH_STRAFE = COUNTS_PER_INCH * 1.65;
-                ROBOT_TRACK = 16.5;                                                     //  distance between centerline of rear wheels robot will pivot on rear wheel of omni on front, 16.5 track is 103.67 inches full circle
-                WHEEL_TURN_FUDGE = 1.0;                                                        // Fine tuning amount
-                COUNTS_PER_DEGREE = (((2 * 3.1415 * ROBOT_TRACK) * COUNTS_PER_INCH) / 360) * WHEEL_TURN_FUDGE;
-                LIFTMAIN_COUNTS_PER_INCH = 420;                                                   //number of encoder counts per inch
-                LIFTTOP_COUNTS_PER_INCH = -420;                                                   //number of encoder counts per inch
-                MECANUM_TURN_OFFSET = 1.72;
-                configLoaded = true;
-                break;
-            case "TileRunnerMecanum2x60":
-                REVERSE_DIRECTION = 1;                                                        // Reverse the direction without significant code changes, (using motor FORWARD REVERSE will affect the driver station as we use same robotconfig file
-                COUNTS_PER_MOTOR_REV = 1680;                                                    // eg: TETRIX = 1440 pulses, NeveRest 20 = 560 pulses, NeveRest 40 =  1120, NeveRest 60 = 1680 pulses
-                DRIVE_GEAR_REDUCTION = 1.0;                                                     // This is < 1.0 if geared UP, Tilerunner is geared up
-                WHEEL_DIAMETER_INCHES = 4.0;                                                     // For figuring circumference
-                WHEEL_ACTUAL_FUDGE = 1.02;                                                     // Fine tuning amount
-                COUNTS_PER_INCH = ((COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415)) * WHEEL_ACTUAL_FUDGE * REVERSE_DIRECTION;
-                COUNTS_PER_INCH_STRAFE_FRONT_OFFSET = 1;
-                COUNTS_PER_INCH_STRAFE_REAR_OFFSET = 1;
-                COUNTS_PER_INCH_STRAFE_LEFT_OFFSET = 1;
-                COUNTS_PER_INCH_STRAFE_RIGHT_OFFSET = .85;
-                COUNTS_PER_INCH_STRAFE = COUNTS_PER_INCH * 1.65;
-                ROBOT_TRACK = 16.5;                                                     //  distance between centerline of rear wheels robot will pivot on rear wheel of omni on front, 16.5 track is 103.67 inches full circle
-                WHEEL_TURN_FUDGE = 1.0;                                                        // Fine tuning amount
-                COUNTS_PER_DEGREE = (((2 * 3.1415 * ROBOT_TRACK) * COUNTS_PER_INCH) / 360) * WHEEL_TURN_FUDGE;
-                LIFTMAIN_COUNTS_PER_INCH = 420;                                                   //number of encoder counts per inch
-                LIFTTOP_COUNTS_PER_INCH = -420;                                                   //number of encoder counts per inch
-                MECANUM_TURN_OFFSET = 1.72;
-                configLoaded = true;
-                break;
-            case "TileRunnerMecanumOrbital2x20":
+            case "TileRunnerOrbital2x20Andy":
                 REVERSE_DIRECTION = 1;                                                        // Reverse the direction without significant code changes, (using motor FORWARD REVERSE will affect the driver station as we use same robotconfig file
                 COUNTS_PER_MOTOR_REV = 537.6;                                                    // eg: TETRIX = 1440 pulses, NeveRest 20 = 560 pulses, NeveRest 40 =  1120, NeveRest 60 = 1680 pulses
                 DRIVE_GEAR_REDUCTION = 1.0;                                                     // This is < 1.0 if geared UP, Tilerunner is geared up
@@ -354,6 +281,206 @@ public class robotConfig {
                 COUNTS_PER_DEGREE_TILT_MOTOR = 30;
                 //number of encoder counts per inch
                 configLoaded = true;
+                break;
+            case "TileRunnerMecanum2x20Andy":
+                REVERSE_DIRECTION = 1;                                                        // Reverse the direction without significant code changes, (using motor FORWARD REVERSE will affect the driver station as we use same robotconfig file
+                COUNTS_PER_MOTOR_REV = 560;                                                    // eg: TETRIX = 1440 pulses, NeveRest 20 = 560 pulses, NeveRest 40 =  1120, NeveRest 60 = 1680 pulses
+                DRIVE_GEAR_REDUCTION = 1.0;                                                     // This is < 1.0 if geared UP, Tilerunner is geared up
+                WHEEL_DIAMETER_INCHES = 4.0;                                                     // For figuring circumference
+                WHEEL_ACTUAL_FUDGE = 1.02;                                                     // Fine tuning amount
+                COUNTS_PER_INCH = ((COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415)) * WHEEL_ACTUAL_FUDGE * REVERSE_DIRECTION;
+                COUNTS_PER_INCH_STRAFE_FRONT_OFFSET = 1;
+                COUNTS_PER_INCH_STRAFE_REAR_OFFSET = 1;
+                COUNTS_PER_INCH_STRAFE_LEFT_OFFSET = 1;
+                COUNTS_PER_INCH_STRAFE_RIGHT_OFFSET = .85;
+                COUNTS_PER_INCH_STRAFE = COUNTS_PER_INCH * 1.65;
+                ROBOT_TRACK = 16.5;                                                     //  distance between centerline of rear wheels robot will pivot on rear wheel of omni on front, 16.5 track is 103.67 inches full circle
+                WHEEL_TURN_FUDGE = 1.0;                                                        // Fine tuning amount
+                COUNTS_PER_DEGREE = (((2 * 3.1415 * ROBOT_TRACK) * COUNTS_PER_INCH) / 360) * WHEEL_TURN_FUDGE;
+                LIFTMAIN_COUNTS_PER_INCH = 420;                                                   //number of encoder counts per inch
+                LIFTTOP_COUNTS_PER_INCH = -420;                                                   //number of encoder counts per inch
+                MECANUM_TURN_OFFSET = 1.72;
+                configLoaded = true;
+                break;
+            case "TileRunnerMecanum2x40Andy":
+                REVERSE_DIRECTION = 1;                                                        // Reverse the direction without significant code changes, (using motor FORWARD REVERSE will affect the driver station as we use same robotconfig file
+                COUNTS_PER_MOTOR_REV = 1120;                                                    // eg: TETRIX = 1440 pulses, NeveRest 20 = 560 pulses, NeveRest 40 =  1120, NeveRest 60 = 1680 pulses
+                DRIVE_GEAR_REDUCTION = 1.0;                                                     // This is < 1.0 if geared UP, Tilerunner is geared up
+                WHEEL_DIAMETER_INCHES = 4.0;                                                     // For figuring circumference
+                WHEEL_ACTUAL_FUDGE = 1.02;                                                     // Fine tuning amount
+                COUNTS_PER_INCH = ((COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415)) * WHEEL_ACTUAL_FUDGE * REVERSE_DIRECTION;
+                COUNTS_PER_INCH_STRAFE_FRONT_OFFSET = 1;
+                COUNTS_PER_INCH_STRAFE_REAR_OFFSET = 1;
+                COUNTS_PER_INCH_STRAFE_LEFT_OFFSET = 1;
+                COUNTS_PER_INCH_STRAFE_RIGHT_OFFSET = .85;
+                COUNTS_PER_INCH_STRAFE = COUNTS_PER_INCH * 1.65;
+                ROBOT_TRACK = 16.5;                                                     //  distance between centerline of rear wheels robot will pivot on rear wheel of omni on front, 16.5 track is 103.67 inches full circle
+                WHEEL_TURN_FUDGE = 1.0;                                                        // Fine tuning amount
+                COUNTS_PER_DEGREE = (((2 * 3.1415 * ROBOT_TRACK) * COUNTS_PER_INCH) / 360) * WHEEL_TURN_FUDGE;
+                LIFTMAIN_COUNTS_PER_INCH = 420;                                                   //number of encoder counts per inch
+                LIFTTOP_COUNTS_PER_INCH = -420;                                                   //number of encoder counts per inch
+                MECANUM_TURN_OFFSET = 1.72;
+                configLoaded = true;
+                break;
+            case "TileRunnerMecanum2x60Andy":
+                REVERSE_DIRECTION = 1;                                                        // Reverse the direction without significant code changes, (using motor FORWARD REVERSE will affect the driver station as we use same robotconfig file
+                COUNTS_PER_MOTOR_REV = 1680;                                                    // eg: TETRIX = 1440 pulses, NeveRest 20 = 560 pulses, NeveRest 40 =  1120, NeveRest 60 = 1680 pulses
+                DRIVE_GEAR_REDUCTION = 1.0;                                                     // This is < 1.0 if geared UP, Tilerunner is geared up
+                WHEEL_DIAMETER_INCHES = 4.0;                                                     // For figuring circumference
+                WHEEL_ACTUAL_FUDGE = 1.02;                                                     // Fine tuning amount
+                COUNTS_PER_INCH = ((COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415)) * WHEEL_ACTUAL_FUDGE * REVERSE_DIRECTION;
+                COUNTS_PER_INCH_STRAFE_FRONT_OFFSET = 1;
+                COUNTS_PER_INCH_STRAFE_REAR_OFFSET = 1;
+                COUNTS_PER_INCH_STRAFE_LEFT_OFFSET = 1;
+                COUNTS_PER_INCH_STRAFE_RIGHT_OFFSET = .85;
+                COUNTS_PER_INCH_STRAFE = COUNTS_PER_INCH * 1.65;
+                ROBOT_TRACK = 16.5;                                                     //  distance between centerline of rear wheels robot will pivot on rear wheel of omni on front, 16.5 track is 103.67 inches full circle
+                WHEEL_TURN_FUDGE = 1.0;                                                        // Fine tuning amount
+                COUNTS_PER_DEGREE = (((2 * 3.1415 * ROBOT_TRACK) * COUNTS_PER_INCH) / 360) * WHEEL_TURN_FUDGE;
+                LIFTMAIN_COUNTS_PER_INCH = 420;                                                   //number of encoder counts per inch
+                LIFTTOP_COUNTS_PER_INCH = -420;                                                   //number of encoder counts per inch
+                MECANUM_TURN_OFFSET = 1.72;
+                configLoaded = true;
+                break;
+            case "TileRunnerMecanumOrbital2x20Andy":
+                REVERSE_DIRECTION = 1;                                                        // Reverse the direction without significant code changes, (using motor FORWARD REVERSE will affect the driver station as we use same robotconfig file
+                COUNTS_PER_MOTOR_REV = 537.6;                                                    // eg: TETRIX = 1440 pulses, NeveRest 20 = 560 pulses, NeveRest 40 =  1120, NeveRest 60 = 1680 pulses
+                DRIVE_GEAR_REDUCTION = 1.0;                                                     // This is < 1.0 if geared UP, Tilerunner is geared up
+                WHEEL_DIAMETER_INCHES = 4.0;                                                     // For figuring circumference
+                WHEEL_ACTUAL_FUDGE = 1.02;                                                     // Fine tuning amount
+                COUNTS_PER_INCH = ((COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415)) * WHEEL_ACTUAL_FUDGE * REVERSE_DIRECTION;
+                COUNTS_PER_INCH_STRAFE_FRONT_OFFSET = 1;
+                COUNTS_PER_INCH_STRAFE_REAR_OFFSET = 1;
+                COUNTS_PER_INCH_STRAFE_LEFT_OFFSET = 1;
+                COUNTS_PER_INCH_STRAFE_RIGHT_OFFSET = 1;
+                COUNTS_PER_INCH_STRAFE = COUNTS_PER_INCH * 1.1;
+                ROBOT_TRACK = 16.5;                                                     //  distance between centerline of rear wheels robot will pivot on rear wheel of omni on front, 16.5 track is 103.67 inches full circle
+                WHEEL_TURN_FUDGE = 1.0;                                                        // Fine tuning amount
+                COUNTS_PER_DEGREE = (((2 * 3.1415 * ROBOT_TRACK) * COUNTS_PER_INCH) / 360) * WHEEL_TURN_FUDGE;
+                LIFTMAIN_COUNTS_PER_INCH = 456;
+                MECANUM_TURN_OFFSET = 1.72;
+                COUNTS_PER_DEGREE_TILT_MOTOR = 30;
+                //number of encoder counts per inch
+                configLoaded = true;
+                break;
+
+
+            case "TileRunner2x40REV":
+                REVERSE_DIRECTION = 1;                                                       // Reverse the direction without significant code changes, (using motor FORWARD REVERSE will affect the driver station as we use same robotconfig file
+                //TODO find and Fix encoder Count for REV 40 Motor
+                COUNTS_PER_MOTOR_REV = 1120;                                                    // eg: TETRIX = 1440 pulses, NeveRest 20 = 560 pulses, NeveRest 40 =  1120, NeveRest 60 = 1680 pulses
+                DRIVE_GEAR_REDUCTION = 0.7;                                                    // This is < 1.0 if geared UP, Tilerunner is geared up
+                WHEEL_DIAMETER_INCHES = 4.0;                                                     // For figuring circumference
+                WHEEL_ACTUAL_FUDGE = 1;                                                        // Fine tuning amount
+                COUNTS_PER_INCH = ((COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415)) * WHEEL_ACTUAL_FUDGE * REVERSE_DIRECTION;
+                ROBOT_TRACK = 16.5;                                                     //  distance between centerline of rear wheels robot will pivot on rear wheel of omni on front, 16.5 track is 103.67 inches full circle
+                WHEEL_TURN_FUDGE = 1.0;                                                        // Fine tuning amount
+                COUNTS_PER_DEGREE = (((2 * 3.1415 * ROBOT_TRACK) * COUNTS_PER_INCH) / 360) * WHEEL_TURN_FUDGE;
+                configLoaded = true;
+                //load the power table
+                break;
+            case "TileRunner2x20REV":
+                REVERSE_DIRECTION = 1;                                                       // Reverse the direction without significant code changes, (using motor FORWARD REVERSE will affect the driver station as we use same robotconfig file
+                //TODO find and ix encoder counts for REV 20 Motor
+                COUNTS_PER_MOTOR_REV = 560;                                                    // eg: TETRIX = 1440 pulses, NeveRest 20 = 560 pulses, NeveRest 40 =  1120, NeveRest 60 = 1680 pulses
+                DRIVE_GEAR_REDUCTION = 0.7;                                                    // This is < 1.0 if geared UP, Tilerunner is geared up
+                WHEEL_DIAMETER_INCHES = 4.0;                                                     // For figuring circumference
+                WHEEL_ACTUAL_FUDGE = 1;                                                        // Fine tuning amount
+                COUNTS_PER_INCH = ((COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415)) * WHEEL_ACTUAL_FUDGE * REVERSE_DIRECTION;
+                ROBOT_TRACK = 16.5;                                                     //  distance between centerline of rear wheels robot will pivot on rear wheel of omni on front, 16.5 track is 103.67 inches full circle
+                WHEEL_TURN_FUDGE = 1.0;                                                        // Fine tuning amount
+                COUNTS_PER_DEGREE = (((2 * 3.1415 * ROBOT_TRACK) * COUNTS_PER_INCH) / 360) * WHEEL_TURN_FUDGE;
+                configLoaded = true;
+                break;
+            case "TileRunnerOrbital2x20REV":
+                REVERSE_DIRECTION = 1;                                                       // Reverse the direction without significant code changes, (using motor FORWARD REVERSE will affect the driver station as we use same robotconfig file
+                //TODO find and ix encoder counts for REV 20 Orbital Motor
+                COUNTS_PER_MOTOR_REV = 560;                                                    // eg: TETRIX = 1440 pulses, NeveRest 20 = 560 pulses, NeveRest 40 =  1120, NeveRest 60 = 1680 pulses
+                DRIVE_GEAR_REDUCTION = 0.7;                                                    // This is < 1.0 if geared UP, Tilerunner is geared up
+                WHEEL_DIAMETER_INCHES = 4.0;                                                     // For figuring circumference
+                WHEEL_ACTUAL_FUDGE = 1;                                                        // Fine tuning amount
+                COUNTS_PER_INCH = ((COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415)) * WHEEL_ACTUAL_FUDGE * REVERSE_DIRECTION;
+                ROBOT_TRACK = 16.5;                                                     //  distance between centerline of rear wheels robot will pivot on rear wheel of omni on front, 16.5 track is 103.67 inches full circle
+                WHEEL_TURN_FUDGE = 1.0;                                                        // Fine tuning amount
+                COUNTS_PER_DEGREE = (((2 * 3.1415 * ROBOT_TRACK) * COUNTS_PER_INCH) / 360) * WHEEL_TURN_FUDGE;
+                configLoaded = true;
+                break;
+            case "TileRunnerMecanum2x20REV":
+                REVERSE_DIRECTION = 1;                                                        // Reverse the direction without significant code changes, (using motor FORWARD REVERSE will affect the driver station as we use same robotconfig file
+                //TODO Fix and Find the encoder counts For REV 20
+                COUNTS_PER_MOTOR_REV = 560;                                                    // eg: TETRIX = 1440 pulses, NeveRest 20 = 560 pulses, NeveRest 40 =  1120, NeveRest 60 = 1680 pulses
+                DRIVE_GEAR_REDUCTION = 1.0;                                                     // This is < 1.0 if geared UP, Tilerunner is geared up
+                WHEEL_DIAMETER_INCHES = 4.0;                                                     // For figuring circumference
+                WHEEL_ACTUAL_FUDGE = 1.02;                                                     // Fine tuning amount
+                COUNTS_PER_INCH = ((COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415)) * WHEEL_ACTUAL_FUDGE * REVERSE_DIRECTION;
+                COUNTS_PER_INCH_STRAFE_FRONT_OFFSET = 1;
+                COUNTS_PER_INCH_STRAFE_REAR_OFFSET = 1;
+                COUNTS_PER_INCH_STRAFE_LEFT_OFFSET = 1;
+                COUNTS_PER_INCH_STRAFE_RIGHT_OFFSET = .85;
+                COUNTS_PER_INCH_STRAFE = COUNTS_PER_INCH * 1.65;
+                ROBOT_TRACK = 16.5;                                                     //  distance between centerline of rear wheels robot will pivot on rear wheel of omni on front, 16.5 track is 103.67 inches full circle
+                WHEEL_TURN_FUDGE = 1.0;                                                        // Fine tuning amount
+                COUNTS_PER_DEGREE = (((2 * 3.1415 * ROBOT_TRACK) * COUNTS_PER_INCH) / 360) * WHEEL_TURN_FUDGE;
+                LIFTMAIN_COUNTS_PER_INCH = 420;                                                   //number of encoder counts per inch
+                LIFTTOP_COUNTS_PER_INCH = -420;                                                   //number of encoder counts per inch
+                MECANUM_TURN_OFFSET = 1.72;
+                configLoaded = true;
+                break;
+            case "TileRunnerMecanum2x40REV":
+                REVERSE_DIRECTION = 1;                                                        // Reverse the direction without significant code changes, (using motor FORWARD REVERSE will affect the driver station as we use same robotconfig file
+                //TODO Fix and Find the encoder counts For REV 40
+                COUNTS_PER_MOTOR_REV = 1120;                                                    // eg: TETRIX = 1440 pulses, NeveRest 20 = 560 pulses, NeveRest 40 =  1120, NeveRest 60 = 1680 pulses
+                DRIVE_GEAR_REDUCTION = 1.0;                                                     // This is < 1.0 if geared UP, Tilerunner is geared up
+                WHEEL_DIAMETER_INCHES = 4.0;                                                     // For figuring circumference
+                WHEEL_ACTUAL_FUDGE = 1.02;                                                     // Fine tuning amount
+                COUNTS_PER_INCH = ((COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415)) * WHEEL_ACTUAL_FUDGE * REVERSE_DIRECTION;
+                COUNTS_PER_INCH_STRAFE_FRONT_OFFSET = 1;
+                COUNTS_PER_INCH_STRAFE_REAR_OFFSET = 1;
+                COUNTS_PER_INCH_STRAFE_LEFT_OFFSET = 1;
+                COUNTS_PER_INCH_STRAFE_RIGHT_OFFSET = .85;
+                COUNTS_PER_INCH_STRAFE = COUNTS_PER_INCH * 1.65;
+                ROBOT_TRACK = 16.5;                                                     //  distance between centerline of rear wheels robot will pivot on rear wheel of omni on front, 16.5 track is 103.67 inches full circle
+                WHEEL_TURN_FUDGE = 1.0;                                                        // Fine tuning amount
+                COUNTS_PER_DEGREE = (((2 * 3.1415 * ROBOT_TRACK) * COUNTS_PER_INCH) / 360) * WHEEL_TURN_FUDGE;
+                LIFTMAIN_COUNTS_PER_INCH = 420;                                                   //number of encoder counts per inch
+                LIFTTOP_COUNTS_PER_INCH = -420;                                                   //number of encoder counts per inch
+                MECANUM_TURN_OFFSET = 1.72;
+                configLoaded = true;
+                break;
+            case "TileRunnerMecanumOrbital2x20REV":
+                REVERSE_DIRECTION = 1;                                                        // Reverse the direction without significant code changes, (using motor FORWARD REVERSE will affect the driver station as we use same robotconfig file
+                //TODO Find the encoder counts for Orbital 20 REV
+                COUNTS_PER_MOTOR_REV = 537.6;                                                    // eg: TETRIX = 1440 pulses, NeveRest 20 = 560 pulses, NeveRest 40 =  1120, NeveRest 60 = 1680 pulses
+                DRIVE_GEAR_REDUCTION = 1.0;                                                     // This is < 1.0 if geared UP, Tilerunner is geared up
+                WHEEL_DIAMETER_INCHES = 4.0;                                                     // For figuring circumference
+                WHEEL_ACTUAL_FUDGE = 1.02;                                                     // Fine tuning amount
+                COUNTS_PER_INCH = ((COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415)) * WHEEL_ACTUAL_FUDGE * REVERSE_DIRECTION;
+                COUNTS_PER_INCH_STRAFE_FRONT_OFFSET = 1;
+                COUNTS_PER_INCH_STRAFE_REAR_OFFSET = 1;
+                COUNTS_PER_INCH_STRAFE_LEFT_OFFSET = 1;
+                COUNTS_PER_INCH_STRAFE_RIGHT_OFFSET = 1;
+                COUNTS_PER_INCH_STRAFE = COUNTS_PER_INCH * 1.1;
+                ROBOT_TRACK = 16.5;                                                     //  distance between centerline of rear wheels robot will pivot on rear wheel of omni on front, 16.5 track is 103.67 inches full circle
+                WHEEL_TURN_FUDGE = 1.0;                                                        // Fine tuning amount
+                COUNTS_PER_DEGREE = (((2 * 3.1415 * ROBOT_TRACK) * COUNTS_PER_INCH) / 360) * WHEEL_TURN_FUDGE;
+                LIFTMAIN_COUNTS_PER_INCH = 456;
+                MECANUM_TURN_OFFSET = 1.72;
+                COUNTS_PER_DEGREE_TILT_MOTOR = 30;
+                //number of encoder counts per inch
+                configLoaded = true;
+                break;
+            case "5291 Tank Tread-2x40 Custom":   //for tank tread base
+                REVERSE_DIRECTION = 1;
+                COUNTS_PER_MOTOR_REV = 1120;                                                    // eg: TETRIX = 1440 pulses, NeveRest 20 = 560 pulses, NeveRest 40 =  1120, NeveRest 60 = 1680 pulses
+                DRIVE_GEAR_REDUCTION = 1.0;                                                     // Tank Tread is 1:1 ration
+                WHEEL_DIAMETER_INCHES = 3.75;                                                     // For figuring circumference
+                WHEEL_ACTUAL_FUDGE = 1;                                                        // Fine tuning amount
+                COUNTS_PER_INCH = ((COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415)) * WHEEL_ACTUAL_FUDGE * REVERSE_DIRECTION;
+                ROBOT_TRACK = 18;                                                     //  distance between centerline of rear wheels robot will pivot on rear wheel of omni on front, 16.5 track is 103.67 inches full circle
+                WHEEL_TURN_FUDGE = 1.12;                                                        // Fine tuning amount
+                COUNTS_PER_DEGREE = (((2 * 3.1415 * ROBOT_TRACK) * COUNTS_PER_INCH) / 360) * WHEEL_TURN_FUDGE;
+                MECANUM_TURN_OFFSET = 0;
+                configLoaded = true;                                                      //load the power table
                 break;
             case "11231 2016 Custom": //2016 - 11231 Drivetrain
                 COUNTS_PER_MOTOR_REV = 1120;                                                     // eg: TETRIX = 1440 pulses, NeveRest 20 = 560 pulses, NeveRest 40 =  1120, NeveRest 60 = 1680 pulses

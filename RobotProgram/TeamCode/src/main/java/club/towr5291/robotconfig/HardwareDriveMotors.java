@@ -44,7 +44,7 @@ import club.towr5291.libraries.robotConfigSettings;
  * Edited by:
  * Ian Haden 07/15/2017 -> Initial creation
  * Ian Haden 07/27/2018 -> Initial creation
- *
+ * Wyatt Ashley 03/03/2019 -> Initial creation
  *
  */
 public class HardwareDriveMotors
@@ -181,11 +181,12 @@ public class HardwareDriveMotors
 
 
     public void setHardwareDriveDirections(robotConfigSettings.robotConfigChoice baseConfig){
-
         switch (baseConfig) {
-            case TileRunner2x20:
-            case TileRunner2x40:
-            case TileRunner2x60:
+            case TileRunner2x20Andy:
+            case TileRunner2x40Andy:
+            case TileRunner2x60Andy:
+            case TileRunner2x20REV:
+            case TileRunner2x40REV:
                 if (baseMotor1 != null)
                     baseMotor1.setDirection(DcMotor.Direction.REVERSE);
                 if (baseMotor2 != null)
@@ -195,7 +196,11 @@ public class HardwareDriveMotors
                 if (baseMotor4 != null)
                     baseMotor4.setDirection(DcMotor.Direction.FORWARD);
                 break;
-            case TileRunnerMecanum2x40:
+            case TileRunnerMecanum2x20Andy:
+            case TileRunnerMecanum2x40Andy:
+            case TileRunnerMecanum2x60Andy:
+            case TileRunnerMecanum2x20REV:
+            case TileRunnerMecanum2x40REV:
                 //TOWR5291 Tilrunner has 2 motors running from belts to the wheel, 2 motors running on gears
                 if (baseMotor1 != null)
                     baseMotor1.setDirection(DcMotor.Direction.FORWARD);
@@ -206,18 +211,8 @@ public class HardwareDriveMotors
                 if (baseMotor4 != null)
                     baseMotor4.setDirection(DcMotor.Direction.FORWARD);
                 break;
-            case TileRunnerMecanum2x20:
-                //TOWR5291 Tilrunner has 2 motors running from belts to the wheel, 2 motors running on gears
-                if (baseMotor1 != null)
-                    baseMotor1.setDirection(DcMotor.Direction.FORWARD);
-                if (baseMotor2 != null)
-                    baseMotor2.setDirection(DcMotor.Direction.REVERSE);
-                if (baseMotor3 != null)
-                    baseMotor3.setDirection(DcMotor.Direction.REVERSE);
-                if (baseMotor4 != null)
-                    baseMotor4.setDirection(DcMotor.Direction.FORWARD);
-                break;
-            case TileRunnerMecanumOrbital2x20:
+            case TileRunnerMecanumOrbital2x20Andy:
+            case TileRunnerMecanumOrbital2x20REV:
                 //TOWR5291 Tilrunner has 2 motors running from belts to the wheel, 2 motors running on gears
                 if (baseMotor1 != null)
                     baseMotor1.setDirection(DcMotor.Direction.REVERSE);

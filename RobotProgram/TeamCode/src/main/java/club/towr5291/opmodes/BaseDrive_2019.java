@@ -26,6 +26,7 @@ import club.towr5291.functions.FileLogger;
 import club.towr5291.functions.TOWR5291PID;
 import club.towr5291.functions.TOWR5291Tick;
 import club.towr5291.functions.TOWR5291Toggle;
+import club.towr5291.libraries.LibraryAutoMoveArmRoverRuckus;
 import club.towr5291.libraries.TOWR5291LEDControl;
 import club.towr5291.libraries.TOWRDashBoard;
 import club.towr5291.libraries.robotConfig;
@@ -49,6 +50,7 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
     private HardwareSensorsRoverRuckus Sensors      = new HardwareSensorsRoverRuckus();
     private TOWR5291LEDControl LEDs;
     private Constants.LEDState LEDStatus            = Constants.LEDState.STATE_ERROR;
+    private LibraryAutoMoveArmRoverRuckus autoMoveArmRoverRuckus;
 
     //Settings from the sharepreferences
     private SharedPreferences sharedPreferences;
@@ -134,6 +136,7 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
         initFunction();
         fileLogger.writeEvent(2,"Init Function Done ");
 
+        autoMoveArmRoverRuckus = new LibraryAutoMoveArmRoverRuckus(Arms, Sensors, ourRobotConfig, gamepad2);
         TOWR5291Toggle toggleGamePad1X = new TOWR5291Toggle(gamepad1.x);
         toggleGamePad1X.setDebounce(500);
 
@@ -244,7 +247,13 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
                     fileLogger.writeEvent(debug,"Controller B Mode", "Standard");
 
                     //Arms.setHardwareLiftPower(-gamepad2.right_stick_y);
+                    autoMoveArmRoverRuckus.runAutoMove();
+                    Arms.intakeServo1.setPosition(gamepad2.left_stick_x);
+                    Arms.intakeServo2.setPosition(gamepad2.left_stick_x);
 
+                    if (gamepad2.a){
+                        autoMoveArmRoverRuckus.runNewJOB(30);
+                    }
                     break;
             }
 

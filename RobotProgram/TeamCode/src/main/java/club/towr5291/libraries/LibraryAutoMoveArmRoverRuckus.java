@@ -22,8 +22,6 @@ public class LibraryAutoMoveArmRoverRuckus {
     private double startingAngleMotor2Count = 0;
     private double targetDegreeMoveToPosition = 0;
 
-    private boolean runningAJob = false;
-
     private club.towr5291.libraries.robotConfig config;
     private Gamepad game2;
 
@@ -91,12 +89,11 @@ public class LibraryAutoMoveArmRoverRuckus {
         return new double[]{currentTiltEncoderCountMotor1, currentTiltEncoderCountMotor2};
     }
 
-
     public void runAutoMove(){
         switch(stepState){
             case STATE_INIT:
-                armMotorsRoverRuckus.tiltMotor1.setTargetPosition((int) (armMotorsRoverRuckus.tiltMotor1.getCurrentPosition() + (targetDegreeMoveToPosition * config.getCOUNTS_PER_DEGREE_TILT())));
-                armMotorsRoverRuckus.tiltMotor2.setTargetPosition((int) (armMotorsRoverRuckus.tiltMotor2.getCurrentPosition() + (targetDegreeMoveToPosition * config.getCOUNTS_PER_DEGREE_TILT())));
+                armMotorsRoverRuckus.tiltMotor1.setTargetPosition((int) ((targetDegreeMoveToPosition * config.getCOUNTS_PER_DEGREE_TILT()) - checkCounts()[0]));
+                armMotorsRoverRuckus.tiltMotor2.setTargetPosition((int) ((targetDegreeMoveToPosition * config.getCOUNTS_PER_DEGREE_TILT()) - checkCounts()[1]));
 
                 armMotorsRoverRuckus.tiltMotor1.setPower(1);
                 armMotorsRoverRuckus.tiltMotor2.setPower(1);
@@ -120,5 +117,10 @@ public class LibraryAutoMoveArmRoverRuckus {
                 armMotorsRoverRuckus.tiltMotor2.setPower(-game2.left_stick_y);
                 break;
         }
+    }
+
+    public void runNewJOB(double targetDegree){
+        stepState = Constants.stepState.STATE_INIT;
+        targetDegreeMoveToPosition = targetDegree;
     }
 }

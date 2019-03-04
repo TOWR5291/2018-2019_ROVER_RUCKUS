@@ -310,7 +310,7 @@ public class BaseDrive_2019_V2 extends OpModeMasterLinear {
 
             dashboard.displayPrintf(10, "Lift Motor 1 Enc: " + Arms.getLiftMotor1Encoder());
             dashboard.displayPrintf(11, "Lift Motor 2 Enc: " + Arms.getLiftMotor2Encoder());
-            dashboard.displayPrintf(12, "Tilt Motor Enc  : " + Arms.getTiltLiftEncoder());
+            //dashboard.displayPrintf(12, "Tilt Motor Enc  : " + Arms.getTiltLiftEncoder());
             switch ((int)controllerBMode.getTickCurrValue()){
                 case 1:
                     dashboard.displayPrintf(9, "Controller B Standard");
@@ -319,7 +319,7 @@ public class BaseDrive_2019_V2 extends OpModeMasterLinear {
                     Arms.tiltMotor1.setPower(-game2.left_stick_y);
                     Arms.setHardwareLiftPower(-game2.right_stick_y);
                     if (game2.left_trigger > 0){
-                        Arms.AdvancedOptionsForArms(LEDs);
+                        //Arms.AdvancedOptionsForArms(LEDs);
                         if (game2.b){
                             if (game2 == gamepad2){
                                 game2 = gamepad1;
