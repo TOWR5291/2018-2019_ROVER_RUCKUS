@@ -87,31 +87,14 @@ public class robotConfigSettings {
     }
 
     public enum robotConfigChoice {
-        //Regular Wheel Bases
-            //Andy Mark Regular Bases
-                TileRunnerOrbital2x20Andy ("TileRunnerOrbital2x20Andy"),
-                TileRunner2x20Andy ("TileRunner2x20Andy"),
-                TileRunner2x40Andy ("TileRunner2x40Andy"),
-                TileRunner2x60Andy ("TileRunner2x60Andy"),
-            //Rev Regualr Bases
-                TileRunnerOrbital2x20REV ("TileRunnerOrbital2x20REV"),
-                TileRunner2x20REV ("TileRunner2x20REV"),
-                TileRunner2x40REV ("TileRunner2x40REV"),
+        TileRunnerRegular ("TileRunnerRegular"),
+        TileRunnerRegularOrbital ("TileRunnerRegularOrbital"),
+        TileRunnerMecanum ("TileRunnerMecanum"),
+        TileRunnerMecanumOrbital ("TileRunnerMecanumOrbital"),
+        TiltRunnerOmni ("TileRunnerOmni"),
 
-        //Mecanum Wheel Bases
-            //Andy Mark Mecanum Motor Bases
-                TileRunnerMecanumOrbital2x20Andy ("TileRunnerMecanumOrbital2x20Andy"),
-                TileRunnerMecanum2x60Andy ("TileRunnerMecanum2x60Andy"),
-                TileRunnerMecanum2x40Andy ("TileRunnerMecanum2x40Andy"),
-                TileRunnerMecanum2x20Andy ("TileRunnerMecanum2x20Andy"),
-            //REV Mecanum Motor Bases
-                TileRunnerMecanumOrbital2x20REV ("TiltRunnerMecanumOrbital2x20REV"),
-                TileRunnerMecanum2x40REV ("TileRunnerMecanum2x40REV"),
-                TileRunnerMecanum2x20REV ("TileRunnerMecanum2x20REV"),
-
-        //Custom Wheel Bases
-            TankTread2x40Custom ("5291 Tank Tread-2x40 Custom"),
-            Custom_11231_2016 ("11231 2016 Custom");
+        TankTread2x40Custom ("5291 Tank Tread-2x40 Custom"),
+        Custom_11231_2016 ("11231 2016 Custom");
 
         private final String value;
 

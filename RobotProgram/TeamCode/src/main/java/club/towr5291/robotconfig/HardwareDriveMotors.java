@@ -182,11 +182,7 @@ public class HardwareDriveMotors
 
     public void setHardwareDriveDirections(robotConfigSettings.robotConfigChoice baseConfig){
         switch (baseConfig) {
-            case TileRunner2x20Andy:
-            case TileRunner2x40Andy:
-            case TileRunner2x60Andy:
-            case TileRunner2x20REV:
-            case TileRunner2x40REV:
+            case TileRunnerRegular:
                 if (baseMotor1 != null)
                     baseMotor1.setDirection(DcMotor.Direction.REVERSE);
                 if (baseMotor2 != null)
@@ -196,11 +192,17 @@ public class HardwareDriveMotors
                 if (baseMotor4 != null)
                     baseMotor4.setDirection(DcMotor.Direction.FORWARD);
                 break;
-            case TileRunnerMecanum2x20Andy:
-            case TileRunnerMecanum2x40Andy:
-            case TileRunnerMecanum2x60Andy:
-            case TileRunnerMecanum2x20REV:
-            case TileRunnerMecanum2x40REV:
+            case TileRunnerRegularOrbital:
+                if (baseMotor1 != null)
+                    baseMotor1.setDirection(DcMotor.Direction.REVERSE);
+                if (baseMotor2 != null)
+                    baseMotor2.setDirection(DcMotor.Direction.REVERSE);
+                if (baseMotor3 != null)
+                    baseMotor3.setDirection(DcMotor.Direction.FORWARD);
+                if (baseMotor4 != null)
+                    baseMotor4.setDirection(DcMotor.Direction.FORWARD);
+                break;
+            case TileRunnerMecanum:
                 //TOWR5291 Tilrunner has 2 motors running from belts to the wheel, 2 motors running on gears
                 if (baseMotor1 != null)
                     baseMotor1.setDirection(DcMotor.Direction.FORWARD);
@@ -211,8 +213,7 @@ public class HardwareDriveMotors
                 if (baseMotor4 != null)
                     baseMotor4.setDirection(DcMotor.Direction.FORWARD);
                 break;
-            case TileRunnerMecanumOrbital2x20Andy:
-            case TileRunnerMecanumOrbital2x20REV:
+            case TileRunnerMecanumOrbital:
                 //TOWR5291 Tilrunner has 2 motors running from belts to the wheel, 2 motors running on gears
                 if (baseMotor1 != null)
                     baseMotor1.setDirection(DcMotor.Direction.REVERSE);
@@ -222,6 +223,16 @@ public class HardwareDriveMotors
                     baseMotor3.setDirection(DcMotor.Direction.FORWARD);
                 if (baseMotor4 != null)
                     baseMotor4.setDirection(DcMotor.Direction.REVERSE);
+                break;
+            case TiltRunnerOmni:
+                if (baseMotor1 != null)
+                    baseMotor1.setDirection(DcMotor.Direction.REVERSE);
+                if (baseMotor2 != null)
+                    baseMotor2.setDirection(DcMotor.Direction.REVERSE);
+                if (baseMotor3 != null)
+                    baseMotor3.setDirection(DcMotor.Direction.FORWARD);
+                if (baseMotor4 != null)
+                    baseMotor4.setDirection(DcMotor.Direction.FORWARD);
                 break;
             default:
                 if (baseMotor1 != null)
