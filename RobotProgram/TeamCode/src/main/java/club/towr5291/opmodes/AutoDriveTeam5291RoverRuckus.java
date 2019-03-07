@@ -83,6 +83,7 @@ import club.towr5291.functions.FileLogger;
 import club.towr5291.functions.ReadStepFileRoverRuckus;
 import club.towr5291.functions.RoverRuckusOCV;
 import club.towr5291.libraries.ImageCaptureOCV;
+import club.towr5291.libraries.LibraryMotorType;
 import club.towr5291.libraries.LibraryStateSegAutoRoverRuckus;
 import club.towr5291.libraries.LibraryTensorFlowRoverRuckus;
 import club.towr5291.libraries.LibraryVuforiaRoverRuckus;
@@ -341,6 +342,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         ourRobotConfig.setAllianceStartPosition(sharedPreferences.getString("club.towr5291.Autonomous.StartPosition", "Left"));
         ourRobotConfig.setDelay(Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Delay", "0")));
         ourRobotConfig.setRobotConfigBase(sharedPreferences.getString("club.towr5291.Autonomous.RobotConfigBase", "TileRunnerMecanum2x40"));
+        ourRobotConfig.setRobotMotorType(sharedPreferences.getString("club.towr5291.Autonomous.RobotMotorChoice", "ANDY40SPUR"));
         debug = Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Debug", "1"));
 
         switch (ourRobotConfig.getAllianceStartPosition()){
@@ -363,6 +365,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         fileLogger.writeEvent(1, "Alliance Start Pos " + ourRobotConfig.getAllianceStartPosition());
         fileLogger.writeEvent(1, "Alliance Delay     " + ourRobotConfig.getDelay());
         fileLogger.writeEvent(1, "Robot Config Base  " + ourRobotConfig.getRobotConfigBase());
+        fileLogger.writeEvent(1, "Robot Motor Type  " + ourRobotConfig.getRobotMotorType());
         fileLogger.writeEvent(3, "Configuring Robot Parameters - Finished");
         fileLogger.writeEvent(3, "Loading Autonomous Steps - Start");
 
@@ -373,16 +376,17 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         dashboard.displayPrintf(5, "Start Pos         " + ourRobotConfig.getAllianceStartPosition());
         dashboard.displayPrintf(6, "Start Del         " + ourRobotConfig.getDelay());
         dashboard.displayPrintf(7, "Robot Base        " + ourRobotConfig.getRobotConfigBase());
-        dashboard.displayPrintf(8, "Debug Level       " + debug);
+        dashboard.displayPrintf(8, "Robot Motor Type  " + ourRobotConfig.getRobotMotorType());
+        dashboard.displayPrintf(9, "Debug Level       " + debug);
 
         // Set up the LEDS
         LEDs = new TOWR5291LEDControl(hardwareMap, "green1", "red1", "blue1", "green2", "red2", "blue2");
         LEDs.setLEDControlDemoMode(false);
         LEDs.setLEDColour(Constants.LEDColours.LED_MAGENTA);
         LEDs.setLEDControlAlliance(ourRobotConfig.getAllianceColor());
-        dashboard.displayPrintf(9, "initRobot LED Initiated!");
+        dashboard.displayPrintf(10, "initRobot LED Initiated!");
 
-        dashboard.displayPrintf(9, "initRobot Limit Switch Initiated!");
+        dashboard.displayPrintf(10, "initRobot Limit Switch Initiated!");
         //load the sequence based on alliance colour and team
 
         autonomousStepsFile.ReadStepFile(ourRobotConfig);
@@ -390,12 +394,12 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         //need to load initial step of a delay based on user input
         autonomousStepsFile.insertSteps(ourRobotConfig.getDelay() + 1, "DELAY", 0, 0, false, false,ourRobotConfig.getDelay() * 1000, 0, 0, 0, 0, 0, 1);
 
-        dashboard.displayPrintf(9, "initRobot STEPS LOADED");
+        dashboard.displayPrintf(10, "initRobot STEPS LOADED");
 
         fileLogger.writeEvent(3, "Loading Autonomous Steps - Finished");
         fileLogger.writeEvent(3, "Configuring Adafruit IMU - Start");
 
-        dashboard.displayPrintf(9, "initRobot IMU Loading");
+        dashboard.displayPrintf(10, "initRobot IMU Loading");
 
         // Set up the parameters with which we will use our IMU. Note that integration
         // algorithm here just reports accelerations to the logcat log; it doesn't actually
@@ -414,21 +418,21 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parametersAdafruitImu);
 
-        dashboard.displayPrintf(9, "initRobot IMU Configured");
+        dashboard.displayPrintf(10, "initRobot IMU Configured");
 
         fileLogger.writeEvent(3, "Configuring Adafruit IMU - Finished");
         fileLogger.writeEvent(3, "Configuring Motors Base - Start");
 
-        dashboard.displayPrintf(9, "initRobot BaseDrive Loading");
+        dashboard.displayPrintf(10, "initRobot BaseDrive Loading");
 
         robotDrive.init(fileLogger, hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(ourRobotConfig.getRobotConfigBase()));
         robotDrive.setHardwareDriveResetEncoders();
         robotDrive.setHardwareDriveRunUsingEncoders();
 
-        dashboard.displayPrintf(9, "initRobot BaseDrive Loaded");
+        dashboard.displayPrintf(10, "initRobot BaseDrive Loaded");
         fileLogger.writeEvent(3, "Configuring Motors Base - Finish");
 
-        dashboard.displayPrintf(9, "Configuring Arm Motors - Start");
+        dashboard.displayPrintf(10, "Configuring Arm Motors - Start");
         fileLogger.writeEvent(3, "Configuring Arm Motors - Start");
 
         robotArms.init(hardwareMap , dashboard);
@@ -444,7 +448,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         robotArms.teamMarkerServo.setPosition(mdblTeamMarkerHome);
 
         fileLogger.writeEvent(3, "Configuring Arm Motors - Finish");
-        dashboard.displayPrintf(9, "Configuring Arm Motors - Finish");
+        dashboard.displayPrintf(10, "Configuring Arm Motors - Finish");
 
         sensor.init(fileLogger, hardwareMap);
         fileLogger.writeEvent(3, "Resetting State Engine - Start");
@@ -457,7 +461,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         fileLogger.writeEvent(3, "Resetting State Engine - Finish");
         fileLogger.writeEvent(3, "Configuring Vuforia - Start");
 
-        dashboard.displayPrintf(9, "initRobot VUFORIA Loading");
+        dashboard.displayPrintf(10, "initRobot VUFORIA Loading");
 
         //init openCV
         initOpenCv();
@@ -479,14 +483,14 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         tensorFlowRoverRuckus.initTensorFlow(RoverRuckusVuforia.getVuforiaLocalizer(), hardwareMap, fileLogger, "RoverRuckus.tflite", "GOLD", "SILVER", true);
 
         fileLogger.writeEvent(3,"MAIN","Configured Vuforia - About to Activate");
-        dashboard.displayPrintf(9, "Configured Vuforia - About to Activate");
+        dashboard.displayPrintf(10, "Configured Vuforia - About to Activate");
 
         //activate vuforia
         RoverRuckusTrackables.activate();
 
         fileLogger.writeEvent(3,"MAIN", "Activated Vuforia");
 
-        dashboard.displayPrintf(9, "Init - Complete, Wait for Start");
+        dashboard.displayPrintf(10, "Init - Complete, Wait for Start");
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();

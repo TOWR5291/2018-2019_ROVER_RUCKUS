@@ -36,10 +36,15 @@ public class HardwareSensorsRoverRuckus {
 
         this.fileLogger = fileloggerhandle;
 
-        limitSwitch1AngleMotor = hwMap.get(DigitalChannel.class, "limitSwitch1");
-        limitSwitch2AngleMotor = hwMap.get(DigitalChannel.class, "limitSwitch2");
-        limitSwitch3AngleMotor = hwMap.get(DigitalChannel.class, "limitSwitch3");
-        limitSwitch4AngleMotor = hwMap.get(DigitalChannel.class, "limitSwitch4");
+        //One of these is the port for the limit switch because I do not know if it is port 1 or two for each
+        //limitSwitch1AngleMotor = hwMap.get(DigitalChannel.class, "limitSwitch1A");
+        limitSwitch1AngleMotor = hwMap.get(DigitalChannel.class, "limitSwitch1B");
+        //limitSwitch2AngleMotor = hwMap.get(DigitalChannel.class, "limitSwitch2A");
+        limitSwitch2AngleMotor = hwMap.get(DigitalChannel.class, "limitSwitch2B");
+        //limitSwitch3AngleMotor = hwMap.get(DigitalChannel.class, "limitSwitch3A");
+        limitSwitch3AngleMotor = hwMap.get(DigitalChannel.class, "limitSwitch3B");
+        //limitSwitch4AngleMotor = hwMap.get(DigitalChannel.class, "limitSwitch4A");
+        limitSwitch4AngleMotor = hwMap.get(DigitalChannel.class, "limitSwitch4B");
 
         limitSwitch1AngleMotor.setMode(DigitalChannel.Mode.INPUT);
         limitSwitch2AngleMotor.setMode(DigitalChannel.Mode.INPUT);

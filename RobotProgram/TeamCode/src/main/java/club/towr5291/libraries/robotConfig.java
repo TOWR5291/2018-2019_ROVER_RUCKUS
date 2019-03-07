@@ -40,7 +40,7 @@ public class robotConfig {
     private String allianceParkPosition;
     private int delay;
     private String robotConfigBase;
-    private LibraryMotorType.MotorTypes robotMotorType;
+    private String robotMotorType;
 
     private LibraryMotorType libraryMotorType = new LibraryMotorType();
     private ReadStepFileRoverRuckus autonomousStepsFile = new ReadStepFileRoverRuckus();
@@ -225,7 +225,7 @@ public class robotConfig {
 
     public boolean initConfig() {
         boolean configLoaded = false;
-        libraryMotorType.loadData(robotMotorType);
+        libraryMotorType.loadData(LibraryMotorType.MotorTypes.valueOf(robotMotorType));
 
         switch (robotConfigBase) {
             case "TileRunnerRegular":
@@ -399,11 +399,11 @@ public class robotConfig {
         this.robotConfigBase = robotConfig;
     }
 
-    public void setRobotMotorType(LibraryMotorType.MotorTypes type){
+    public void setRobotMotorType(String type){
         this.robotMotorType = type;
     }
 
-    public LibraryMotorType.MotorTypes getRobotMotorType() {
+    public String getRobotMotorType() {
         return this.robotMotorType;
     }
 

@@ -92,6 +92,9 @@ public class LibraryAutoMoveArmRoverRuckus {
     public void runAutoMove(){
         switch(stepState){
             case STATE_INIT:
+                armMotorsRoverRuckus.tiltMotor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                armMotorsRoverRuckus.tiltMotor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
                 armMotorsRoverRuckus.tiltMotor1.setTargetPosition((int) ((targetDegreeMoveToPosition * config.getCOUNTS_PER_DEGREE_TILT()) - checkTiltCounts()[0]));
                 armMotorsRoverRuckus.tiltMotor2.setTargetPosition((int) ((targetDegreeMoveToPosition * config.getCOUNTS_PER_DEGREE_TILT()) - checkTiltCounts()[1]));
 
@@ -109,10 +112,17 @@ public class LibraryAutoMoveArmRoverRuckus {
                     stepState = Constants.stepState.STATE_COMPLETE;
                     armMotorsRoverRuckus.tiltMotor1.setPower(0);
                     armMotorsRoverRuckus.tiltMotor2.setPower(0);
+
+                    armMotorsRoverRuckus.tiltMotor1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    armMotorsRoverRuckus.tiltMotor2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 }
+                checkTiltCounts();
                 break;
 
             case STATE_COMPLETE:
+                armMotorsRoverRuckus.tiltMotor1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                armMotorsRoverRuckus.tiltMotor2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
                 armMotorsRoverRuckus.tiltMotor1.setPower(-game2.left_stick_y);
                 armMotorsRoverRuckus.tiltMotor2.setPower(-game2.left_stick_y);
                 break;

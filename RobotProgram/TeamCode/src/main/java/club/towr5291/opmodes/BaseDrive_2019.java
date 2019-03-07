@@ -99,7 +99,7 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
         ourRobotConfig.setTeamNumber(sharedPreferences.getString("club.towr5291.Autonomous.TeamNumber", "0000"));
         ourRobotConfig.setAllianceStartPosition(sharedPreferences.getString("club.towr5291.Autonomous.Position", "Left"));
         ourRobotConfig.setDelay(Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Delay", "0")));
-        ourRobotConfig.setRobotMotorType(LibraryMotorType.MotorTypes.valueOf(sharedPreferences.getString("club.towr5291.Autonomous.RobotMotorChoice", "ANDY40SPUR")));
+        ourRobotConfig.setRobotMotorType(sharedPreferences.getString("club.towr5291.Autonomous.RobotMotorChoice", "ANDY40SPUR"));
         ourRobotConfig.setRobotConfigBase(sharedPreferences.getString("club.towr5291.Autonomous.RobotConfigBase", "TileRunner2x40"));
         debug = Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Debug", "1"));
 
@@ -142,6 +142,7 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
         TOWR5291Toggle toggleGamePad1X = new TOWR5291Toggle(gamepad1.x);
         toggleGamePad1X.setDebounce(500);
 
+        Arms.teamMarkerServo.setPosition(0);
         // All The Specification of the robot and controller
         fileLogger.writeEvent(1,"Alliance Color", ourRobotConfig.getAllianceColor());
         fileLogger.writeEvent(1,"Alliance Start Position", ourRobotConfig.getAllianceStartPosition());
@@ -250,11 +251,24 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
 
                     //Arms.setHardwareLiftPower(-gamepad2.right_stick_y);
                     autoMoveArmRoverRuckus.runAutoMove();
-                    Arms.intakeServo1.setPosition(gamepad2.left_stick_x);
-                    Arms.intakeServo2.setPosition(gamepad2.left_stick_x);
+                    if (gamepad2.left_bumper){
+                        Arms.intakeServo1.setPosition(.9);
+                        Arms.intakeServo2.setPosition(.9);
+                    } else if (gamepad2.right_bumper){
+                        Arms.intakeServo1.setPosition(-.9);
+                        Arms.intakeServo2.setPosition(-.9);
+                    } else {
+                        Arms.intakeServo1.setPosition(0);
+                        Arms.intakeServo2.setPosition(0);
+                    }
+
+                    Arms.liftMotor1.setPower(-gamepad2.right_stick_y);
+                    Arms.liftMotor2.setPower(-gamepad2.right_stick_y);
 
                     if (gamepad2.a){
                         autoMoveArmRoverRuckus.runNewJOB(30);
+                    } else if (gamepad2.b) {
+                        autoMoveArmRoverRuckus.runNewJOB(10);
                     }
                     break;
             }
