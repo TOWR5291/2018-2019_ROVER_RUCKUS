@@ -69,8 +69,8 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
     private TOWR5291Toggle leftBumperToggle         = new TOWR5291Toggle();//For Moving Lift
 
     private double maxDrivePower                    = 1;
-    private double minDrivePower                    = 0.3333333333333;
-    private double incrementDrivePower              = 0.333333333333;
+    private double minDrivePower                    = 0.33;
+    private double incrementDrivePower              = 0.33;
     private double startDrivePower                  = 1;
     //Controller A has 4 modes of operation
     private double controllerAModes                 = 5;
