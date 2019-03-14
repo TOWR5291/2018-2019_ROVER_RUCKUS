@@ -111,7 +111,7 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
         fileLogger.open();// Opening FileLogger
         fileLogger.writeEvent(TAG, "Log Started");// First Line Add To Log
 
-        Robot.init(fileLogger, hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(ourRobotConfig.getRobotConfigBase()));// Starting robot Hardware map
+        Robot.init(fileLogger, hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(ourRobotConfig.getRobotConfigBase()), LibraryMotorType.MotorTypes.valueOf(ourRobotConfig.getRobotMotorType()));// Starting robot Hardware map
         Robot.allMotorsStop();
         dashboard.displayPrintf(0, "Robot Base Loaded");
 
@@ -138,7 +138,7 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
         initFunction();
         fileLogger.writeEvent(2,"Init Function Done ");
 
-        autoMoveArmRoverRuckus = new LibraryAutoMoveArmRoverRuckus(Arms, Sensors, ourRobotConfig, gamepad2);
+        autoMoveArmRoverRuckus = new LibraryAutoMoveArmRoverRuckus(Arms, Sensors, ourRobotConfig, gamepad2, fileLogger);
         TOWR5291Toggle toggleGamePad1X = new TOWR5291Toggle(gamepad1.x);
         toggleGamePad1X.setDebounce(500);
 
@@ -251,12 +251,12 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
 
                     //Arms.setHardwareLiftPower(-gamepad2.right_stick_y);
                     autoMoveArmRoverRuckus.runAutoMove();
-                    if (gamepad2.left_bumper){
+                    if (gamepad2.left_trigger > .8){
                         Arms.intakeServo1.setPosition(.9);
                         Arms.intakeServo2.setPosition(.9);
-                    } else if (gamepad2.right_bumper){
-                        Arms.intakeServo1.setPosition(-.9);
-                        Arms.intakeServo2.setPosition(-.9);
+                    } else if (gamepad2.right_trigger > .8){
+                        Arms.intakeServo1.setPosition(.1);
+                        Arms.intakeServo2.setPosition(.1);
                     } else {
                         Arms.intakeServo1.setPosition(0);
                         Arms.intakeServo2.setPosition(0);
@@ -265,14 +265,13 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
                     Arms.liftMotor1.setPower(-gamepad2.right_stick_y);
                     Arms.liftMotor2.setPower(-gamepad2.right_stick_y);
 
-                    if (gamepad2.a){
-                        autoMoveArmRoverRuckus.runNewJOB(30);
-                    } else if (gamepad2.b) {
-                        autoMoveArmRoverRuckus.runNewJOB(10);
-                    }
+                    //if (gamepad2.a){
+                        //autoMoveArmRoverRuckus.runNewJOB(30);
+                    //} //else if (gamepad2.b) {
+                        //autoMoveArmRoverRuckus.runNewJOB(10);
+                    //}
                     break;
             }
-
         }
 
         //stop the logging

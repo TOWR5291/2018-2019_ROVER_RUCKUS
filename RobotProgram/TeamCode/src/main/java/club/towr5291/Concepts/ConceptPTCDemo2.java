@@ -42,6 +42,7 @@ import java.util.Locale;
 
 import club.towr5291.R;
 import club.towr5291.functions.FileLogger;
+import club.towr5291.libraries.LibraryMotorType;
 import club.towr5291.libraries.robotConfig;
 import club.towr5291.libraries.robotConfigSettings;
 import club.towr5291.opmodes.OpModeMasterLinear;
@@ -144,7 +145,8 @@ public class ConceptPTCDemo2  extends OpModeMasterLinear {
         ourRobotConfig.setTeamNumber(sharedPreferences.getString("club.towr5291.Autonomous.TeamNumber", "0000"));
         ourRobotConfig.setAllianceStartPosition(sharedPreferences.getString("club.towr5291.Autonomous.Position", "Left"));
         ourRobotConfig.setDelay(Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Delay", "0")));
-        ourRobotConfig.setRobotConfigBase(sharedPreferences.getString("club.towr5291.Autonomous.RobotConfig", "TileRunner-2x40"));
+        ourRobotConfig.setRobotMotorType(sharedPreferences.getString("club.towr5291.Autonomous.RobotMotorChoice", "ANDY40SPUR"));
+        ourRobotConfig.setRobotConfigBase(sharedPreferences.getString("club.towr5291.Autonomous.RobotConfigBase", "TileRunner2x40"));
 
         ourRobotConfig.initConfig();
 
@@ -170,10 +172,10 @@ public class ConceptPTCDemo2  extends OpModeMasterLinear {
         dashboard.displayPrintf(1, "IMU Inited");
 
         robot = new HardwareDriveMotors();
-        robot.init(fileLogger, hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(ourRobotConfig.getRobotConfigBase()));// Starting robot Hardware map
+        robot.init(fileLogger, hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(ourRobotConfig.getRobotConfigBase()), LibraryMotorType.MotorTypes.valueOf(ourRobotConfig.getRobotMotorType()));// Starting robot Hardware map
         robot.logEncoderCounts(fileLogger);// Logging The Encoder Counts
         robot.allMotorsStop();
-        robot.setHardwareDriveDirections(robotConfigSettings.robotConfigChoice.valueOf(ourRobotConfig.getRobotConfigBase()));
+        robot.setHardwareDriveDirections(robotConfigSettings.robotConfigChoice.valueOf(ourRobotConfig.getRobotConfigBase()), LibraryMotorType.MotorTypes.valueOf(ourRobotConfig.getRobotMotorType()));
 
         dashboard.displayPrintf(2, "Hardware Loaded");
 

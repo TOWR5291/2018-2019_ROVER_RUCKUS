@@ -232,8 +232,8 @@ public class RRMecanumTestIanFanuc extends OpModeMasterLinear
             fileLogger.writeEvent(TAG, "Loading baseHardware");
         }
 
-        robotDrive.init(fileLogger, hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(robotConfig));
-        armDrive.init(fileLogger, hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(robotConfig), "lifttop", "liftbot", null, null);
+        //robotDrive.init(fileLogger, hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(robotConfig));
+        //armDrive.init(fileLogger, hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(robotConfig), "lifttop", "liftbot", null, null);
 
         if (debug >= 1)
         {

@@ -77,8 +77,8 @@ public class HardwareArmMotorsRoverRuckus
     public void setHardwareArmDirections(){
         liftMotor1.setDirection(DcMotor.Direction.FORWARD);
         liftMotor2.setDirection(DcMotor.Direction.FORWARD);
-        tiltMotor1.setDirection(DcMotor.Direction.FORWARD);
-        tiltMotor2.setDirection(DcMotorSimple.Direction.REVERSE);
+        tiltMotor1.setDirection(DcMotor.Direction.REVERSE);
+        tiltMotor2.setDirection(DcMotor.Direction.FORWARD);
         intakeServo1.setDirection(Servo.Direction.FORWARD);
         intakeServo2.setDirection(Servo.Direction.REVERSE);
     }
@@ -142,7 +142,6 @@ public class HardwareArmMotorsRoverRuckus
     public double getLift2Speed(){
         return this.liftMotor2.getPower();
     }
-
 
     public void setTiltMotorSpeed(double speed){
         this.tiltMotor1.setPower(speed);

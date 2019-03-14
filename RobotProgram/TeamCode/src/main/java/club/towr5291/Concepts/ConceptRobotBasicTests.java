@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import club.towr5291.functions.FileLogger;
+import club.towr5291.libraries.LibraryMotorType;
 import club.towr5291.libraries.robotConfigSettings;
 import club.towr5291.robotconfig.HardwareArmMotors;
 import club.towr5291.robotconfig.HardwareDriveMotors;
@@ -89,6 +90,7 @@ public class ConceptRobotBasicTests extends LinearOpMode {
     private int delay;
     private String robotConfig;
     private ElapsedTime runtime = new ElapsedTime();
+    private String motorType;
 
     //set up the variables for file logger and what level of debug we will log info at
     private FileLogger fileLogger;
@@ -194,6 +196,7 @@ public class ConceptRobotBasicTests extends LinearOpMode {
         allianceStartPosition = sharedPreferences.getString("club.towr5291.Autonomous.StartPosition", "Left");
         delay = Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Delay", "0"));
         robotConfig = sharedPreferences.getString("club.towr5291.Autonomous.RobotConfig", "TileRunnerMecanum2x40");
+        motorType = sharedPreferences.getString("club.towr5291.Autonomous.RobotMotorChoice", "ANDY40SPUR");
         debug = Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Debug", "1"));
 
         if (debug >= 1)
@@ -210,7 +213,7 @@ public class ConceptRobotBasicTests extends LinearOpMode {
             fileLogger.writeEvent("ConceptRobotBasicTests", "Loading baseHardware");
         }
 
-        robotDrive.init(hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(robotConfig));
+        robotDrive.init(hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(robotConfig), LibraryMotorType.MotorTypes.valueOf(motorType));
         armDrive.init(hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(robotConfig));
 
         if (debug >= 1)

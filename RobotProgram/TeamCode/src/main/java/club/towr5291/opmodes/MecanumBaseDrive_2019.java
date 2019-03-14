@@ -26,6 +26,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 import club.towr5291.R;
 import club.towr5291.functions.FileLogger;
 import club.towr5291.functions.TOWR5291PID;
+import club.towr5291.libraries.LibraryMotorType;
 import club.towr5291.libraries.TOWRDashBoard;
 import club.towr5291.libraries.robotConfigSettings;
 import club.towr5291.robotconfig.HardwareDriveMotors;
@@ -80,6 +81,7 @@ public class MecanumBaseDrive_2019 extends OpModeMasterLinear
     private String allianceStartPosition;
     private int delay;
     private String robotConfig;
+    private String motorType;
     private ElapsedTime runtime = new ElapsedTime();
 
     //adafruit IMU
@@ -119,6 +121,7 @@ public class MecanumBaseDrive_2019 extends OpModeMasterLinear
         allianceStartPosition = sharedPreferences.getString("club.towr5291.Autonomous.StartPosition", "Left");
         delay = Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Delay", "0"));
         robotConfig = sharedPreferences.getString("club.towr5291.Autonomous.RobotConfig", "TileRunnerMecanum2x40");
+        motorType = sharedPreferences.getString("club.towr5291.Autonomous.RobotMotorChoice", "ANDY40SPUR");
         debug = Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Debug", "1"));
 
         //create logging based on initial settings, sharepreferences will adjust levels
@@ -142,7 +145,7 @@ public class MecanumBaseDrive_2019 extends OpModeMasterLinear
         fileLogger.writeEvent(1,TAG, "Loaded sharePreferences");
         fileLogger.writeEvent(1,TAG, "Loading baseHardware");
 
-        robotDrive.init(fileLogger, hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(robotConfig));
+        robotDrive.init(fileLogger, hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(robotConfig), LibraryMotorType.MotorTypes.valueOf(motorType));
 
         fileLogger.writeEvent(1,TAG, "Loaded baseHardware");
         fileLogger.writeEvent(1,TAG, "Setting setHardwareDriveRunWithoutEncoders");

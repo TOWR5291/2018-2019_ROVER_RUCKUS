@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import club.towr5291.functions.Constants;
+import club.towr5291.functions.FileLogger;
 import club.towr5291.robotconfig.HardwareArmMotorsRoverRuckus;
 import club.towr5291.robotconfig.HardwareSensors;
 import club.towr5291.robotconfig.HardwareSensorsRoverRuckus;
@@ -18,8 +19,8 @@ public class LibraryAutoMoveArmRoverRuckus {
     private boolean haveACurrentValue = false;
     private double currentTiltEncoderCountMotor1 = 0;
     private double currentTiltEncoderCountMotor2 = 0;
-    private double startingAngleMotor1Count = 0;
-    private double startingAngleMotor2Count = 0;
+    private double startingAngleMotor1Count;
+    private double startingAngleMotor2Count;
     private double targetDegreeMoveToPosition = 0;
 
     private club.towr5291.libraries.robotConfig config;
@@ -29,14 +30,20 @@ public class LibraryAutoMoveArmRoverRuckus {
     private static final double LIMITSWITCH2DEGREEMEASURE = 0;
     private static final double LIMITSWITCH3DEGREEMEASURE = 0;
     private static final double LIMITSWITCH4DEGREEMEASURE = 0;
+    private FileLogger fileLogger;
+    private boolean hold;
 
     private static final double ANGLETOSCOREDEGREE = 45;
 
-    public LibraryAutoMoveArmRoverRuckus(HardwareArmMotorsRoverRuckus armHardware, HardwareSensorsRoverRuckus sensorsRoverRuckus, club.towr5291.libraries.robotConfig robotconfig, Gamepad g2){
+    public LibraryAutoMoveArmRoverRuckus(HardwareArmMotorsRoverRuckus armHardware, HardwareSensorsRoverRuckus sensorsRoverRuckus, club.towr5291.libraries.robotConfig robotconfig, Gamepad g2, FileLogger fileLogger){
         this.armMotorsRoverRuckus = armHardware;
         this.sensorsRoverRuckus = sensorsRoverRuckus;
         this.config = robotconfig;
         this.game2 = g2;
+        this.fileLogger = fileLogger;
+        this.stepState = Constants.stepState.STATE_COMPLETE;
+        armMotorsRoverRuckus.tiltMotor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        armMotorsRoverRuckus.tiltMotor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     private double[] checkTiltCounts(){
@@ -90,10 +97,8 @@ public class LibraryAutoMoveArmRoverRuckus {
     }
 
     public void runAutoMove(){
-        switch(stepState){
+        switch(stepState) {
             case STATE_INIT:
-                armMotorsRoverRuckus.tiltMotor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                armMotorsRoverRuckus.tiltMotor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
                 armMotorsRoverRuckus.tiltMotor1.setTargetPosition((int) ((targetDegreeMoveToPosition * config.getCOUNTS_PER_DEGREE_TILT()) - checkTiltCounts()[0]));
                 armMotorsRoverRuckus.tiltMotor2.setTargetPosition((int) ((targetDegreeMoveToPosition * config.getCOUNTS_PER_DEGREE_TILT()) - checkTiltCounts()[1]));
@@ -108,23 +113,40 @@ public class LibraryAutoMoveArmRoverRuckus {
                 break;
 
             case STATE_RUNNING:
-                if (!armMotorsRoverRuckus.tiltMotor1.isBusy() && !armMotorsRoverRuckus.tiltMotor2.isBusy()){
+                if (!armMotorsRoverRuckus.tiltMotor1.isBusy() && !armMotorsRoverRuckus.tiltMotor2.isBusy()) {
                     stepState = Constants.stepState.STATE_COMPLETE;
                     armMotorsRoverRuckus.tiltMotor1.setPower(0);
                     armMotorsRoverRuckus.tiltMotor2.setPower(0);
 
-                    armMotorsRoverRuckus.tiltMotor1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    armMotorsRoverRuckus.tiltMotor2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 }
                 checkTiltCounts();
                 break;
 
             case STATE_COMPLETE:
-                armMotorsRoverRuckus.tiltMotor1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                armMotorsRoverRuckus.tiltMotor2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-                armMotorsRoverRuckus.tiltMotor1.setPower(-game2.left_stick_y);
-                armMotorsRoverRuckus.tiltMotor2.setPower(-game2.left_stick_y);
+                if ((game2.left_stick_y == 0))
+                {
+                    if ((hold == false)) {
+                        armMotorsRoverRuckus.tiltMotor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                        armMotorsRoverRuckus.tiltMotor2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+                        armMotorsRoverRuckus.tiltMotor1.setTargetPosition(armMotorsRoverRuckus.tiltMotor1.getCurrentPosition());
+                        armMotorsRoverRuckus.tiltMotor2.setTargetPosition(armMotorsRoverRuckus.tiltMotor2.getCurrentPosition());
+                        hold = true;
+                    }
+                    armMotorsRoverRuckus.tiltMotor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    armMotorsRoverRuckus.tiltMotor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    armMotorsRoverRuckus.tiltMotor1.setPower(.2);
+                    armMotorsRoverRuckus.tiltMotor2.setPower(.2);
+
+                } else {
+                    armMotorsRoverRuckus.tiltMotor1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    armMotorsRoverRuckus.tiltMotor2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    hold = false;
+                    armMotorsRoverRuckus.tiltMotor1.setPower(-game2.left_stick_y);
+                    armMotorsRoverRuckus.tiltMotor2.setPower(-game2.left_stick_y);
+                }
+
                 break;
         }
     }

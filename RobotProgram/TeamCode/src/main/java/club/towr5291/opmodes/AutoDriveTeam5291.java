@@ -104,6 +104,7 @@ import club.towr5291.functions.Constants;
 import club.towr5291.functions.FileLogger;
 import club.towr5291.functions.JewelAnalysisOCV;
 import club.towr5291.functions.ReadStepFile;
+import club.towr5291.libraries.LibraryMotorType;
 import club.towr5291.libraries.TOWRDashBoard;
 import club.towr5291.libraries.TOWRDashBoard;
 import club.towr5291.libraries.robotConfigSettings;
@@ -161,6 +162,7 @@ public class AutoDriveTeam5291 extends OpModeMasterLinear {
     private String allianceStartPosition;
     private int delay;
     private String robotConfigBase;
+    private String motorType;
 
     private ElapsedTime runtime = new ElapsedTime();
 
@@ -496,6 +498,7 @@ public class AutoDriveTeam5291 extends OpModeMasterLinear {
         allianceStartPosition = sharedPreferences.getString("club.towr5291.Autonomous.StartPosition", "Left");
         delay = Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Delay", "0"));
         robotConfigBase = sharedPreferences.getString("club.towr5291.Autonomous.RobotConfigBase", "TileRunnerMecanum2x40");
+        motorType = sharedPreferences.getString("club.towr5291.Autonomous.RobotConfigBase", "TileRunner2x40");
         debug = Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Debug", "1"));
 
         //adjust debug level
@@ -745,8 +748,8 @@ public class AutoDriveTeam5291 extends OpModeMasterLinear {
 
         dashboard.displayPrintf(1, "initRobot BaseDrive Loading");
 
-        robotDrive.init(fileLogger, hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(robotConfigBase));
-        robotDrive.init(hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(robotConfigBase));
+        robotDrive.init(fileLogger, hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(robotConfigBase), LibraryMotorType.MotorTypes.valueOf(motorType));
+        robotDrive.init(hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(robotConfigBase), LibraryMotorType.MotorTypes.valueOf(motorType));
         robotDrive.setHardwareDriveResetEncoders();
         robotDrive.setHardwareDriveRunUsingEncoders();
 
@@ -755,7 +758,7 @@ public class AutoDriveTeam5291 extends OpModeMasterLinear {
         fileLogger.writeEvent(3, TAG, "Configuring Motors Base - Finish");
         fileLogger.writeEvent(3, TAG, "Configuring Motors Arms - Start");
 
-        armDrive.init(fileLogger, hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(robotConfigBase), "lifttop", "liftbot", null, null);
+        armDrive.init(fileLogger, hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(robotConfigBase), "lifttop", "liftbot", null, null, LibraryMotorType.MotorTypes.valueOf(motorType));
         armDrive.setHardwareDriveResetEncoders();
         armDrive.setHardwareDriveRunUsingEncoders();
 
