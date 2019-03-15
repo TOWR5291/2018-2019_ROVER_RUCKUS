@@ -92,6 +92,7 @@ import club.towr5291.libraries.TOWR5291LEDControl;
 import club.towr5291.libraries.robotConfig;
 import club.towr5291.libraries.robotConfigSettings;
 import club.towr5291.functions.TOWR5291Utils;
+import club.towr5291.opmodes.OpModeMasterLinear;
 import club.towr5291.robotconfig.HardwareArmMotorsRoverRuckus;
 import club.towr5291.robotconfig.HardwareDriveMotors;
 import club.towr5291.robotconfig.HardwareSensorsRoverRuckus;

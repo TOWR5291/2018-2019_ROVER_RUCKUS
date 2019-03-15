@@ -1,17 +1,9 @@
 package club.towr5291.robotconfig;
 
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 
-import club.towr5291.functions.Constants;
 import club.towr5291.functions.FileLogger;
-import club.towr5291.functions.TOWR5291Utils;
-import club.towr5291.libraries.robotConfig;
-import club.towr5291.libraries.robotConfigSettings;
 
 public class HardwareSensorsRoverRuckus {
 
@@ -19,22 +11,17 @@ public class HardwareSensorsRoverRuckus {
     public DigitalChannel limitSwitch2AngleMotor;
     public DigitalChannel limitSwitch3AngleMotor;
     public DigitalChannel limitSwitch4AngleMotor;
-    /* local OpMode members. */
-    HardwareMap hwMap            = null;
-    //set up the variables for the logger
-    private FileLogger fileLogger = null;
-    private static final String TAG = "HardwareDriveMotors";
+
+    HardwareMap hwMap = null;
 
     /* Constructor */
     public HardwareSensorsRoverRuckus(){
 
     }
 
-    public void init(FileLogger fileloggerhandle, HardwareMap ahwMap) {
+    public void init(HardwareMap ahwMap) {
         // Save reference to Hardware map
         hwMap = ahwMap;
-
-        this.fileLogger = fileloggerhandle;
 
         //One of these is the port for the limit switch because I do not know if it is port 1 or two for each
         //limitSwitch1AngleMotor = hwMap.get(DigitalChannel.class, "limitSwitch1A");

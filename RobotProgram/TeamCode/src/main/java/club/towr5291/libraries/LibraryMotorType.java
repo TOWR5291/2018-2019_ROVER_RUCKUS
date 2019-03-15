@@ -52,6 +52,15 @@ public class LibraryMotorType {
         public String toString() {
             return this.name;
         }
+
+        public boolean isAndyMark(){
+            if(this.name.equals("ANDY20SPUR") || this.name.equals("ANDY40SPUR") || this.name.equals("ANDY60SPUR") || this.name.equals("ANDY20ORBIT") || this.name.equals("ANDY3_7ORBIT")) {
+                return true;
+            } else {
+                return false;
+            }
+
+        }
     }
 
     public LibraryMotorType(){

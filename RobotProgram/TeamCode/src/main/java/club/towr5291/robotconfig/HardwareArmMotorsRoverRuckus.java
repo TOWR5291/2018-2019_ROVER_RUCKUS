@@ -32,7 +32,6 @@ import club.towr5291.libraries.robotConfigSettings;
 public class HardwareArmMotorsRoverRuckus
 {
     public ElapsedTime elapse = new ElapsedTime();
-    public boolean gameDance = false;
     /* Public OpMode members. */
     public DcMotor  liftMotor1      = null;
     public DcMotor  liftMotor2      = null;
@@ -183,5 +182,14 @@ public class HardwareArmMotorsRoverRuckus
     public void setLiftMotorRUNWITHOUTENCODERS(){
         this.liftMotor1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         this.liftMotor2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+
+    public void allMotorsStop(){
+        this.tiltMotor1.setPower(0);
+        this.tiltMotor2.setPower(0);
+        this.liftMotor1.setPower(0);
+        this.liftMotor2.setPower(0);
+        this.intakeServo1.setPosition(0);
+        this.intakeServo2.setPosition(0);
     }
 }

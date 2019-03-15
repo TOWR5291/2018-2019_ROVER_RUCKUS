@@ -4,29 +4,18 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.widget.TextView;
 
-import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.robotcore.external.navigation.Position;
-import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 
 import club.towr5291.R;
 import club.towr5291.functions.Constants;
 import club.towr5291.functions.FileLogger;
-import club.towr5291.functions.TOWR5291PID;
 import club.towr5291.functions.TOWR5291Tick;
 import club.towr5291.functions.TOWR5291Toggle;
-import club.towr5291.libraries.LibraryAutoMoveArmRoverRuckus;
 import club.towr5291.libraries.LibraryMotorType;
 import club.towr5291.libraries.TOWR5291LEDControl;
 import club.towr5291.libraries.TOWRDashBoard;
@@ -36,14 +25,23 @@ import club.towr5291.robotconfig.HardwareArmMotorsRoverRuckus;
 import club.towr5291.robotconfig.HardwareDriveMotors;
 import club.towr5291.robotconfig.HardwareSensorsRoverRuckus;
 
-import static club.towr5291.functions.Constants.stepState.STATE_INIT;
-import static club.towr5291.functions.Constants.stepState.STATE_RUNNING;
+import static club.towr5291.functions.Constants.stepState.STATE_COMPLETE;
 
 /*
     made by Wyatt Ashley on 8/2/2018
 */
 @TeleOp(name = "Base Drive 2019", group = "5291")
 public class BaseDrive_2019 extends OpModeMasterLinear {
+    private Constants.stepState stepState = Constants.stepState.STATE_COMPLETE;
+
+    private boolean haveACurrentValue = false;
+    private double currentTiltEncoderCountMotor1 = 0;
+    private double currentTiltEncoderCountMotor2 = 0;
+    private double startingAngleMotor1Count;
+    private double startingAngleMotor2Count;
+    private double targetDegreeMoveToPosition = 0;
+    private double HOLDINGTILTMOTORPOWER = .2;
+    private boolean hold = false;
 
     /* Hardware Set Up */
     private HardwareDriveMotors Robot               = new HardwareDriveMotors();
@@ -51,7 +49,6 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
     private HardwareSensorsRoverRuckus Sensors      = new HardwareSensorsRoverRuckus();
     private TOWR5291LEDControl LEDs;
     private Constants.LEDState LEDStatus            = Constants.LEDState.STATE_ERROR;
-    private LibraryAutoMoveArmRoverRuckus autoMoveArmRoverRuckus;
 
     //Settings from the sharepreferences
     private SharedPreferences sharedPreferences;
@@ -67,6 +64,11 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
     private TOWR5291Tick controllerBMode            = new TOWR5291Tick();
     private TOWR5291Tick teamMarkerServoPosition    = new TOWR5291Tick();
     private TOWR5291Toggle leftBumperToggle         = new TOWR5291Toggle();//For Moving Lift
+
+    private static final double LIMITSWITCH1DEGREEMEASURE = 0;
+    private static final double LIMITSWITCH2DEGREEMEASURE = 0;
+    private static final double LIMITSWITCH3DEGREEMEASURE = 0;
+    private static final double LIMITSWITCH4DEGREEMEASURE = 0;
 
     private double maxDrivePower                    = 1;
     private double minDrivePower                    = 0.33;
@@ -84,22 +86,21 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        dashboard = TOWRDashBoard.createInstance(telemetry);
 
+        dashboard = TOWRDashBoard.createInstance(telemetry);
         FtcRobotControllerActivity act = (FtcRobotControllerActivity)(hardwareMap.appContext);
 
         dashboard.setTextView((TextView)act.findViewById(R.id.textOpMode));
         dashboard.displayPrintf(0, "Starting Menu System");
 
         ourRobotConfig = new robotConfig();
-
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(hardwareMap.appContext);
 
         ourRobotConfig.setAllianceColor(sharedPreferences.getString("club.towr5291.Autonomous.Color", "Red"));// Using a Function to Store The Robot Specification
         ourRobotConfig.setTeamNumber(sharedPreferences.getString("club.towr5291.Autonomous.TeamNumber", "0000"));
         ourRobotConfig.setAllianceStartPosition(sharedPreferences.getString("club.towr5291.Autonomous.Position", "Left"));
         ourRobotConfig.setDelay(Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Delay", "0")));
-        ourRobotConfig.setRobotMotorType(sharedPreferences.getString("club.towr5291.Autonomous.RobotMotorChoice", "ANDY40SPUR"));
+        ourRobotConfig.setRobotMotorType(sharedPreferences.getString("club.towr5291.Autonomous.RobotMotorChoice", "REV20ORBIT"));
         ourRobotConfig.setRobotConfigBase(sharedPreferences.getString("club.towr5291.Autonomous.RobotConfigBase", "TileRunner2x40"));
         debug = Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Debug", "1"));
 
@@ -111,46 +112,37 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
         fileLogger.open();// Opening FileLogger
         fileLogger.writeEvent(TAG, "Log Started");// First Line Add To Log
 
+        // All The Specification of the robot and controller
+        fileLogger.writeEvent(1,"Alliance Color", ourRobotConfig.getAllianceColor());
+        fileLogger.writeEvent(1,"Alliance Start Position", ourRobotConfig.getAllianceStartPosition());
+        fileLogger.writeEvent(1,"Delay", String.valueOf(ourRobotConfig.getDelay()));
+        fileLogger.writeEvent(1,"Robot Base Config", ourRobotConfig.getRobotConfigBase());
+        fileLogger.writeEvent(1, "Robot Motor Type", ourRobotConfig.getRobotMotorType());
+        fileLogger.writeEvent(1,"Team Number", ourRobotConfig.getTeamNumber());
+
         Robot.init(fileLogger, hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(ourRobotConfig.getRobotConfigBase()), LibraryMotorType.MotorTypes.valueOf(ourRobotConfig.getRobotMotorType()));// Starting robot Hardware map
-        Robot.allMotorsStop();
+        Arms.init(hardwareMap, dashboard);
+        Sensors.init(hardwareMap);
         dashboard.displayPrintf(0, "Robot Base Loaded");
 
-        Arms.init(hardwareMap, dashboard);
-        Arms.setHardwareArmDirections();
+        Arms.allMotorsStop();
+        Robot.allMotorsStop();
 
-        Arms.tiltMotor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        Arms.tiltMotor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        Arms.tiltMotor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        Arms.tiltMotor2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        fileLogger.writeEvent("Starting init for sensors ", String.valueOf(runtime));
-        Sensors.init(fileLogger, hardwareMap);
-        dashboard.displayPrintf(0, "Sensors Loaded");
-
-        fileLogger.writeEvent(2,"Sensors Init");
+        fileLogger.writeEvent(2,"LED Init");
         LEDs = new TOWR5291LEDControl(hardwareMap);
         LEDs.setLEDControlDemoMode(true);
         LEDs.setLEDControlAlliance(ourRobotConfig.getAllianceColor());
         dashboard.displayPrintf(0, "LEDs Loaded");
 
         //init all the values for the counters etc
+        fileLogger.writeEvent(2, "INIT Function Started -- " + String.valueOf(this.runtime));
         initFunction();
-        fileLogger.writeEvent(2,"Init Function Done ");
+        fileLogger.writeEvent(2,"Init Function Done -- " + String.valueOf(this.runtime));
 
-        autoMoveArmRoverRuckus = new LibraryAutoMoveArmRoverRuckus(Arms, Sensors, ourRobotConfig, gamepad2, fileLogger);
         TOWR5291Toggle toggleGamePad1X = new TOWR5291Toggle(gamepad1.x);
         toggleGamePad1X.setDebounce(500);
 
         Arms.teamMarkerServo.setPosition(0);
-        // All The Specification of the robot and controller
-        fileLogger.writeEvent(1,"Alliance Color", ourRobotConfig.getAllianceColor());
-        fileLogger.writeEvent(1,"Alliance Start Position", ourRobotConfig.getAllianceStartPosition());
-        fileLogger.writeEvent(1,"Delay", String.valueOf(ourRobotConfig.getDelay()));
-        fileLogger.writeEvent(1,"Robot Base Config", ourRobotConfig.getRobotConfigBase());
-        fileLogger.writeEvent(1,"Team Number", ourRobotConfig.getTeamNumber());
-        fileLogger.writeEvent(1,"Robot Controller Min Tick", String.valueOf(controllerAMode.getTickMin()));
-        fileLogger.writeEvent(1,"Robot Controller Max Tick", String.valueOf(controllerAMode.getTickMax()));
 
         fileLogger.writeEvent(1,"","Wait For Start ");
 
@@ -173,9 +165,7 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
             fileLogger.writeEvent(1,"In Main Loop");
 
             //change LED state every cycle
-            if (!Arms.gameDance) {
-                LEDStatus = LEDs.LEDControlUpdate(LEDStatus);
-            }
+            LEDStatus = LEDs.LEDControlUpdate(LEDStatus);
 
             //adjust the robot power using the dpad on the game controller
             robotPowerMultiplier.incrementTick(gamepad1.dpad_up);
@@ -190,9 +180,10 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
 
             //drivers controller, operation based on the mode selection
             switch ((int)controllerAMode.getTickCurrValue()) {
+
                 case 1:
-                    fileLogger.writeEvent(debug,"Controller Mode", "POV");
-                    dashboard.displayPrintf(5, "Controller POV");
+                    fileLogger.writeEvent(debug,"Controller Mode -- ", "POV");
+                    dashboard.displayPrintf(5, "Controller POV:");
                     /*
                      * Case 1 is the controller type POV
                      * POV uses both joy sticks to drive
@@ -206,36 +197,42 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
                     break;
 
                 case 2:
+                    dashboard.displayPrintf(5, "Controller Mode -- ", "Tank");
+                    fileLogger.writeEvent("Controller Mode -- ", "Tank");
                     /*
                      * Case 2 is the controller type Tank drive
                      * Tank uses both joy sticks to drive
                      * The left joy stick is for the left wheel speed
                      * The right joy stick is for the right wheel speed
                      */
-                    dashboard.displayPrintf(5, "Controller Tank");
-                    fileLogger.writeEvent("Controller Mode", "Tank");
                     Robot.setHardwareDriveLeftMotorPower(-gamepad1.left_stick_y * robotPowerMultiplier.getTickCurrValue());
                     Robot.setHardwareDriveRightMotorPower(-gamepad1.right_stick_y * robotPowerMultiplier.getTickCurrValue());
                     break;
-                    
+
                 case 3:
-                    dashboard.displayPrintf(5, "Mecanum Drive New 2018-19");
-                    fileLogger.writeEvent(debug,"Controller Mode", "Mecanum Drive New 2018-19");
+                    dashboard.displayPrintf(5, "Controller Mode -- ", "Mecanum Drive 18-19");
+                    fileLogger.writeEvent(debug,"Controller Mode -- ", "Mecanum Drive New 2018-19");
+                    /*
+                     * This is a controller type that is going to be deprecated soon.
+                     *
+                     */
                     Robot.baseMotor1.setPower(gamepad1.left_stick_x + -gamepad1.left_stick_y + gamepad1.right_stick_x);
                     Robot.baseMotor2.setPower(-gamepad1.left_stick_x + -gamepad1.left_stick_y + gamepad1.right_stick_x);
                     Robot.baseMotor3.setPower(-gamepad1.left_stick_x + -gamepad1.left_stick_y + -gamepad1.right_stick_x);
                     Robot.baseMotor4.setPower(-gamepad1.left_stick_x + -gamepad1.left_stick_y + -gamepad1.right_stick_x);
 
                     break;
+
                 //last years driving mode, prefered not to use
                 case 4:
-                    dashboard.displayPrintf(5, "Mecanum Drive Relic Recovery");
+                    dashboard.displayPrintf(5, "Controller Mode -- ", "Mecanum Drive Relic Recovery (BAD)");
                     fileLogger.writeEvent(debug,"Controller Mode", "Mecanum Drive Relic Recovery");
-                    Robot.baseMotor1.setPower(Range.clip(-gamepad1.left_stick_y + gamepad1.left_stick_x - gamepad1.right_stick_x, -1, 1));
-                    Robot.baseMotor2.setPower(Range.clip(-gamepad1.left_stick_y - gamepad1.left_stick_x - gamepad1.right_stick_x, -1, 1));
-                    Robot.baseMotor3.setPower(Range.clip(-gamepad1.left_stick_y - gamepad1.left_stick_x + gamepad1.right_stick_x, -1, 1));
-                    Robot.baseMotor4.setPower(Range.clip(-gamepad1.left_stick_y + gamepad1.left_stick_x + gamepad1.right_stick_x, -1, 1));
+                    Robot.baseMotor1.setPower(Range.clip(-gamepad1.left_stick_y + gamepad1.left_stick_x + gamepad1.right_stick_x, -1, 1));
+                    Robot.baseMotor2.setPower(Range.clip(-gamepad1.left_stick_y - gamepad1.left_stick_x + gamepad1.right_stick_x, -1, 1));
+                    Robot.baseMotor3.setPower(Range.clip(-gamepad1.left_stick_y - gamepad1.left_stick_x - gamepad1.right_stick_x, -1, 1));
+                    Robot.baseMotor4.setPower(Range.clip(-gamepad1.left_stick_y + gamepad1.left_stick_x - gamepad1.right_stick_x, -1, 1));
                     break;
+
             } //Switch ControllerA
 
             //controller 2 functions, arms and intakes, depends on which mode selected
@@ -243,14 +240,14 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
             dashboard.displayPrintf(10, "Lift Motor 1 Enc: " + Arms.getLiftMotor1Encoder());
             dashboard.displayPrintf(11, "Lift Motor 2 Enc: " + Arms.getLiftMotor2Encoder());
             //dashboard.displayPrintf(12, "Tilt Motor Enc  : " + Arms.getTiltLiftEncoder());
-            
+
             switch ((int)controllerBMode.getTickCurrValue()){
                 case 1:
                     dashboard.displayPrintf(9, "Controller B Standard");
                     fileLogger.writeEvent(debug,"Controller B Mode", "Standard");
 
                     //Arms.setHardwareLiftPower(-gamepad2.right_stick_y);
-                    autoMoveArmRoverRuckus.runAutoMove();
+                    runAutoMove();
                     if (gamepad2.left_trigger > .8){
                         Arms.intakeServo1.setPosition(.9);
                         Arms.intakeServo2.setPosition(.9);
@@ -265,9 +262,12 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
                     Arms.liftMotor1.setPower(-gamepad2.right_stick_y);
                     Arms.liftMotor2.setPower(-gamepad2.right_stick_y);
 
-                    //if (gamepad2.a){
-                        //autoMoveArmRoverRuckus.runNewJOB(30);
-                    //} //else if (gamepad2.b) {
+                    if (gamepad2.a){
+                        fileLogger.writeEvent(4, "Got a new job for the auto function now setting the step state to INIT");
+                        stepState = Constants.stepState.STATE_INIT;
+                        fileLogger.writeEvent(4, "Setting target degree to..... " + 30);
+                        targetDegreeMoveToPosition = 30;
+                    } //else if (gamepad2.b) {
                         //autoMoveArmRoverRuckus.runNewJOB(10);
                     //}
                     break;
@@ -325,4 +325,133 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
         fileLogger.writeEvent(debug, "initFunctions" ,  "Toggle for left bumper End");
 
     }
+
+    private double[] checkTiltCounts(){
+        if (Sensors.getLimitSwitch1AngleMotorState()){
+            currentTiltEncoderCountMotor1 = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH1DEGREEMEASURE);
+            currentTiltEncoderCountMotor2 = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH1DEGREEMEASURE);
+
+            if (!haveACurrentValue){
+                startingAngleMotor1Count = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH1DEGREEMEASURE) - Arms.tiltMotor1.getCurrentPosition();
+                startingAngleMotor2Count = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH1DEGREEMEASURE) - Arms.tiltMotor2.getCurrentPosition();
+                haveACurrentValue = true;
+            }
+
+        } else if (Sensors.getLimitSwitch2AngleMotorState()){
+            currentTiltEncoderCountMotor1 = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH2DEGREEMEASURE);
+            currentTiltEncoderCountMotor2 = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH2DEGREEMEASURE);
+
+            if (!haveACurrentValue){
+                startingAngleMotor1Count = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH2DEGREEMEASURE) - Arms.tiltMotor1.getCurrentPosition();
+                startingAngleMotor2Count = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH2DEGREEMEASURE) - Arms.tiltMotor2.getCurrentPosition();
+                haveACurrentValue = true;
+            }
+
+        } else if (Sensors.getLimitSwitch3AngleMotorState()){
+            currentTiltEncoderCountMotor1 = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH3DEGREEMEASURE);
+            currentTiltEncoderCountMotor2 = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH3DEGREEMEASURE);
+
+            if (!haveACurrentValue){
+                startingAngleMotor1Count = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH3DEGREEMEASURE) - Arms.tiltMotor1.getCurrentPosition();
+                startingAngleMotor2Count = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH3DEGREEMEASURE) - Arms.tiltMotor2.getCurrentPosition();
+                haveACurrentValue = true;
+            }
+
+        } else if (Sensors.getLimitSwitch4AngleMotorState()){
+            currentTiltEncoderCountMotor1 = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH4DEGREEMEASURE);
+            currentTiltEncoderCountMotor2 = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH4DEGREEMEASURE);
+
+            if (!haveACurrentValue){
+                startingAngleMotor1Count = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH4DEGREEMEASURE) - Arms.tiltMotor1.getCurrentPosition();
+                startingAngleMotor2Count = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH4DEGREEMEASURE) - Arms.tiltMotor2.getCurrentPosition();
+                haveACurrentValue = true;
+            }
+        } else {
+            if (haveACurrentValue){
+                currentTiltEncoderCountMotor1 = Arms.tiltMotor1.getCurrentPosition() - startingAngleMotor1Count;
+                currentTiltEncoderCountMotor2 = Arms.tiltMotor2.getCurrentPosition() - startingAngleMotor2Count;
+            }
+        }
+
+        fileLogger.writeEvent(8, "Returning current position of the tilt motor 1... " + currentTiltEncoderCountMotor1);
+        fileLogger.writeEvent(8, "Returning current position of the tilt motor 2... " + currentTiltEncoderCountMotor2);
+        return new double[]{currentTiltEncoderCountMotor1, currentTiltEncoderCountMotor2};
+    }
+
+    public void runAutoMove(){
+        switch(stepState) {
+            case STATE_INIT:
+                fileLogger.setEventTag("Auto Move Arm INIT");
+
+                fileLogger.writeEvent("Running INIT Step in Library AutoMoveArmRoverRuckus");
+
+                fileLogger.writeEvent("Setting Target Degree Position of: ", String.valueOf(targetDegreeMoveToPosition));
+
+                double currentTilt1Position = checkTiltCounts()[0];
+                double currentTilt2Position = checkTiltCounts()[1];
+                fileLogger.writeEvent(4,"Checking the current Tilt 1 Val: " + currentTilt1Position);
+                fileLogger.writeEvent(4, "Checking the current Tilt 2 Val: " + currentTilt2Position);
+
+                Arms.tiltMotor1.setTargetPosition((int) ((targetDegreeMoveToPosition * ourRobotConfig.getCOUNTS_PER_DEGREE_TILT()) - currentTilt1Position));
+                Arms.tiltMotor2.setTargetPosition((int) ((targetDegreeMoveToPosition * ourRobotConfig.getCOUNTS_PER_DEGREE_TILT()) - currentTilt2Position));
+
+                fileLogger.writeEvent(5, "Setting Power TO: 1");
+                Arms.tiltMotor1.setPower(1);
+                Arms.tiltMotor2.setPower(1);
+
+                fileLogger.writeEvent(2, "Setting both tilt motors to Run To Position");
+                Arms.tiltMotor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                Arms.tiltMotor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+                stepState = Constants.stepState.STATE_RUNNING;
+                fileLogger.writeEvent(3, "Setting step state to RUNNING now");
+                break;
+
+            case STATE_RUNNING:
+                if (!Arms.tiltMotor1.isBusy() && !Arms.tiltMotor2.isBusy()) {
+                    stepState = STATE_COMPLETE;
+                    fileLogger.writeEvent(1,"State now for Auto Drive Rover Ruckus is set to complete");
+                    Arms.tiltMotor1.setPower(0);
+                    Arms.tiltMotor2.setPower(0);
+
+                }
+                fileLogger.writeEvent(10, "Checking Tilt Counts NOW");
+                checkTiltCounts();
+                break;
+
+            case STATE_COMPLETE:
+
+                if ((gamepad2.left_stick_y == 0))
+                {
+                    if ((hold == false)) {
+                        fileLogger.writeEvent(8, "Hold is Now true");
+                        fileLogger.writeEvent(8,"Run using encoders now in hold function in the movement of the arm");
+                        Arms.tiltMotor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                        Arms.tiltMotor2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+                        fileLogger.writeEvent(8, "Setting the target position so that the arm does not move!");
+                        Arms.tiltMotor1.setTargetPosition(Arms.tiltMotor1.getCurrentPosition());
+                        Arms.tiltMotor2.setTargetPosition(Arms.tiltMotor2.getCurrentPosition());
+                        hold = true;
+                    }
+                    Arms.tiltMotor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    Arms.tiltMotor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+                    Arms.tiltMotor1.setPower(HOLDINGTILTMOTORPOWER);
+                    Arms.tiltMotor2.setPower(HOLDINGTILTMOTORPOWER);
+
+                    fileLogger.writeEvent(8, "Setting the power to the tilt motor at " + Arms.tiltMotor1.getPower());
+                } else {
+                    Arms.tiltMotor1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    Arms.tiltMotor2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    hold = false;
+                    Arms.tiltMotor1.setPower(-gamepad2.left_stick_y);
+                    Arms.tiltMotor2.setPower(-gamepad2.left_stick_y);
+                }
+
+                break;
+        }
+    }
+
+
 }

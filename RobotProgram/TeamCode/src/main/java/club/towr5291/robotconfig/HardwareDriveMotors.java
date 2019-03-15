@@ -100,7 +100,7 @@ public class HardwareDriveMotors
         setHardwareDriveRunUsingEncoders();
     }
 
-    public void init(FileLogger fileloggerhandle, HardwareMap ahwMap, String motor1, String motor2, String motor3, String motor4) {
+    public void init(FileLogger fileloggerhandle, robotConfigSettings.robotConfigChoice baseConfig, HardwareMap ahwMap, String motor1, String motor2, String motor3, String motor4, LibraryMotorType.MotorTypes motorTypes) {
         // Save reference to Hardware map
         hwMap = ahwMap;
 
@@ -116,6 +116,7 @@ public class HardwareDriveMotors
         if (motor4 != null)
             baseMotor4  = hwMap.dcMotor.get(motor4);
 
+        setHardwareDriveDirections(baseConfig, motorTypes);
         // Set all motors to zero power
         setHardwareDrivePower(0);
 
@@ -133,7 +134,7 @@ public class HardwareDriveMotors
 
         this.fileLogger = fileloggerhandle;
 
-        initMotorDefaults(baseConfig);
+        initMotorDefaults(baseConfig, motorTypes);
 
         setHardwareDriveDirections(baseConfig, motorTypes);
     }
@@ -155,6 +156,7 @@ public class HardwareDriveMotors
         baseMotor2  = hwMap.dcMotor.get(robotConfig.motors.leftMotor2.toString());
         baseMotor3  = hwMap.dcMotor.get(robotConfig.motors.rightMotor1.toString());
         baseMotor4  = hwMap.dcMotor.get(robotConfig.motors.rightMotor2.toString());
+
         // Set all motors to zero power
         setHardwareDrivePower(0);
         // Set all motors to run without encoders.
@@ -164,13 +166,15 @@ public class HardwareDriveMotors
 
     }
 
-    private void initMotorDefaults (robotConfigSettings.robotConfigChoice baseConfig) {
+    private void initMotorDefaults (robotConfigSettings.robotConfigChoice baseConfig, LibraryMotorType.MotorTypes motorTypes) {
 
         // Define and Initialize Motors
         baseMotor1  = hwMap.dcMotor.get(robotConfig.motors.leftMotor1.toString());
         baseMotor2  = hwMap.dcMotor.get(robotConfig.motors.leftMotor2.toString());
         baseMotor3  = hwMap.dcMotor.get(robotConfig.motors.rightMotor1.toString());
         baseMotor4  = hwMap.dcMotor.get(robotConfig.motors.rightMotor2.toString());
+
+        setHardwareDriveDirections(baseConfig, motorTypes);
         // Set all motors to zero power
         setHardwareDrivePower(0);
         // Set all motors to run without encoders.
@@ -178,15 +182,6 @@ public class HardwareDriveMotors
         setHardwareDriveResetEncoders();
         setHardwareDriveRunUsingEncoders();
 
-    }
-
-
-    public boolean isAndy(LibraryMotorType.MotorTypes motorTypes){
-        if (motorTypes == LibraryMotorType.MotorTypes.ANDY3_7ORBIT || motorTypes == LibraryMotorType.MotorTypes.ANDY20ORBIT || motorTypes == LibraryMotorType.MotorTypes.ANDY20SPUR || motorTypes == LibraryMotorType.MotorTypes.ANDY40SPUR || motorTypes == LibraryMotorType.MotorTypes.ANDY60SPUR){
-            return true;
-        } else {
-            return false;
-        }
     }
 
     public void setHardwareDriveDirections(robotConfigSettings.robotConfigChoice baseConfig, LibraryMotorType.MotorTypes motorTypes){
@@ -224,7 +219,7 @@ public class HardwareDriveMotors
                 break;
             case TileRunnerMecanumOrbital:
                 //TOWR5291 Tilrunner has 2 motors running from belts to the wheel, 2 motors running on gears
-                if (isAndy(motorTypes)) {
+                if (motorTypes.isAndyMark()) {
                     if (baseMotor1 != null)
                         baseMotor1.setDirection(DcMotor.Direction.REVERSE);
                     if (baseMotor2 != null)
@@ -235,13 +230,13 @@ public class HardwareDriveMotors
                         baseMotor4.setDirection(DcMotor.Direction.REVERSE);
                 } else {
                     if (baseMotor1 != null)
-                        baseMotor1.setDirection(DcMotor.Direction.FORWARD);
+                        baseMotor1.setDirection(DcMotor.Direction.REVERSE);
                     if (baseMotor2 != null)
-                        baseMotor2.setDirection(DcMotor.Direction.REVERSE);
+                        baseMotor2.setDirection(DcMotor.Direction.FORWARD);
                     if (baseMotor3 != null)
-                        baseMotor3.setDirection(DcMotor.Direction.REVERSE);
+                        baseMotor3.setDirection(DcMotor.Direction.FORWARD);
                     if (baseMotor4 != null)
-                        baseMotor4.setDirection(DcMotor.Direction.FORWARD);
+                        baseMotor4.setDirection(DcMotor.Direction.REVERSE);
                 }
                 break;
             case TiltRunnerOmni:
