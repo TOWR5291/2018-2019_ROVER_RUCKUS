@@ -441,18 +441,12 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         robotArms.setHardwareLiftMotorResetEncoders();
         robotArms.setHardwareLiftMotorRunUsingEncoders();
         robotArms.setHardwareArmDirections();
-        //robotArms.init(fileLogger, hardwareMap, robotConfig.armMotorsROVERRUCKUS.Motor1.toString(),
-        //        robotConfig.armMotorsROVERRUCKUS.Motor2.toString(),
-        //        robotConfig.armMotorsROVERRUCKUS.Motor3.toString(),
-        //        robotConfig.armMotorsROVERRUCKUS.Motor4.toString());
-        //robotArms.setHardwareDriveResetEncoders();
-        //robotArms.setHardwareDriveRunUsingEncoders();
         robotArms.teamMarkerServo.setPosition(mdblTeamMarkerHome);
 
         fileLogger.writeEvent(3, "Configuring Arm Motors - Finish");
         dashboard.displayPrintf(10, "Configuring Arm Motors - Finish");
 
-        sensor.init(fileLogger, hardwareMap);
+        sensor.init(hardwareMap);
         fileLogger.writeEvent(3, "Resetting State Engine - Start");
 
         initDefaultStates();
@@ -1697,19 +1691,18 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 int mintWyattsGyroDriveMoveCounts = (int)(mdblStepDistance * ourRobotConfig.getCOUNTS_PER_INCH());
                 fileLogger.writeEvent(3, "move counts in Wyatt Gyro Drive is: " + mintWyattsGyroDriveMoveCounts);
 
+                robotDrive.baseMotor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                robotDrive.baseMotor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                robotDrive.baseMotor3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                robotDrive.baseMotor4.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
                 // Set Target and Turn On RUN_TO_POSITION
                 robotDrive.baseMotor1.setTargetPosition(robotDrive.baseMotor1.getCurrentPosition() + mintWyattsGyroDriveMoveCounts);
                 robotDrive.baseMotor2.setTargetPosition(robotDrive.baseMotor2.getCurrentPosition() + mintWyattsGyroDriveMoveCounts);
                 robotDrive.baseMotor3.setTargetPosition(robotDrive.baseMotor3.getCurrentPosition() + mintWyattsGyroDriveMoveCounts);
                 robotDrive.baseMotor4.setTargetPosition(robotDrive.baseMotor4.getCurrentPosition() + mintWyattsGyroDriveMoveCounts);
 
-                robotDrive.baseMotor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                robotDrive.baseMotor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                robotDrive.baseMotor3.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                robotDrive.baseMotor4.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
                 robotDrive.setHardwareDrivePower(mdblStepSpeed);
-
                 break;
 
             case STATE_RUNNING:

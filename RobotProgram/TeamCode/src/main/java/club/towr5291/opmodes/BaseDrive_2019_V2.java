@@ -158,7 +158,7 @@ public class BaseDrive_2019_V2 extends OpModeMasterLinear {
         Arms.init(hardwareMap, dashboard);
         fileLogger.writeEvent(2,"Arms Init");
 
-        Sensors.init(fileLogger, hardwareMap);
+        Sensors.init(hardwareMap);
 
         fileLogger.writeEvent(2,"Sensors Init");
         LEDs = new TOWR5291LEDControl(hardwareMap);

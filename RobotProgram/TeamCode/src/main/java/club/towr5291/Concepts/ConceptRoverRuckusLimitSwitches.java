@@ -100,7 +100,7 @@ public class ConceptRoverRuckusLimitSwitches extends OpModeMasterLinear {
         Arms.tiltMotor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         fileLogger.writeEvent(2,"Arms Init");
 
-        Sensors.init(fileLogger, hardwareMap);
+        Sensors.init(hardwareMap);
 
         Sensors.limitSwitch1AngleMotor.setMode(DigitalChannel.Mode.INPUT);
         Sensors.limitSwitch2AngleMotor.setMode(DigitalChannel.Mode.INPUT);

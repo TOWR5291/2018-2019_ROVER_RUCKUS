@@ -227,6 +227,10 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
                 case 4:
                     dashboard.displayPrintf(5, "Controller Mode -- ", "Mecanum Drive Relic Recovery (BAD)");
                     fileLogger.writeEvent(debug,"Controller Mode", "Mecanum Drive Relic Recovery");
+                    /*
+                     * This was made just for Rover Ruckus becaues the drivers wanted something new!
+                     * THis also allows for strafing
+                     */
                     Robot.baseMotor1.setPower(Range.clip(-gamepad1.left_stick_y + gamepad1.left_stick_x + gamepad1.right_stick_x, -1, 1));
                     Robot.baseMotor2.setPower(Range.clip(-gamepad1.left_stick_y - gamepad1.left_stick_x + gamepad1.right_stick_x, -1, 1));
                     Robot.baseMotor3.setPower(Range.clip(-gamepad1.left_stick_y - gamepad1.left_stick_x - gamepad1.right_stick_x, -1, 1));
@@ -328,44 +332,43 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
 
     private double[] checkTiltCounts(){
         if (Sensors.getLimitSwitch1AngleMotorState()){
-            currentTiltEncoderCountMotor1 = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH1DEGREEMEASURE);
-            currentTiltEncoderCountMotor2 = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH1DEGREEMEASURE);
-
             if (!haveACurrentValue){
                 startingAngleMotor1Count = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH1DEGREEMEASURE) - Arms.tiltMotor1.getCurrentPosition();
                 startingAngleMotor2Count = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH1DEGREEMEASURE) - Arms.tiltMotor2.getCurrentPosition();
                 haveACurrentValue = true;
+            } else {
+                currentTiltEncoderCountMotor1 = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH1DEGREEMEASURE);
+                currentTiltEncoderCountMotor2 = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH1DEGREEMEASURE);
             }
 
         } else if (Sensors.getLimitSwitch2AngleMotorState()){
-            currentTiltEncoderCountMotor1 = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH2DEGREEMEASURE);
-            currentTiltEncoderCountMotor2 = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH2DEGREEMEASURE);
-
             if (!haveACurrentValue){
                 startingAngleMotor1Count = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH2DEGREEMEASURE) - Arms.tiltMotor1.getCurrentPosition();
                 startingAngleMotor2Count = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH2DEGREEMEASURE) - Arms.tiltMotor2.getCurrentPosition();
                 haveACurrentValue = true;
+            } else {
+                currentTiltEncoderCountMotor1 = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH2DEGREEMEASURE);
+                currentTiltEncoderCountMotor2 = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH2DEGREEMEASURE);
             }
 
         } else if (Sensors.getLimitSwitch3AngleMotorState()){
-            currentTiltEncoderCountMotor1 = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH3DEGREEMEASURE);
-            currentTiltEncoderCountMotor2 = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH3DEGREEMEASURE);
-
             if (!haveACurrentValue){
                 startingAngleMotor1Count = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH3DEGREEMEASURE) - Arms.tiltMotor1.getCurrentPosition();
                 startingAngleMotor2Count = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH3DEGREEMEASURE) - Arms.tiltMotor2.getCurrentPosition();
                 haveACurrentValue = true;
+            } else {
+                currentTiltEncoderCountMotor1 = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH3DEGREEMEASURE);
+                currentTiltEncoderCountMotor2 = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH3DEGREEMEASURE);
             }
 
         } else if (Sensors.getLimitSwitch4AngleMotorState()){
-            currentTiltEncoderCountMotor1 = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH4DEGREEMEASURE);
-            currentTiltEncoderCountMotor2 = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH4DEGREEMEASURE);
-
             if (!haveACurrentValue){
                 startingAngleMotor1Count = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH4DEGREEMEASURE) - Arms.tiltMotor1.getCurrentPosition();
                 startingAngleMotor2Count = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH4DEGREEMEASURE) - Arms.tiltMotor2.getCurrentPosition();
                 haveACurrentValue = true;
-            }
+            } else {
+                currentTiltEncoderCountMotor1 = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH4DEGREEMEASURE);
+                currentTiltEncoderCountMotor2 = (ourRobotConfig.getCOUNTS_PER_DEGREE_TILT() * LIMITSWITCH4DEGREEMEASURE);            }
         } else {
             if (haveACurrentValue){
                 currentTiltEncoderCountMotor1 = Arms.tiltMotor1.getCurrentPosition() - startingAngleMotor1Count;
