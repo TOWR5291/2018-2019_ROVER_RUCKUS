@@ -82,6 +82,7 @@ import club.towr5291.functions.Constants;
 import club.towr5291.functions.FileLogger;
 import club.towr5291.functions.ReadStepFileRoverRuckus;
 import club.towr5291.functions.RoverRuckusOCV;
+import club.towr5291.functions.TOWR5291TextToSpeech;
 import club.towr5291.libraries.ImageCaptureOCV;
 import club.towr5291.libraries.LibraryMotorType;
 import club.towr5291.libraries.LibraryStateSegAutoRoverRuckus;
@@ -277,6 +278,8 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
     private int mintNumberColourTries = 0;
     private Constants.ObjectColours mColour;
 
+    private TOWR5291TextToSpeech towr5291TextToSpeech = new TOWR5291TextToSpeech(true);
+
     //LED Strips
     private TOWR5291LEDControl LEDs;
     private Constants.LEDState mint5291LEDStatus = Constants.LEDState.STATE_NULL;
@@ -400,12 +403,14 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
 
         fileLogger.writeEvent(3, "Loading Autonomous Steps - Finished");
         fileLogger.writeEvent(3, "Configuring Adafruit IMU - Start");
+        towr5291TextToSpeech.Speak("Step File Loaded!", debug);
 
         dashboard.displayPrintf(10, "initRobot IMU Loading");
 
         // Set up the parameters with which we will use our IMU. Note that integration
         // algorithm here just reports accelerations to the logcat log; it doesn't actually
         // provide positional information.
+        towr5291TextToSpeech.Speak("Loading IMU Gyro", debug);
         BNO055IMU.Parameters parametersAdafruitImu = new BNO055IMU.Parameters();
         parametersAdafruitImu.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         parametersAdafruitImu.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
@@ -459,6 +464,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
 
         dashboard.displayPrintf(10, "initRobot VUFORIA Loading");
 
+        towr5291TextToSpeech.Speak("Loading OpenCV & Vuforia", debug);
         //init openCV
         initOpenCv();
         dashboard.displayPrintf(1, "initRobot OpenCV!");
@@ -486,6 +492,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
 
         fileLogger.writeEvent(3,"MAIN", "Activated Vuforia");
 
+        towr5291TextToSpeech.Speak("Completed Loading, Waiting for Start", debug);
         dashboard.displayPrintf(10, "Init - Complete, Wait for Start");
 
         // Wait for the game to start (driver presses PLAY)
@@ -767,63 +774,82 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         switch (mstrRobotCommand) {
             case "DELAY":
                 mintCurrentStepDelay                = Constants.stepState.STATE_INIT;
+                towr5291TextToSpeech.Speak("Running Delay", debug);
                 break;
             case "GTH":
                 mintCurrentStateTankTurnGyroHeading = Constants.stepState.STATE_INIT;
+                towr5291TextToSpeech.Speak("Running Tank Turn Gyro Heading", debug);
                 break;
             case "STRAFE":
                 mintCurrentStateMecanumStrafe       = Constants.stepState.STATE_INIT;
+                towr5291TextToSpeech.Speak("Running Mecanum Strafe", debug);
                 break;
             case "TANKTURN":
                 mintCurrentStateTankTurn            = Constants.stepState.STATE_INIT;
+                towr5291TextToSpeech.Speak("Running Tank Turn", debug);
                 break;
             case "LPE":
                 mintCurrentStatePivotTurn           = Constants.stepState.STATE_INIT;
+                towr5291TextToSpeech.Speak("Running Pivot Turn", debug);
                 break;
             case "RPE":
                 mintCurrentStatePivotTurn           = Constants.stepState.STATE_INIT;
+                towr5291TextToSpeech.Speak("Running Pivot Turn", debug);
                 break;
             case "LRE":  // Left turn with a Radius in Parm 1
                 mintCurrentStateRadiusTurn          = Constants.stepState.STATE_INIT;
+                towr5291TextToSpeech.Speak("Running Radius Turn", debug);
                 break;
             case "RRE":  // Right turn with a Radius in Parm 1
                 mintCurrentStateRadiusTurn          = Constants.stepState.STATE_INIT;
+                towr5291TextToSpeech.Speak("Running Radius Turn", debug);
                 break;
             case "DRIVE":  // Drive forward a distance in inches and power setting
                 mintCurrentStateDriveHeading        = Constants.stepState.STATE_INIT;
+                towr5291TextToSpeech.Speak("Running Drive Heading", debug);
                 break;
             case "VME":  // Move the robot using localisation from the targets
                 mintCurStVuforiaMove5291            = Constants.stepState.STATE_INIT;
+                towr5291TextToSpeech.Speak("Running Vuforia Move", debug);
                 break;
             case "VTE":  // Turn the Robot using information from Vuforia and Pythag
                 mintCurStVuforiaTurn5291            = Constants.stepState.STATE_INIT;
+                towr5291TextToSpeech.Speak("Running Vuforia Turn", debug);
                 break;
             case "GTE":  // Special Function, 5291 Move forward until line is found
                 mintCurrentStateGyroTurnEncoder5291 = Constants.stepState.STATE_INIT;
+                towr5291TextToSpeech.Speak("Running Gyro Turn Encoder", debug);
                 break;
             case "EYE":  // Special Function, 5291 Move forward until line is found
                 mintCurrentStateEyes5291            = Constants.stepState.STATE_INIT;
+                towr5291TextToSpeech.Speak("Running Move Eyes", debug);
                 break;
             case "LIFT":
                 mintCurrentStateMoveLift            = Constants.stepState.STATE_INIT;
+                towr5291TextToSpeech.Speak("Running Move Lift", debug);
                 break;
             case "INTAKE":
                 mintCurrentStateInTake              = Constants.stepState.STATE_INIT;
+                towr5291TextToSpeech.Speak("Running Set Intake", debug);
                 break;
             case "TILT":
                 mintCurrentStateTiltMotor           = Constants.stepState.STATE_INIT;
+                towr5291TextToSpeech.Speak("Running Tilt Motor", debug);
                 break;
             case "FINDGOLD":
                 mintCurrentStateFindGold            = Constants.stepState.STATE_INIT;
+                towr5291TextToSpeech.Speak("Running Find Gold", debug);
                 break;
             case "WYATTGYRO":
                 mintCurrentStateWyattsGyroDrive     = Constants.stepState.STATE_INIT;
+                towr5291TextToSpeech.Speak("Running Wyatt's Gyro Drive", debug);
                 break;
             case "FNC":  //  Run a special Function with Parms
 
                 break;
             case "TEAMMARKER":
                 mintCurrentStateTeamMarker          = Constants.stepState.STATE_INIT;
+                towr5291TextToSpeech.Speak("Running Set Team Marker Servo Position", debug);
                 break;
         }
 

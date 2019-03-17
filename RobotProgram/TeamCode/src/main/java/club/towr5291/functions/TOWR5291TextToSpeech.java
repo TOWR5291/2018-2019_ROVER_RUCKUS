@@ -7,9 +7,19 @@ import org.firstinspires.ftc.robotcore.external.android.AndroidTextToSpeech;
 public class TOWR5291TextToSpeech {
     private AndroidTextToSpeech androidTextToSpeech;
     private float SpeakingRate = 1.5f;
-    private float SpeakingPitch = .75f;
+    private float SpeakingPitch = 1f;
+    private boolean Speak = true;
 
     public TOWR5291TextToSpeech(){
+        this.androidTextToSpeech = new AndroidTextToSpeech();
+        this.androidTextToSpeech.initialize();
+        this.androidTextToSpeech.setLanguageAndCountry("en", "US");
+        this.androidTextToSpeech.setSpeechRate(this.SpeakingRate);
+        this.androidTextToSpeech.setPitch(this.SpeakingPitch);
+    }
+
+    public TOWR5291TextToSpeech(boolean speak){
+        this.Speak = speak;
         this.androidTextToSpeech = new AndroidTextToSpeech();
         this.androidTextToSpeech.initialize();
         this.androidTextToSpeech.setLanguageAndCountry("en", "US");
@@ -37,13 +47,25 @@ public class TOWR5291TextToSpeech {
         this.androidTextToSpeech.setPitch(this.SpeakingPitch);
     }
 
+    /**
+     * Call this and it sets the tone, pitch, and it checks to make sure that it is not speaking
+     * @param Text
+     */
     public void Speak(String Text){
-        androidTextToSpeech.setSpeechRate(this.SpeakingRate);
-        androidTextToSpeech.setPitch(this.SpeakingPitch);
-        if (!this.androidTextToSpeech.isSpeaking()) {
+        if (!this.androidTextToSpeech.isSpeaking() && this.Speak) {
             this.androidTextToSpeech.speak(Text);
         } else {
             Log.e("Speaking", "ERROR CAN NOT SPEAK TEXT ALREADY SPEAKING");
+        }
+    }
+
+    public void Speak(String Text, int debug){
+        if (!this.androidTextToSpeech.isSpeaking() && debug >= 8 && this.Speak){
+            this.androidTextToSpeech.speak(Text);
+        } else if (this.androidTextToSpeech.isSpeaking()){
+            Log.e("Speaking", "ERROR CAN NOT SPEAK TEXT ALREADY SPEAKING");
+        } else {
+            Log.e("Speaking", "ERROR Debug not above 8");
         }
     }
 
@@ -56,7 +78,7 @@ public class TOWR5291TextToSpeech {
      * @param Rate
      */
     public void setSpeakingRate(float Rate){
-        this.SpeakingRate = Rate;
+        this.androidTextToSpeech.setSpeechRate(Rate);
     }
 
     /**
@@ -66,5 +88,9 @@ public class TOWR5291TextToSpeech {
      */
     public void setSpeakingPitch(float Pitch){
         this.androidTextToSpeech.setPitch(Pitch);
+    }
+
+    public void setSpeak(boolean speak){
+        this.Speak = speak;
     }
 }
