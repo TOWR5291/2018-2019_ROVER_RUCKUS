@@ -304,7 +304,7 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
         controllerAMode.setTickMin(1);
         controllerAMode.setTickIncrement(1);
         controllerAMode.setTickMax(controllerAModes);
-        controllerAMode.setTickValue(5);
+        controllerAMode.setTickValue(4);
         fileLogger.writeEvent(debug, "initFunctions" ,  "ControllerAMode End");
 
         fileLogger.writeEvent(debug, "initFunctions" ,  "ControllerBMode Start");

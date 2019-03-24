@@ -98,6 +98,7 @@ public class HardwareDriveMotors
         setHardwareDriveResetEncoders();
 
         setHardwareDriveRunUsingEncoders();
+        setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
     public void init(FileLogger fileloggerhandle, robotConfigSettings.robotConfigChoice baseConfig, HardwareMap ahwMap, String motor1, String motor2, String motor3, String motor4, LibraryMotorType.MotorTypes motorTypes) {
@@ -125,6 +126,8 @@ public class HardwareDriveMotors
         setHardwareDriveResetEncoders();
 
         setHardwareDriveRunUsingEncoders();
+
+        setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
     /* Initialize standard Hardware interfaces */
@@ -137,6 +140,8 @@ public class HardwareDriveMotors
         initMotorDefaults(baseConfig, motorTypes);
 
         setHardwareDriveDirections(baseConfig, motorTypes);
+
+        setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
     /* Initialize standard Hardware interfaces */
@@ -147,6 +152,8 @@ public class HardwareDriveMotors
         initMotorDefaults();
 
         setHardwareDriveDirections(baseConfig, motorTypes);
+
+        setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
     private void initMotorDefaults () {
@@ -157,6 +164,7 @@ public class HardwareDriveMotors
         baseMotor3  = hwMap.dcMotor.get(robotConfig.motors.rightMotor1.toString());
         baseMotor4  = hwMap.dcMotor.get(robotConfig.motors.rightMotor2.toString());
 
+        setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         // Set all motors to zero power
         setHardwareDrivePower(0);
         // Set all motors to run without encoders.
@@ -181,9 +189,20 @@ public class HardwareDriveMotors
         // May want to use RUN_USING_ENCODERS if encoders are installed.
         setHardwareDriveResetEncoders();
         setHardwareDriveRunUsingEncoders();
+        setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
     }
 
+    public void setZeroPowerBehavior(DcMotor.ZeroPowerBehavior zeroPowerBehavior){
+        if (baseMotor1 != null)
+            baseMotor1.setZeroPowerBehavior(zeroPowerBehavior);
+        if (baseMotor2 != null)
+            baseMotor2.setZeroPowerBehavior(zeroPowerBehavior);
+        if (baseMotor3 != null)
+            baseMotor3.setZeroPowerBehavior(zeroPowerBehavior);
+        if (baseMotor4 != null)
+            baseMotor4.setZeroPowerBehavior(zeroPowerBehavior);
+    }
     public void setHardwareDriveDirections(robotConfigSettings.robotConfigChoice baseConfig, LibraryMotorType.MotorTypes motorTypes){
         switch (baseConfig) {
             case TileRunnerRegular:
