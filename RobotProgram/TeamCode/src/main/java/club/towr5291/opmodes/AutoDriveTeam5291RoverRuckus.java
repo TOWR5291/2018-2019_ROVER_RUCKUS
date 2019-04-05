@@ -278,7 +278,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
     private int mintNumberColourTries = 0;
     private Constants.ObjectColours mColour;
 
-    private TOWR5291TextToSpeech towr5291TextToSpeech = new TOWR5291TextToSpeech(true);
+    private TOWR5291TextToSpeech towr5291TextToSpeech = new TOWR5291TextToSpeech(false);
 
     //LED Strips
     private TOWR5291LEDControl LEDs;
@@ -1298,15 +1298,15 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
 
                 // Determine new target position
                 if (mdblStepDistance > 0) {
-                    mintStepLeftTarget1 = mintStartPositionLeft1 - (int) (ourRobotConfig.getMecanumTurnOffset() * 0.5 * Math.abs(mdblStepDistance) * ourRobotConfig.getCOUNTS_PER_DEGREE());
-                    mintStepLeftTarget2 = mintStartPositionLeft2 - (int) (ourRobotConfig.getMecanumTurnOffset() * 0.5 * Math.abs(mdblStepDistance) * ourRobotConfig.getCOUNTS_PER_DEGREE());
-                    mintStepRightTarget1 = mintStartPositionRight1 + (int) (ourRobotConfig.getMecanumTurnOffset() * 0.5 * Math.abs(mdblStepDistance) * ourRobotConfig.getCOUNTS_PER_DEGREE());
-                    mintStepRightTarget2 = mintStartPositionRight2 + (int) (ourRobotConfig.getMecanumTurnOffset() * 0.5 * Math.abs(mdblStepDistance) * ourRobotConfig.getCOUNTS_PER_DEGREE());
-                } else {
                     mintStepLeftTarget1 = mintStartPositionLeft1 + (int) (ourRobotConfig.getMecanumTurnOffset() * 0.5 * Math.abs(mdblStepDistance) * ourRobotConfig.getCOUNTS_PER_DEGREE());
                     mintStepLeftTarget2 = mintStartPositionLeft2 + (int) (ourRobotConfig.getMecanumTurnOffset() * 0.5 * Math.abs(mdblStepDistance) * ourRobotConfig.getCOUNTS_PER_DEGREE());
                     mintStepRightTarget1 = mintStartPositionRight1 - (int) (ourRobotConfig.getMecanumTurnOffset() * 0.5 * Math.abs(mdblStepDistance) * ourRobotConfig.getCOUNTS_PER_DEGREE());
                     mintStepRightTarget2 = mintStartPositionRight2 - (int) (ourRobotConfig.getMecanumTurnOffset() * 0.5 * Math.abs(mdblStepDistance) * ourRobotConfig.getCOUNTS_PER_DEGREE());
+                } else {
+                    mintStepLeftTarget1 = mintStartPositionLeft1 - (int) (ourRobotConfig.getMecanumTurnOffset() * 0.5 * Math.abs(mdblStepDistance) * ourRobotConfig.getCOUNTS_PER_DEGREE());
+                    mintStepLeftTarget2 = mintStartPositionLeft2 - (int) (ourRobotConfig.getMecanumTurnOffset() * 0.5 * Math.abs(mdblStepDistance) * ourRobotConfig.getCOUNTS_PER_DEGREE());
+                    mintStepRightTarget1 = mintStartPositionRight1 + (int) (ourRobotConfig.getMecanumTurnOffset() * 0.5 * Math.abs(mdblStepDistance) * ourRobotConfig.getCOUNTS_PER_DEGREE());
+                    mintStepRightTarget2 = mintStartPositionRight2 + (int) (ourRobotConfig.getMecanumTurnOffset() * 0.5 * Math.abs(mdblStepDistance) * ourRobotConfig.getCOUNTS_PER_DEGREE());
                 }
 
                 //store the encoder positions so next step can calculate destination
@@ -1602,10 +1602,10 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 }
                 mblnNextStepLastPos = false;
 
-                mintStepLeftTarget1 = mintStartPositionLeft1 + (int) (mdblStepDistance * ourRobotConfig.getCOUNTS_PER_INCH_STRAFE_LEFT_OFFSET() * ourRobotConfig.getCOUNTS_PER_INCH_STRAFE() * ourRobotConfig.getCOUNTS_PER_INCH_STRAFE_FRONT_OFFSET());
-                mintStepLeftTarget2 = mintStartPositionLeft2 - (int) (mdblStepDistance * ourRobotConfig.getCOUNTS_PER_INCH_STRAFE_LEFT_OFFSET() * ourRobotConfig.getCOUNTS_PER_INCH_STRAFE() * ourRobotConfig.getCOUNTS_PER_INCH_STRAFE_REAR_OFFSET());
-                mintStepRightTarget1 = mintStartPositionRight1 - (int) (mdblStepDistance * ourRobotConfig.getCOUNTS_PER_INCH_STRAFE_RIGHT_OFFSET() * ourRobotConfig.getCOUNTS_PER_INCH_STRAFE() * ourRobotConfig.getCOUNTS_PER_INCH_STRAFE_FRONT_OFFSET());
-                mintStepRightTarget2 = mintStartPositionRight2 + (int) (mdblStepDistance * ourRobotConfig.getCOUNTS_PER_INCH_STRAFE_RIGHT_OFFSET() * ourRobotConfig.getCOUNTS_PER_INCH_STRAFE() + ourRobotConfig.getCOUNTS_PER_INCH_STRAFE_REAR_OFFSET());
+                mintStepLeftTarget1 = mintStartPositionLeft1 - (int) (mdblStepDistance * ourRobotConfig.getCOUNTS_PER_INCH_STRAFE_LEFT_OFFSET() * ourRobotConfig.getCOUNTS_PER_INCH_STRAFE() * ourRobotConfig.getCOUNTS_PER_INCH_STRAFE_FRONT_OFFSET());
+                mintStepLeftTarget2 = mintStartPositionLeft2 + (int) (mdblStepDistance * ourRobotConfig.getCOUNTS_PER_INCH_STRAFE_LEFT_OFFSET() * ourRobotConfig.getCOUNTS_PER_INCH_STRAFE() * ourRobotConfig.getCOUNTS_PER_INCH_STRAFE_REAR_OFFSET());
+                mintStepRightTarget1 = mintStartPositionRight1 + (int) (mdblStepDistance * ourRobotConfig.getCOUNTS_PER_INCH_STRAFE_RIGHT_OFFSET() * ourRobotConfig.getCOUNTS_PER_INCH_STRAFE() * ourRobotConfig.getCOUNTS_PER_INCH_STRAFE_FRONT_OFFSET());
+                mintStepRightTarget2 = mintStartPositionRight2 - (int) (mdblStepDistance * ourRobotConfig.getCOUNTS_PER_INCH_STRAFE_RIGHT_OFFSET() * ourRobotConfig.getCOUNTS_PER_INCH_STRAFE() * ourRobotConfig.getCOUNTS_PER_INCH_STRAFE_REAR_OFFSET());
 
                 //store the encoder positions so next step can calculate destination
                 mintLastEncoderDestinationLeft1 = mintStepLeftTarget1;
@@ -1684,7 +1684,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                     }
                 }
 
-                if (!robotDrive.baseMotor1.isBusy() || (!robotDrive.baseMotor3.isBusy())) {
+                if (!robotDrive.baseMotor1.isBusy() || (!robotDrive.baseMotor3.isBusy()) || (!robotDrive.baseMotor2.isBusy()) || (!robotDrive.baseMotor4.isBusy())) {
                     robotDrive.setHardwareDrivePower(0);
                     fileLogger.writeEvent(1, "Complete         ");
                     mintCurrentStateMecanumStrafe = Constants.stepState.STATE_COMPLETE;
@@ -1952,30 +1952,33 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 robotArms.setHardwareLiftMotorResetEncoders();
                 fileLogger.writeEvent(5, "Resetting Encoders");
 
-                if (mdblRobotParm1 == 1){
-                    dblDistanceToMoveLift1 = robotArms.getLiftMotor1Encoder() + (mdblStepDistance * ourRobotConfig.getLIFTMAIN_COUNTS_PER_INCH());
-                    dblDistanceToMoveLift2 = robotArms.getLiftMotor2Encoder() + (mdblStepDistance * ourRobotConfig.getLIFTMAIN_COUNTS_PER_INCH());
-                } else if (mdblRobotParm1 == 0){
-                    double distaceInCounts = (mdblStepDistance * ourRobotConfig.getLIFTMAIN_COUNTS_PER_INCH());
-                    dblDistanceToMoveLift1 = (robotArms.getLiftMotor1Encoder() - mintLiftStartCountMotor1) + distaceInCounts;
-                    dblDistanceToMoveLift2 = (robotArms.getLiftMotor2Encoder() - mintLiftStartCountMotor2) + distaceInCounts;
-                } else {
-                    dblDistanceToMoveLift1 = 0;
-                    dblDistanceToMoveLift2 = 0;
-                    fileLogger.writeEvent("ERROR ERROR ERROR ERROR ERROR ERROR ERROR");
-                    fileLogger.writeEvent("ERROR ERROR ERROR ERROR ERROR ERROR ERROR");
-                    fileLogger.writeEvent("ERROR MOVING LIFT PARM 1 IS THE MODE CSN BE 0 OR 1");
-                    fileLogger.writeEvent("Mode 1 is to move a certain distance so like move out 1 more inch");
-                    fileLogger.writeEvent("Mode 2 is to move to a spot so move to 5 inches on the lift");
+                //check timeout value
+                if (mStateTime.milliseconds() > mdblRobotParm1) {
+                    if (mdblRobotParm2 == 0){
+                        dblDistanceToMoveLift1 = robotArms.getLiftMotor1Encoder() + (mdblStepDistance * ourRobotConfig.getLIFTMAIN_COUNTS_PER_INCH());
+                        dblDistanceToMoveLift2 = robotArms.getLiftMotor2Encoder() + (mdblStepDistance * ourRobotConfig.getLIFTMAIN_COUNTS_PER_INCH());
+                    } else if (mdblRobotParm2 == 1){
+                        double distaceInCounts = (mdblStepDistance * ourRobotConfig.getLIFTMAIN_COUNTS_PER_INCH());
+                        dblDistanceToMoveLift1 = (robotArms.getLiftMotor1Encoder() - mintLiftStartCountMotor1) + distaceInCounts;
+                        dblDistanceToMoveLift2 = (robotArms.getLiftMotor2Encoder() - mintLiftStartCountMotor2) + distaceInCounts;
+                    } else {
+                        dblDistanceToMoveLift1 = 0;
+                        dblDistanceToMoveLift2 = 0;
+                        fileLogger.writeEvent("ERROR ERROR ERROR ERROR ERROR ERROR ERROR");
+                        fileLogger.writeEvent("ERROR ERROR ERROR ERROR ERROR ERROR ERROR");
+                        fileLogger.writeEvent("ERROR MOVING LIFT PARM 1 IS THE MODE CSN BE 0 OR 1");
+                        fileLogger.writeEvent("Mode 1 is to move a certain distance so like move out 1 more inch");
+                        fileLogger.writeEvent("Mode 2 is to move to a spot so move to 5 inches on the lift");
+                    }
+                    robotArms.liftMotor1.setTargetPosition((int)dblDistanceToMoveLift1);
+                    robotArms.liftMotor2.setTargetPosition((int)dblDistanceToMoveLift2);
+
+                    robotArms.setHardwareLiftPower(mdblStepSpeed);
+
+                    robotArms.setHardwareLiftMotorRunToPosition();
+
+                    mintCurrentStateMoveLift = Constants.stepState.STATE_RUNNING;
                 }
-                robotArms.liftMotor1.setTargetPosition((int)dblDistanceToMoveLift1);
-                robotArms.liftMotor2.setTargetPosition((int)dblDistanceToMoveLift2);
-
-                robotArms.setHardwareLiftPower(mdblStepSpeed);
-
-                robotArms.setHardwareLiftMotorRunToPosition();
-
-                mintCurrentStateMoveLift = Constants.stepState.STATE_RUNNING;
                 break;
             case STATE_RUNNING:
                 fileLogger.writeEvent(2, "Running");
@@ -2066,8 +2069,8 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 robotArms.tiltMotor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 robotArms.tiltMotor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-                dblDistanceToMoveTilt1 = robotArms.tiltMotor1.getCurrentPosition() + (mdblStepDistance * ourRobotConfig.getLIFTMAIN_COUNTS_PER_INCH());
-                dblDistanceToMoveTilt2 = robotArms.tiltMotor2.getCurrentPosition() + (mdblStepDistance * ourRobotConfig.getLIFTMAIN_COUNTS_PER_INCH());
+                dblDistanceToMoveTilt1 = robotArms.tiltMotor1.getCurrentPosition() + (mdblStepDistance * ourRobotConfig.getCOUNTS_PER_DEGREE_TILT());
+                dblDistanceToMoveTilt2 = robotArms.tiltMotor2.getCurrentPosition() + (mdblStepDistance * ourRobotConfig.getCOUNTS_PER_DEGREE_TILT());
 
                 fileLogger.writeEvent(2, "Distance to move = " + mdblStepDistance + ", dblDistanceToMoveTilt1 " + dblDistanceToMoveTilt1);
                 fileLogger.writeEvent(2, "Distance to move = " + mdblStepDistance + ", dblDistanceToMoveTilt2 " + dblDistanceToMoveTilt2);
@@ -2155,8 +2158,9 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                                 autonomousStepsFile.insertSteps(3, "TANKTURN", 45,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
                                 break;
                         }
-                        autonomousStepsFile.insertSteps(3, "DRIVE", -18,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                        autonomousStepsFile.insertSteps(3, "DRIVE", 18,mdblStepSpeed, false, true, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                        //autonomousStepsFile.insertSteps(3, "DRIVE", 18,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                        //autonomousStepsFile.insertSteps(3, "DRIVE", -18,mdblStepSpeed, false, true, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                        autonomousStepsFile.insertSteps(3, "TANKTURN", 180, mdblStepSpeed, false, false, 0,0,0,0,0,0,mintCurrentStep + 1);
                     } else {
                         fileLogger.writeEvent(3,"Found NOTHING ");
                         switch (mintFindGoldLoop) {

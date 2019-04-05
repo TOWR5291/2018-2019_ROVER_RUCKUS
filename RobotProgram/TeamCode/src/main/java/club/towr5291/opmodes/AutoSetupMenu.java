@@ -98,7 +98,7 @@ public class AutoSetupMenu extends OpModeMasterLinear implements FTCMenu.MenuBut
         editor = sharedPreferences.edit();
         teamNumber = sharedPreferences.getString("club.towr5291.Autonomous.TeamNumber", "0000");
         allianceColor = sharedPreferences.getString("club.towr5291.Autonomous.Color", "Red");
-        allianceStartPosition = sharedPreferences.getString("club.towr5291.Autonomous.StartPosition", "Left");
+        allianceStartPosition = sharedPreferences.getString("club.towr5291.Autonomous.Position", "Left");
         delay = Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Delay", "0"));
         robotConfigBase = sharedPreferences.getString("club.towr5291.Autonomous.RobotConfigBase", "TileRunner-Mecanum-2x40");
         robotMotorChoice = sharedPreferences.getString("club.towr5291.Autonomous.RobotMotorChoice", "ANDY40SPUR");
@@ -112,7 +112,7 @@ public class AutoSetupMenu extends OpModeMasterLinear implements FTCMenu.MenuBut
         FTCChoiceMenu startPosMenu       = new FTCChoiceMenu("Start:", allianceMenu, this);
         FTCValueMenu delayMenu           = new FTCValueMenu("Delay:", startPosMenu, this, 0.0, 20.0, 1.0, delay, "%1f");
         FTCChoiceMenu robotMotorMenu    = new FTCChoiceMenu("Robot Base:", delayMenu, this);
-        FTCChoiceMenu robotConfigMenu    = new FTCChoiceMenu("Robot Base:", robotMotorMenu, this);
+        FTCChoiceMenu robotConfigMenu    = new FTCChoiceMenu("Robot Motor:", robotMotorMenu, this);
         FTCChoiceMenu debugConfigMenu    = new FTCChoiceMenu("Debug:", robotConfigMenu, this);
 
         //
@@ -468,7 +468,7 @@ public class AutoSetupMenu extends OpModeMasterLinear implements FTCMenu.MenuBut
         //write the options to sharedpreferences
         editor.putString("club.towr5291.Autonomous.TeamNumber", teamNumber);
         editor.putString("club.towr5291.Autonomous.Color", allianceColor);
-        editor.putString("club.towr5291.Autonomous.StartPosition", allianceStartPosition);
+        editor.putString("club.towr5291.Autonomous.Position", allianceStartPosition);
         editor.putString("club.towr5291.Autonomous.Delay", String.valueOf(delay));
         editor.putString("club.towr5291.Autonomous.RobotConfigBase", robotConfigBase);
         editor.putString("club.towr5291.Autonomous.RobotMotorChoice", robotMotorChoice);
@@ -478,7 +478,7 @@ public class AutoSetupMenu extends OpModeMasterLinear implements FTCMenu.MenuBut
         //read them back to ensure they were written
         teamNumber = sharedPreferences.getString("club.towr5291.Autonomous.TeamNumber", null);
         allianceColor = sharedPreferences.getString("club.towr5291.Autonomous.Color", null);
-        allianceStartPosition = sharedPreferences.getString("club.towr5291.Autonomous.StartPosition", null);
+        allianceStartPosition = sharedPreferences.getString("club.towr5291.Autonomous.Position", null);
         delay = Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Delay", null));
         robotConfigBase = sharedPreferences.getString("club.towr5291.Autonomous.RobotConfigBase", null);
         robotMotorChoice = sharedPreferences.getString("club.towr5291.Autonomous.RobotMotorChoice", null);

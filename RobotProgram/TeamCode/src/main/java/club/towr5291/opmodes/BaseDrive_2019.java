@@ -180,7 +180,6 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
 
             //drivers controller, operation based on the mode selection
             switch ((int)controllerAMode.getTickCurrValue()) {
-
                 case 1:
                     fileLogger.writeEvent(debug,"Controller Mode -- ", "POV");
                     dashboard.displayPrintf(5, "Controller POV:");
@@ -276,6 +275,9 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
                     //}
                     break;
             }
+
+            dashboard.displayText(1, "Tilt Motor 1 Encoder Counts" +  Arms.tiltMotor1.getCurrentPosition());
+            dashboard.displayText(2, "Tilt Motor 2 Encoder Counts" +  Arms.tiltMotor2.getCurrentPosition());
         }
 
         //stop the logging

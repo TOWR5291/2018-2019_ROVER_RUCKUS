@@ -288,18 +288,17 @@ public class robotConfig {
                 WHEEL_DIAMETER_INCHES = 4.0;                                                  // For figuring circumference
                 WHEEL_ACTUAL_FUDGE = 1.02;                                                    // Fine tuning amount
                 COUNTS_PER_INCH = ((COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415)) * WHEEL_ACTUAL_FUDGE * REVERSE_DIRECTION;
-                COUNTS_PER_INCH_STRAFE_FRONT_OFFSET = 1;
-                COUNTS_PER_INCH_STRAFE_REAR_OFFSET = 1;
+                COUNTS_PER_INCH_STRAFE_FRONT_OFFSET = 1.8;//1.25
+                COUNTS_PER_INCH_STRAFE_REAR_OFFSET = 1;//1.8
                 COUNTS_PER_INCH_STRAFE_LEFT_OFFSET = 1;
                 COUNTS_PER_INCH_STRAFE_RIGHT_OFFSET = 1;
                 COUNTS_PER_INCH_STRAFE = COUNTS_PER_INCH * 1.1;
                 ROBOT_TRACK = 16.5;                                                     //  distance between centerline of rear wheels robot will pivot on rear wheel of omni on front, 16.5 track is 103.67 inches full circle
                 WHEEL_TURN_FUDGE = 1.0;                                                        // Fine tuning amount
                 COUNTS_PER_DEGREE = (((2 * 3.1415 * ROBOT_TRACK) * COUNTS_PER_INCH) / 360) * WHEEL_TURN_FUDGE;
-                LIFTMAIN_COUNTS_PER_INCH = 456;
+                LIFTMAIN_COUNTS_PER_INCH = 287;
                 MECANUM_TURN_OFFSET = 1.72;
-                COUNTS_PER_DEGREE_TILT_MOTOR = 30;
-                //number of encoder counts per inch
+                COUNTS_PER_DEGREE_TILT_MOTOR = 48;
                 configLoaded = true;
                 break;
             case "TileRunnerOmni":

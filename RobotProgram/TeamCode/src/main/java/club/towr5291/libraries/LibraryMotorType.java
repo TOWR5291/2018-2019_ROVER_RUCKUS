@@ -6,18 +6,18 @@ public class LibraryMotorType {
     public double COUNTSPERROTATION;
     public double PULSEPERROTATION;
 
-    private double dblENCODER_CPR_REV40SPUR = 0;
-    private double dblENCODER_CPR_REV20SPUR = 0;
-    private double dblENCODER_CPR_REV20ORBITAL = 0;
+    private double dblENCODER_CPR_REV40SPUR = 1120;
+    private double dblENCODER_CPR_REV20SPUR = 560;
+    private double dblENCODER_CPR_REV20ORBITAL = 560;
     private double dblENCODER_CPR_ANDY20ORBITAL = 537.6;
     private double dblENCODER_CPR_ANDY20SPUR = 560;
     private double dblENCODER_CPR_ANDY40SPUR = 1120;
     private double dblENCODER_CPR_ANDY60SPUR = 1680;
     private double dblENCODER_CPR_ANDY3_7ORBITAL = 0;
 
-    private double dblENCODER_PPR_REV40SPUR = 0;
-    private double dblENCODER_PPR_REV20SPUR = 0;
-    private double dblENCODER_PPR_REV20ORBITAL = 0;
+    private double dblENCODER_PPR_REV40SPUR = 112;
+    private double dblENCODER_PPR_REV20SPUR = 56;
+    private double dblENCODER_PPR_REV20ORBITAL = 56;
     private double dblENCODER_PPR_ANDY20ORBITAL = 134.4;
     private double dblENCODER_PPR_ANDY20SPUR = 28;
     private double dblENCODER_PPR_ANDY40SPUR = 28;
