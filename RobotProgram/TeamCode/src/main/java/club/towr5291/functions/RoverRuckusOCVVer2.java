@@ -4,9 +4,6 @@ package club.towr5291.functions;
 import android.os.Environment;
 import android.util.Log;
 
-import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
-
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -14,7 +11,6 @@ import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
-import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
@@ -23,9 +19,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -39,16 +33,29 @@ import static org.opencv.core.Core.flip;
  * Created by LZTDD0 on 11/7/2016.
  */
 
-public class RoverRuckusOCV {
+public class RoverRuckusOCVVer2 {
 
-    private final static double MIN_COLOR_ZONE_AREA = 2500;//10000;// Min Area to look for
+    private final static double MIN_COLOR_ZONE_AREA = 10000;// Min Area to look for
 
     private Mat hsvImg;
     private Mat finalImg;
+    private Mat jewelMaskImg;
+    private Mat zonedImg;
+    private Mat tmpHsvImg;
+    private Mat tmp1Img;
+    private Mat tmp2Img;
+    private Mat maskImg;
     private Mat showImg;
+    private Mat cvImage;
+    private Mat colorDiff;
+    private Mat onesImg;
+    private Mat zeroImg;
+    private Mat white;
     private Mat out;
     private Mat original;
     private Mat garbage1;
+    private Mat garbage2;
+    private Mat btnTmpImg;
     private Mat red;
 
     private Rect red_box = new Rect();
@@ -57,6 +64,7 @@ public class RoverRuckusOCV {
     private List<Mat>        rgb_channels    = new ArrayList<>();
     private List<MatOfPoint> red_blobs       = new ArrayList<>();
     private List<MatOfPoint> white_blobs     = new ArrayList<>();
+    private List<MatOfPoint> black_blobs     = new ArrayList<>();
 
     private ArrayList<Rect>  red_matches     = new ArrayList<>();
     private ArrayList<Rect>  white_matches   = new ArrayList<>();
@@ -87,7 +95,7 @@ public class RoverRuckusOCV {
     int desiredWidth = 1280;
     int desiredHeight = 720;
 
-    public RoverRuckusOCV() {
+    public RoverRuckusOCVVer2() {
 
     }
 
@@ -105,6 +113,8 @@ public class RoverRuckusOCV {
         original = new Mat();
         hsvImg = new Mat();
         garbage1 = new Mat();
+        garbage2 = new Mat();
+        btnTmpImg = new Mat();
         showImg = new Mat();
 
         hsv_channels.clear();
@@ -126,8 +136,7 @@ public class RoverRuckusOCV {
         fileLogger.writeEvent(debug, TAG, "HSV Filters loaded");
 
         imageCounter = count;
-        //Rect roi = new Rect(img.width() / 2, img.height() / 2, img.width() / 2, img.height() / 2);
-        Rect roi;
+        Rect roi = new Rect(img.width() / 2, img.height() / 2, img.width() / 2, img.height() / 2);
 
         double offset = img.height() / 10;
 
@@ -164,7 +173,7 @@ public class RoverRuckusOCV {
             case 6:
                 // bottom
                 // Just get where the object is so we don't analyse the wrong items in the image
-                roi = new Rect(0, img.height() / 2 - (int)offset, img.width(), img.height() / 2);
+                roi = new Rect(0, img.height() / 2 - (int)offset, img.width() / 1, img.height() / 2);
                 break;
             case 7:
                 // center bottom
@@ -175,8 +184,6 @@ public class RoverRuckusOCV {
                 // Just get where the object is so we don't analyse the wrong items in the image
                 roi = new Rect(img.width() / 2, img.height() / 2, img.width() / 2, img.height() / 2);
         }
-        fileLogger.writeEvent(debug, TAG, "ROI " + "{XXX, YYY, WIDTH x Height}");
-        fileLogger.writeEvent(debug, TAG, "ROI " + roi);
 
         if (flipit) {
             flip(img,img,-1);

@@ -277,6 +277,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
 
     private int mintNumberColourTries = 0;
     private Constants.ObjectColours mColour;
+    private Constants.ObjectColours mLocation;
 
     private TOWR5291TextToSpeech towr5291TextToSpeech = new TOWR5291TextToSpeech(false);
 
@@ -326,6 +327,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         FtcRobotControllerActivity activity = (FtcRobotControllerActivity) hardwareMap.appContext;
 
         dashboard.setTextView((TextView) activity.findViewById(R.id.textOpMode));
+        dashboard.clearDisplay();
         dashboard.displayPrintf(0, LABEL_WIDTH, "Text: ", "*** Robot Data ***");
         //start the logging
 
@@ -482,7 +484,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         }
 
         imageCaptureOCV.initImageCaptureOCV(RoverRuckusVuforia, dashboard, fileLogger);
-        tensorFlowRoverRuckus.initTensorFlow(RoverRuckusVuforia.getVuforiaLocalizer(), hardwareMap, fileLogger, "RoverRuckus.tflite", "GOLD", "SILVER", true);
+        //tensorFlowRoverRuckus.initTensorFlow(RoverRuckusVuforia.getVuforiaLocalizer(), hardwareMap, fileLogger, "RoverRuckus.tflite", "GOLD", "SILVER", true);
 
         fileLogger.writeEvent(3,"MAIN","Configured Vuforia - About to Activate");
         dashboard.displayPrintf(10, "Configured Vuforia - About to Activate");
@@ -648,7 +650,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
             fileLogger = null;
         }
 
-        tensorFlowRoverRuckus.shutdown();
+        //tensorFlowRoverRuckus.shutdown();
 
         //switch opmode to teleop
         //opModeManager = (OpModeManagerImpl) onStop.internalOpModeServices;
@@ -1031,7 +1033,6 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                     robotDrive.setHardwareDriveLeftMotorPower(dblStepSpeedTempLeft);
                     robotDrive.setHardwareDriveRightMotorPower(dblStepSpeedTempRight);
                 } else {
-                    // Stop all motion;
                     robotDrive.setHardwareDrivePower(0);
                     fileLogger.writeEvent(2,"Complete         ");
                     mblnDisableVisionProcessing = false;  //enable vision processing
@@ -1040,7 +1041,8 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 }
 
                 //check timeout value
-                if (mStateTime.seconds() > mdblStepTimeout) {
+                if (mStateTime.seconds() > mdblStepTimeout) {// Stop all motion;
+                    robotDrive.setHardwareDrivePower(0);
                     fileLogger.writeEvent(1,"Timeout:- " + mStateTime.seconds());
                     //  Transition to a new state.
                     mintCurrentStateDriveHeading = Constants.stepState.STATE_COMPLETE;
@@ -2029,17 +2031,18 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 fileLogger.writeEvent(2,"Power: " + String.valueOf(mdblStepSpeed));
                 //robotArms.intakeMotor.setPower(mdblStepSpeed);
                 if (mdblStepSpeed == 0) {
+                    fileLogger.writeEvent(1,"Complete.......");
                     mintCurrentStateInTake = Constants.stepState.STATE_COMPLETE;
                     deleteParallelStep();
+                    break;
                 }
 
                 if (mStateTime.milliseconds() >= mdblRobotParm1)
                 {
-                    fileLogger.writeEvent(1,"Complete.......");
-                    robotArms.intakeServo1.setPosition(0);
-                    robotArms.intakeServo1.setPosition(0);
+                    fileLogger.writeEvent(1,"Timer Complete.......");
                     mintCurrentStateInTake = Constants.stepState.STATE_COMPLETE;
                     deleteParallelStep();
+                    break;
                 }//check timeout value
 
                 if (mStateTime.seconds() > mdblStepTimeout) {
@@ -2065,9 +2068,6 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 fileLogger.writeEvent(2, "Initialised");
                 robotArms.tiltMotor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 robotArms.tiltMotor2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-                robotArms.tiltMotor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                robotArms.tiltMotor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
                 dblDistanceToMoveTilt1 = robotArms.tiltMotor1.getCurrentPosition() + (mdblStepDistance * ourRobotConfig.getCOUNTS_PER_DEGREE_TILT());
                 dblDistanceToMoveTilt2 = robotArms.tiltMotor2.getCurrentPosition() + (mdblStepDistance * ourRobotConfig.getCOUNTS_PER_DEGREE_TILT());
@@ -2095,14 +2095,34 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 fileLogger.writeEvent(2, "Motor Speed Set: Busy 1 " + robotArms.tiltMotor1.isBusy());
                 fileLogger.writeEvent(2, "Motor Speed Set: Busy 2 " + robotArms.tiltMotor2.isBusy());
 
-                if (!(robotArms.tiltMotor1.isBusy()) && !(robotArms.tiltMotor2.isBusy())){
-                    fileLogger.writeEvent(2, "Motor 1 is not busy");
-                    fileLogger.writeEvent(2, "Motor 2 is not busy");
-                    robotArms.tiltMotor1.setPower(0);
-                    robotArms.tiltMotor2.setPower(0);
-                    fileLogger.writeEvent(2, "Finished");
-                    mintCurrentStateTiltMotor = Constants.stepState.STATE_COMPLETE;
-                    deleteParallelStep();
+                fileLogger.writeEvent(3, "Current Encoder 1 = " + robotArms.tiltMotor1.getCurrentPosition() + " Expected Encoder " + robotArms.tiltMotor1.getTargetPosition());
+                fileLogger.writeEvent(3, "Current Encoder 2 = " + robotArms.tiltMotor1.getCurrentPosition() + " Expected Encoder " + robotArms.tiltMotor2.getTargetPosition());
+
+                if (mdblRobotParm1 > 0){
+                    if ((robotArms.tiltMotor1.getCurrentPosition() < (robotArms.tiltMotor1.getTargetPosition() + mdblRobotParm1))
+                        && (robotArms.tiltMotor1.getCurrentPosition() > (robotArms.tiltMotor1.getTargetPosition() - mdblRobotParm1))
+                        && (robotArms.tiltMotor2.getCurrentPosition() < (robotArms.tiltMotor2.getTargetPosition() + mdblRobotParm1))
+                        && (robotArms.tiltMotor2.getCurrentPosition() > (robotArms.tiltMotor2.getTargetPosition() - mdblRobotParm1))) {
+
+                        fileLogger.writeEvent(2, "Motor 1 is near the target Stopping Motor");
+                        fileLogger.writeEvent(2, "Motor 2 is near the target Stopping Motor");
+
+                        fileLogger.writeEvent(2, "Finished");
+                        mintCurrentStateTiltMotor = Constants.stepState.STATE_COMPLETE;
+                        deleteParallelStep();
+                        break;
+                    }
+                } else {
+                    if (!(robotArms.tiltMotor1.isBusy()) && !(robotArms.tiltMotor2.isBusy())) {
+                        fileLogger.writeEvent(2, "Motor 1 is not busy");
+                        fileLogger.writeEvent(2, "Motor 2 is not busy");
+                        //robotArms.tiltMotor1.setPower(0);
+                        //robotArms.tiltMotor2.setPower(0);
+                        fileLogger.writeEvent(2, "Finished");
+                        mintCurrentStateTiltMotor = Constants.stepState.STATE_COMPLETE;
+                        deleteParallelStep();
+                        break;
+                    }
                 }
                 //check timeout value
                 if (mStateTime.seconds() > mdblStepTimeout) {
@@ -2123,19 +2143,32 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
 
         switch (mintCurrentStateFindGold){
             case STATE_INIT:
-                fileLogger.writeEvent(3, "Initialised");
-                mintFindGoldLoop = (int)mdblRobotParm6;
-                mboolFoundGold = false;
+                if (mStateTime.milliseconds() > mdblRobotParm1) {
+                    fileLogger.writeEvent(3, "Initialised");
+                    mintFindGoldLoop = (int) mdblRobotParm6;
+                    mboolFoundGold = false;
 
-                imageCaptureOCV.takeImage(new ImageCaptureOCV.OnImageCapture() {
-                    @Override
-                    public void OnImageCaptureVoid(Mat mat) {
-                        mColour = elementColour.RoverRuckusOCV(fileLogger, dashboard, mat, 0, true, 6, false);
-                    }
-                });
-                mintNumberColourTries           = 0;
-                //if mintFindGoldLoop is 1 then we look ahead, 2 look right, 3 look left
-                mintCurrentStateFindGold = Constants.stepState.STATE_RUNNING;
+                    imageCaptureOCV.takeImage(new ImageCaptureOCV.OnImageCapture() {
+                        @Override
+                        public void OnImageCaptureVoid(Mat mat) {
+                            //mColour = elementColour.RoverRuckusOCV(fileLogger, dashboard, mat, 0, true, 6, false);
+                            //check if gold is middle
+                            if (elementColour.RoverRuckusOCV(fileLogger, dashboard, mat, 0, true, 7, false) == Constants.ObjectColours.OBJECT_RED){
+                                mColour = Constants.ObjectColours.OBJECT_RED;
+                                mLocation = Constants.ObjectColours.OBJECT_RED_CENTER;
+                            } else if (elementColour.RoverRuckusOCV(fileLogger, dashboard, mat, 0, true, 4, false) == Constants.ObjectColours.OBJECT_RED){
+                                mColour = Constants.ObjectColours.OBJECT_RED;
+                                mLocation = Constants.ObjectColours.OBJECT_RED_LEFT;
+                            } else if (elementColour.RoverRuckusOCV(fileLogger, dashboard, mat, 0, true, 3, false) == Constants.ObjectColours.OBJECT_RED){
+                                mColour = Constants.ObjectColours.OBJECT_RED;
+                                mLocation = Constants.ObjectColours.OBJECT_RED_RIGHT;
+                            }
+                        }
+                    });
+                    mintNumberColourTries = 0;
+                    //if mintFindGoldLoop is 1 then we look ahead, 2 look right, 3 look left
+                    mintCurrentStateFindGold = Constants.stepState.STATE_RUNNING;
+                }
                 break;
             case STATE_RUNNING:
                 fileLogger.writeEvent(3, "Running");
@@ -2144,54 +2177,81 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 if ((mColour == Constants.ObjectColours.OBJECT_RED) || (mColour == Constants.ObjectColours.OBJECT_NONE)) {
                     fileLogger.writeEvent(1,"Image Processed:- " + mColour.toString());
 
+                    switch (mLocation){
+                        case OBJECT_RED_LEFT:
+                            autonomousStepsFile.insertSteps(3, "DRIVE", -14,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "TANKTURN", -135,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "DRIVE", 24,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "TANKTURN", 45,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "TILT", -85,mdblStepSpeed, false, false, 50, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            break;
+                        case OBJECT_RED_RIGHT:
+                            autonomousStepsFile.insertSteps(3, "DRIVE", -14,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "TANKTURN", 135,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "DRIVE", 24,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "TANKTURN", -45,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "TILT", -85,mdblStepSpeed, false, false, 50, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            break;
+                        default:
+                            autonomousStepsFile.insertSteps(3, "DRIVE", 24,mdblStepSpeed, true, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "TILT", -85,mdblStepSpeed, false, false, 50, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "LIFT", -23,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "TANKTURN", -180,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "DRIVE", -14,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            break;
+                    }
+
+                    //autonomousStepsFile.insertSteps(3, "DRIVE", -14,mdblStepSpeed, true, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+
                     //need to insert the next steps
                     //if we found gold we need to move forward and knock it off
                     //need to check findloopgold value to see if we have turned
-                    if (mColour == Constants.ObjectColours.OBJECT_RED) {
-                        fileLogger.writeEvent(3,"Found GOLD - Current Bearing " + getAdafruitHeading());
-                        mboolFoundGold = true;
-                        switch (mintFindGoldLoop) {
-                            case 1:
-                                autonomousStepsFile.insertSteps(3, "TANKTURN", -45,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                                break;
-                            case 2:
-                                autonomousStepsFile.insertSteps(3, "TANKTURN", 45,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                                break;
-                        }
-                        //autonomousStepsFile.insertSteps(3, "DRIVE", 18,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                        //autonomousStepsFile.insertSteps(3, "DRIVE", -18,mdblStepSpeed, false, true, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                        autonomousStepsFile.insertSteps(3, "TANKTURN", 180, mdblStepSpeed, false, false, 0,0,0,0,0,0,mintCurrentStep + 1);
-                    } else {
-                        fileLogger.writeEvent(3,"Found NOTHING ");
-                        switch (mintFindGoldLoop) {
-                            case 0:
-                                fileLogger.writeEvent(3,"Case 0 : Turn to see if we can find it - Current Bearing " + getAdafruitHeading());
-                                autonomousStepsFile.insertSteps(3, "FINDGOLD", 0,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 1,  mintCurrentStep + 1);
-                                autonomousStepsFile.insertSteps(3, "TANKTURN", 45,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                                break;
-                            case 1:
-                                fileLogger.writeEvent(3,"Case 1 : Turn other way to see if we can find it - Current Bearing " + getAdafruitHeading());
-                                autonomousStepsFile.insertSteps(3, "FINDGOLD", 0,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 2,  mintCurrentStep + 1);
-                                autonomousStepsFile.insertSteps(3, "TANKTURN", -90,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                                break;
-                            case 2:   //no gold found, just turn around and leave
-                                fileLogger.writeEvent(3,"Case 2 : We Found Nothing, so get back straight and finish ");
-                                autonomousStepsFile.insertSteps(3, "TANKTURN", 45,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                                break;
-                        }
-                    }
+//                    if (mColour == Constants.ObjectColours.OBJECT_RED) {
+//                        fileLogger.writeEvent(3,"Found GOLD - Current Bearing " + getAdafruitHeading());
+//                        mboolFoundGold = true;
+//                        switch (mintFindGoldLoop) {
+//                            case 1:
+//                                autonomousStepsFile.insertSteps(3, "TANKTURN", -45,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+//                                break;
+//                            case 2:
+//                                autonomousStepsFile.insertSteps(3, "TANKTURN", 45,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+//                                break;
+//                        }
+//                        //autonomousStepsFile.insertSteps(3, "DRIVE", 18,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+//                        //autonomousStepsFile.insertSteps(3, "DRIVE", -18,mdblStepSpeed, false, true, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+//                        autonomousStepsFile.insertSteps(3, "TANKTURN", 180, mdblStepSpeed, false, false, 0,0,0,0,0,0,mintCurrentStep + 1);
+//                    } else {
+//                        fileLogger.writeEvent(3,"Found NOTHING ");
+//                        switch (mintFindGoldLoop) {
+//                            case 0:
+//                                fileLogger.writeEvent(3,"Case 0 : Turn to see if we can find it - Current Bearing " + getAdafruitHeading());
+//                                autonomousStepsFile.insertSteps(3, "FINDGOLD", 0,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 1,  mintCurrentStep + 1);
+//                                autonomousStepsFile.insertSteps(3, "TANKTURN", 45,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+//                                break;
+//                            case 1:
+//                                fileLogger.writeEvent(3,"Case 1 : Turn other way to see if we can find it - Current Bearing " + getAdafruitHeading());
+//                                autonomousStepsFile.insertSteps(3, "FINDGOLD", 0,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 2,  mintCurrentStep + 1);
+//                                autonomousStepsFile.insertSteps(3, "TANKTURN", -90,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+//                                break;
+//                            case 2:   //no gold found, just turn around and leave
+//                                fileLogger.writeEvent(3,"Case 2 : We Found Nothing, so get back straight and finish ");
+//                                autonomousStepsFile.insertSteps(3, "TANKTURN", 45,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+//                                break;
+//                        }
+//                    }
 
                     //  Transition to a new state.
                     mintCurrentStateFindGold = Constants.stepState.STATE_COMPLETE;
                     deleteParallelStep();
-                } else {
-                    imageCaptureOCV.takeImage(new ImageCaptureOCV.OnImageCapture() {
-                        @Override
-                        public void OnImageCaptureVoid(Mat mat) {
-                            mColour = elementColour.RoverRuckusOCV(fileLogger, dashboard, mat, 0, true, 6, false);
-                        }
-                    });
                 }
+//                else {
+//                    imageCaptureOCV.takeImage(new ImageCaptureOCV.OnImageCapture() {
+//                        @Override
+//                        public void OnImageCaptureVoid(Mat mat) {
+//                            mColour = elementColour.RoverRuckusOCV(fileLogger, dashboard, mat, 0, true, 6, false);
+//                        }
+//                    });
+//                }
                 //check timeout value
                 if (mStateTime.seconds() > mdblStepTimeout) {
                     fileLogger.writeEvent(1,"Timeout:- " + mStateTime.seconds());
