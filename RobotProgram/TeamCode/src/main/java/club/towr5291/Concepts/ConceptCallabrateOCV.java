@@ -50,7 +50,6 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.YZX;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.EXTRINSIC;
 
-
 /**
  * Created by ianhaden on 4/10/2016.
  */
@@ -336,7 +335,7 @@ public class ConceptCallabrateOCV extends OpModeMasterLinear
             calibrate = true;
 
         dashboard.displayPrintf(2, "Calibatrate " + calibrate);
-        Colour = elementColour.RoverRuckusOCV(fileLogger, dashboard, tmp, 0, true, 6, calibrate);
+        Colour = elementColour.RoverRuckusOCV(fileLogger, dashboard, tmp, 0, true, 7, calibrate);
 
         for (VuforiaTrackable trackable : trackables) {
             /**

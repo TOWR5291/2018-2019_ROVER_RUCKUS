@@ -167,6 +167,7 @@ public abstract class Constants {
     public enum ObjectColours {
         OBJECT_RED ("OBJECT_RED"),
         OBJECT_BLUE ("OBJECT_BLUE"),
+        OBJECT_WHITE ("OBJECT_WHITE"),
         OBJECT_RED_BLUE ("OBJECT_RED_BLUE"),
         OBJECT_BLUE_RED ("OBJECT_BLUE_RED"),
         OBJECT_RED_LEFT ("OBJECT_RED_LEFT"),

@@ -41,7 +41,6 @@ public class ConceptVuforiaOpGrabImageLocation extends LinearOpMode{
     private double robotY;
     private double robotBearing;
 
-
     @Override
     public void runOpMode() throws InterruptedException {
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(R.id.cameraMonitorViewId);
@@ -247,7 +246,6 @@ public class ConceptVuforiaOpGrabImageLocation extends LinearOpMode{
          *
          * @see VuforiaTrackableDefaultListener#getRobotLocation()
          */
-
 
         waitForStart();
 

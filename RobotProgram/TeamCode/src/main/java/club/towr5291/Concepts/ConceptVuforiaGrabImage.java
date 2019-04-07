@@ -26,7 +26,6 @@ public class ConceptVuforiaGrabImage extends VuforiaLocalizerImpl {
         }
     }
 
-
     public class VuforiaCallbackSubclass extends VuforiaLocalizerImpl.VuforiaCallback {
 
         @Override public synchronized void Vuforia_onUpdate(State state) {
@@ -46,9 +45,7 @@ public class ConceptVuforiaGrabImage extends VuforiaLocalizerImpl {
                 if (frame.getImage(i).getFormat() == PIXEL_FORMAT.RGB565) {
                     rgb = frame.getImage(i);
                 }
-
             }
-
             frame.close();
         }
     }
