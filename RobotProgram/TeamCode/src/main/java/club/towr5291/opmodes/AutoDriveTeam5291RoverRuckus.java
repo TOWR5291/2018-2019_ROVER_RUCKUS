@@ -342,7 +342,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
 
         //load menu settings and setup robot and debug level
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(hardwareMap.appContext);
-        ourRobotConfig = new robotConfig();
+        ourRobotConfig = new robotConfig(sharedPreferences);
 
         //Do not need the code below any more because there is a function to do this now and make every thing easyer
 //        ourRobotConfig.setAllianceColor(sharedPreferences.getString("club.towr5291.Autonomous.Color", "Red"));// Using a Function to Store The Robot Specification
@@ -352,6 +352,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
 //        ourRobotConfig.setRobotMotorType(sharedPreferences.getString("club.towr5291.Autonomous.RobotMotorChoice", "ANDY40SPUR"));
 //        ourRobotConfig.setRobotConfigBase(sharedPreferences.getString("club.towr5291.Autonomous.RobotConfigBase", "TileRunner2x40"));
 //        debug = Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Debug", "1"));
+        debug = ourRobotConfig.getDebug();
 
         switch (ourRobotConfig.getAllianceStartPosition()){
             case "Left":
