@@ -20,6 +20,7 @@
 //           out   and    angle                         1     2     3     4     5     6  
 //            s                      %
 //lower the robot down
+2,TILT,.1,1,FALSE,FALSE,0,0,0,0,0,0
 3,LIFT,10,.5,FALSE,FALSE,0,0,0,0,0,0
 //move forward X inches
 2,DRIVE,11,0.5,FALSE,FALSE,0,0,0,0,0,0

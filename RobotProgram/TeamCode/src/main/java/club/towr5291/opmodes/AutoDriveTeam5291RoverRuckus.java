@@ -35,6 +35,7 @@ package club.towr5291.opmodes;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.preference.PreferenceManager;
+import android.support.annotation.MainThread;
 import android.util.Log;
 import android.widget.TextView;
 
@@ -152,6 +153,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
 
     private double mdblTurnAbsoluteGyro;
     private double mdblGyrozAccumulated;
+    private double mdblTankTurnGyroRequiredHeading;
     private int mintStableCount;
     private String mstrWiggleDir;
     private double mdblPowerBoost;
@@ -709,10 +711,10 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
             case "TANKTURN":
                 TankTurnStep();
                 break;
-            case "GTH":
+            case "TANKTURNGYRO":
                 TankTurnGyroHeading();
                 break;
-            case "GTE":  // Special Function, 5291 Move forward until line is found
+            case "TANKTURNGYROENCODER":
                 TankTurnGyroHeadingEncoder();
                 break;
             case "LPE":
@@ -777,7 +779,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 mintCurrentStepDelay                = Constants.stepState.STATE_INIT;
                 towr5291TextToSpeech.Speak("Running Delay", debug);
                 break;
-            case "GTH":
+            case "TANKTURNGYRO":
                 mintCurrentStateTankTurnGyroHeading = Constants.stepState.STATE_INIT;
                 towr5291TextToSpeech.Speak("Running Tank Turn Gyro Heading", debug);
                 break;
@@ -788,6 +790,10 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
             case "TANKTURN":
                 mintCurrentStateTankTurn            = Constants.stepState.STATE_INIT;
                 towr5291TextToSpeech.Speak("Running Tank Turn", debug);
+                break;
+            case "TANKTURNGYROENCODER":
+                mintCurrentStateGyroTurnEncoder5291  = Constants.stepState.STATE_INIT;
+                towr5291TextToSpeech.Speak("Running Tank Turn Gyro", debug);
                 break;
             case "LPE":
                 mintCurrentStatePivotTurn           = Constants.stepState.STATE_INIT;
@@ -1905,25 +1911,34 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 mintStableCount = 0;
                 mstrWiggleDir = "";
                 mdblRobotTurnAngle = mdblStepDistance;
-                fileLogger.writeEvent(3,"USE ADAFRUIT IMU = " + useAdafruitIMU + ",mdblRobotTurnAngle " + mdblRobotTurnAngle + " adafruitIMUHeading " + adafruitIMUHeading);
+                if (mdblRobotParm2 > 0)
+                    mdblTankTurnGyroRequiredHeading = mdblRobotTurnAngle;
+                else
+                    mdblTankTurnGyroRequiredHeading = mdblRobotTurnAngle + adafruitIMUHeading;
+                fileLogger.writeEvent(3,",mdblRobotTurnAngle " + mdblRobotTurnAngle + " adafruitIMUHeading " + adafruitIMUHeading + " Target Heading " + mdblTankTurnGyroRequiredHeading);
                 //mdblTurnAbsoluteGyro = Double.parseDouble(newAngleDirection((int)adafruitIMUHeading, (int) mdblRobotTurnAngle).substring(3));
                 mdblTurnAbsoluteGyro = TOWR5291Utils.getNewHeading((int) adafruitIMUHeading, (int) mdblRobotTurnAngle);
                 mintCurrentStateGyroTurnEncoder5291 = Constants.stepState.STATE_RUNNING;
             }
             break;
             case STATE_RUNNING: {
-
                 double adafruitIMUHeading;
                 adafruitIMUHeading = getAdafruitHeading();
                 mdblGyrozAccumulated = teamAngleAdjust(mdblGyrozAccumulated); //Set variables to MRgyro readings
-                mdblTurnAbsoluteGyro = Double.parseDouble(newAngleDirectionGyro ((int)mdblGyrozAccumulated, (int)mdblRobotTurnAngle).substring(3));
-                String mstrDirection = (newAngleDirectionGyro ((int)mdblGyrozAccumulated, (int)mdblRobotTurnAngle).substring(0, 3));
-                fileLogger.writeEvent(3,"USING HEADING FROM IMU=" + useAdafruitIMU);
+                //mdblTurnAbsoluteGyro = Double.parseDouble(newAngleDirectionGyro ((int)mdblGyrozAccumulated, (int)mdblRobotTurnAngle).substring(3));
+                //String mstrDirection = (newAngleDirectionGyro ((int)mdblGyrozAccumulated, (int)mdblRobotTurnAngle).substring(0, 3));
                 fileLogger.writeEvent(3,"Running, mdblGyrozAccumulated = " + mdblGyrozAccumulated);
-                fileLogger.writeEvent(3,"Running, mdblTurnAbsoluteGyro = " + mdblTurnAbsoluteGyro);
-                fileLogger.writeEvent(3,"Running, mstrDirection        = " + mstrDirection);
+                //fileLogger.writeEvent(3,"Running, mdblTurnAbsoluteGyro = " + mdblTurnAbsoluteGyro);
+                //fileLogger.writeEvent(3,"Running, mstrDirection        = " + mstrDirection);
                 fileLogger.writeEvent(3,"Running, adafruitIMUHeading   = " + adafruitIMUHeading);
-                autonomousStepsFile.insertSteps(3,  newAngleDirectionGyro ((int)mdblGyrozAccumulated, (int)mdblRobotTurnAngle),(int)mdblRobotTurnAngle,mdblStepSpeed,false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                //fileLogger.writeEvent(3,"Running, new angle   = " + (newAngleDirectionGyroOffset ((int)adafruitIMUHeading, (int)mdblTankTurnGyroRequiredHeading)));
+                fileLogger.writeEvent(3,"Running, new angle   = " + (newAngleDirectionGyroOffset ((int)adafruitIMUHeading, (int)mdblTankTurnGyroRequiredHeading)));
+
+                //only keep aiming for target if the angle is greater than the error specified in parm1
+                if (Math.abs((newAngleDirectionGyroOffset ((int)adafruitIMUHeading, (int)mdblTankTurnGyroRequiredHeading))) > mdblRobotParm1) {
+                    autonomousStepsFile.insertSteps(3, "TANKTURNGYROENCODER", (int) mdblTankTurnGyroRequiredHeading, .6, false, false, mdblRobotParm1, 1, 0, 0, 0, 0, mintCurrentStep + 1);
+                    autonomousStepsFile.insertSteps(3, "TANKTURN", (newAngleDirectionGyroOffset((int) adafruitIMUHeading, (int) mdblTankTurnGyroRequiredHeading)), .6, false, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
+                }
                 mintCurrentStateGyroTurnEncoder5291 = Constants.stepState.STATE_COMPLETE;
                 deleteParallelStep();
             }
@@ -2146,21 +2161,24 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                     fileLogger.writeEvent(3, "Initialised");
                     mintFindGoldLoop = (int) mdblRobotParm6;
                     mboolFoundGold = false;
+                    mColour = Constants.ObjectColours.OBJECT_NONE;
+                    mLocation = Constants.ObjectColours.OBJECT_NONE;
 
                     imageCaptureOCV.takeImage(new ImageCaptureOCV.OnImageCapture() {
                         @Override
                         public void OnImageCaptureVoid(Mat mat) {
                             //mColour = elementColour.RoverRuckusOCV(fileLogger, dashboard, mat, 0, true, 6, false);
                             //check if gold is middle
-                            if (elementColour.RoverRuckusOCV(fileLogger, dashboard, mat, 0, true, 7, false) == Constants.ObjectColours.OBJECT_RED){
-                                mColour = Constants.ObjectColours.OBJECT_RED;
-                                mLocation = Constants.ObjectColours.OBJECT_RED_CENTER;
-                            } else if (elementColour.RoverRuckusOCV(fileLogger, dashboard, mat, 0, true, 4, false) == Constants.ObjectColours.OBJECT_RED){
-                                mColour = Constants.ObjectColours.OBJECT_RED;
-                                mLocation = Constants.ObjectColours.OBJECT_RED_LEFT;
-                            } else if (elementColour.RoverRuckusOCV(fileLogger, dashboard, mat, 0, true, 3, false) == Constants.ObjectColours.OBJECT_RED){
-                                mColour = Constants.ObjectColours.OBJECT_RED;
-                                mLocation = Constants.ObjectColours.OBJECT_RED_RIGHT;
+                            if (mColour == Constants.ObjectColours.OBJECT_NONE)
+                                if (elementColour.RoverRuckusOCV(fileLogger, dashboard, mat, 0, false, 7, false) == Constants.ObjectColours.OBJECT_RED) {
+                                    mColour = Constants.ObjectColours.OBJECT_RED;
+                                    mLocation = Constants.ObjectColours.OBJECT_RED_CENTER;
+                                }
+                            if (mColour == Constants.ObjectColours.OBJECT_NONE) {
+                                if (elementColour.RoverRuckusOCV(fileLogger, dashboard, mat, 0, false, 4, false) == Constants.ObjectColours.OBJECT_RED) {
+                                    mColour = Constants.ObjectColours.OBJECT_RED;
+                                    mLocation = Constants.ObjectColours.OBJECT_RED_LEFT;
+                                }
                             }
                         }
                     });
@@ -2177,26 +2195,34 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                     fileLogger.writeEvent(1,"Image Processed:- " + mColour.toString());
 
                     switch (mLocation){
+                        case OBJECT_RED_CENTER:
+                            autonomousStepsFile.insertSteps(3, "TILT", 75,1, true, false, 50, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "DRIVE", 12,1, true, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "DRIVE", -6,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "TILT", -84,1, false, false, 50, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "LIFT", -22,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "TANKTURN", 180,.6, true, false, 5, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "DRIVE", 9,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            break;
                         case OBJECT_RED_LEFT:
-                            autonomousStepsFile.insertSteps(3, "DRIVE", -14,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "TANKTURN", -135,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "DRIVE", 24,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "TANKTURN", 45,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "TILT", -85,mdblStepSpeed, false, false, 50, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "TANKTURN", 30,.6, false, false, 5, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "TILT", 75,1, true, false, 50, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "DRIVE", 16,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "DRIVE", -16,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "TILT", -84,1, false, false, 50, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "LIFT", -22,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "TANKTURN", 155,.6, true, false, 5, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "DRIVE", 9,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
                             break;
-                        case OBJECT_RED_RIGHT:
-                            autonomousStepsFile.insertSteps(3, "DRIVE", -14,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "TANKTURN", 135,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "DRIVE", 24,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "TANKTURN", -45,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "TILT", -85,mdblStepSpeed, false, false, 50, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            break;
-                        default:
-                            autonomousStepsFile.insertSteps(3, "DRIVE", 24,mdblStepSpeed, true, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "TILT", -85,mdblStepSpeed, false, false, 50, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "LIFT", -23,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "TANKTURN", -180,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "DRIVE", -14,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                        default:  //right side, unfortunately we don't sample the right side so if its not left or center we assume right
+                            autonomousStepsFile.insertSteps(3, "TANKTURN", -45,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "TILT", 75,1, true, false, 50, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "DRIVE", 16,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "DRIVE", -16,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "TILT", -84,1, false, false, 50, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "LIFT", -22,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "TANKTURN", -145,.6, true, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "DRIVE", 9,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
                             break;
                     }
 
@@ -2482,6 +2508,31 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         return angle;
     }
 
+    private double newAngleDirectionGyroOffset (int currentDirection, int newDirection) {
+        fileLogger.setEventTag("newAngleDirectionGyroOffset()");
+        int intAngle1;
+        //calculate the smallest angle
+        //if (currentDirection < newDirection) {
+            intAngle1 = (newDirection - currentDirection);
+            if (intAngle1 > 180)
+            {
+                intAngle1 = (currentDirection + 360 - newDirection);
+                return intAngle1;
+            }
+            return intAngle1;
+        //}
+        //else
+        //{
+        //    intAngle1 = (currentDirection - newDirection);
+        //    if (intAngle1 > 180)
+        //    {
+        //        intAngle1 = (newDirection + 360 - currentDirection);
+        //        return -intAngle1;
+        //    }
+        //    return intAngle1;
+        //}
+    }
+
     private String newAngleDirectionGyro (int currentDirection, int newDirection)
     {
         fileLogger.setEventTag("newAngleDirectionGyro()");
@@ -2493,9 +2544,9 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
             if (intAngle1 > 180)
             {
                 intAngle1 = (currentDirection + 360 - newDirection);
-                return "LTE" + intAngle1;
+                return "-" + intAngle1;
             }
-            return "RTE" + intAngle1;
+            return "+" + intAngle1;
         }
         else
         {
@@ -2503,9 +2554,9 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
             if (intAngle1 > 180)
             {
                 intAngle1 = (newDirection + 360 - currentDirection);
-                return "RTE" + intAngle1;
+                return "+" + intAngle1;
             }
-            return "LTE" + intAngle1;
+            return "-" + intAngle1;
         }
     }
 

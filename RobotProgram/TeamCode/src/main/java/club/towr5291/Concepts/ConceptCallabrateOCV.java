@@ -146,6 +146,7 @@ public class ConceptCallabrateOCV extends OpModeMasterLinear
         dashboard.displayPrintf(5, "Start Del         " + delay);
         dashboard.displayPrintf(6, "Robot             " + RobotConfigBase);
         dashboard.displayPrintf(7, "Debug             " + debug);
+        dashboard.displayPrintf(8, "Press A to Calibrate");
 
         fileLogger.setDebugLevel(debug);
 
