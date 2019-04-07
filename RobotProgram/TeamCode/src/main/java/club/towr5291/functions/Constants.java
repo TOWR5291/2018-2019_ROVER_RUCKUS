@@ -1,6 +1,13 @@
 package club.towr5291.functions;
 
+import android.content.SharedPreferences;
+import android.content.res.Configuration;
+
 import com.qualcomm.robotcore.hardware.Servo;
+
+import club.towr5291.libraries.LibraryMotorType;
+import club.towr5291.libraries.robotConfig;
+import club.towr5291.libraries.robotConfigSettings;
 
 /**
  * Created by Ian Haden on 11/7/2016.
@@ -179,6 +186,27 @@ public abstract class Constants {
         public String toString() {
             return name;
         }
+    }
+
+    public enum SharedPreferencesValues {
+        ALLIANCE_COLOR ("club.towr5291.Autonomous.Color", "Red"),
+        TEAM_NUMBER ("club.towr5291.Autonomous.TeamNumber", "0000"),
+        ALLIANCE_START_POSITION ("club.towr5291.Autonomous.Position", "Left"),
+        START_DELAY ("club.towr5291.Autonomous.Delay", "0"),
+        ROBOT_MOTOR_TYPE ("club.towr5291.Autonomous.RobotMotorChoice", LibraryMotorType.MotorTypes.REV20ORBIT.toString()),
+        ROBOT_BASE_CONFIG ("club.towr5291.Autonomous.RobotConfigBase", robotConfigSettings.robotConfigChoice.TileRunnerMecanum.toString()),
+        DEBUG ("club.towr5291.Autonomous.Debug", "1");
+
+        private final String SharedPrefString;
+        private final String SharedPrefDefault;
+
+        SharedPreferencesValues(String SharedPrefString, String SharedPrefDefault){
+            this.SharedPrefString = SharedPrefString;
+            this.SharedPrefDefault = SharedPrefDefault;
+        }
+
+        public String getSharedPrefString(){ return SharedPrefString; }
+        public String getSharedPrefDefault(){ return SharedPrefDefault; }
     }
 
 }

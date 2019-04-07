@@ -1,8 +1,18 @@
 package club.towr5291.libraries;
 
+import android.content.SharedPreferences;
+
 import java.util.HashMap;
 
 import club.towr5291.functions.ReadStepFileRoverRuckus;
+
+import static club.towr5291.functions.Constants.SharedPreferencesValues.ALLIANCE_COLOR;
+import static club.towr5291.functions.Constants.SharedPreferencesValues.ALLIANCE_START_POSITION;
+import static club.towr5291.functions.Constants.SharedPreferencesValues.DEBUG;
+import static club.towr5291.functions.Constants.SharedPreferencesValues.ROBOT_BASE_CONFIG;
+import static club.towr5291.functions.Constants.SharedPreferencesValues.ROBOT_MOTOR_TYPE;
+import static club.towr5291.functions.Constants.SharedPreferencesValues.START_DELAY;
+import static club.towr5291.functions.Constants.SharedPreferencesValues.TEAM_NUMBER;
 
 /**
  * Created by Ian Haden on 02/06/2018.
@@ -30,6 +40,7 @@ import club.towr5291.functions.ReadStepFileRoverRuckus;
  * Edited by:
  * Ian Haden    02/06/2018  -> Initial creation
  * Wyatt Ashley 03/05/2019  -> Changed A LOT configuration is now different have another class for motor types
+ * Wyatt Ashley 04/06/2019  -> Cleaned all of the code and is now easier to use
  */
 
 public class robotConfig {
@@ -37,13 +48,12 @@ public class robotConfig {
     private String teamNumber;
     private String allianceColor;
     private String allianceStartPosition;
-    private String allianceParkPosition;
     private int delay;
+    private int debug;
     private String robotConfigBase;
     private String robotMotorType;
 
     private LibraryMotorType libraryMotorType = new LibraryMotorType();
-    private ReadStepFileRoverRuckus autonomousStepsFile = new ReadStepFileRoverRuckus();
 
     //set up robot variables
     private double COUNTS_PER_MOTOR_REV;                                        // eg: TETRIX = 1440 pulses, NeveRest 20 = 560 pulses, NeveRest 40 =  1120, NeveRest 60 = 1680 pulses
@@ -56,7 +66,6 @@ public class robotConfig {
     private double WHEEL_TURN_FUDGE;
     private double REVERSE_DIRECTION;                                           // determines which direction the robot runs when FW is positive or negative when commanded to move a direction
     private int    LIFTMAIN_COUNTS_PER_INCH;                                    // number of encoder counts oer inch
-    private int    LIFTTOP_COUNTS_PER_INCH;                                     // number of encoder counts oer inch
     private double COUNTS_PER_INCH_STRAFE;
     private double COUNTS_PER_INCH_STRAFE_FRONT_OFFSET;
     private double COUNTS_PER_INCH_STRAFE_REAR_OFFSET;
@@ -121,44 +130,6 @@ public class robotConfig {
         }
     }
 
-    public enum armMotorsROVERRUCKUS {
-        Motor1 ("liftMotor1", 1),
-        Motor2 ("liftMotor2", 2),
-        Motor3 ("tiltMotor1", 4),
-        Motor4 ("intakeMotor", 8);
-
-        private final String name;
-        private final int value;
-
-        armMotorsROVERRUCKUS (String name, int value) {
-            this.name = name;
-            this.value = value;
-        }
-
-        public String toString() {
-            return name;
-        }
-
-        public int toInt() {
-            return value;
-        }
-    }
-
-    public enum SensorNames {
-        BNO0055 ("imu"),
-        MRGYRO ("gyro");
-
-        private final String name;
-
-        SensorNames (String name) {
-            this.name = name;
-        }
-
-        public String toString() {
-            return name;
-        }
-    }
-
     public enum LEDnames {
         leftGreen ("green1", 1),
         leftRed ("red1", 2),
@@ -191,40 +162,61 @@ public class robotConfig {
     public double getCOUNTS_PER_DEGREE() {
         return COUNTS_PER_DEGREE;
     }
+
     public double getROBOT_TRACK() {
         return ROBOT_TRACK;
     }
+
     public double getCOUNTS_PER_INCH_STRAFE() {
         return COUNTS_PER_INCH_STRAFE;
     }
+
     public double getCOUNTS_PER_INCH_STRAFE_FRONT_OFFSET() {
         return COUNTS_PER_INCH_STRAFE_FRONT_OFFSET;
     }
+
     public double getCOUNTS_PER_INCH_STRAFE_REAR_OFFSET() {
         return COUNTS_PER_INCH_STRAFE_REAR_OFFSET;
     }
+
     public double getCOUNTS_PER_INCH_STRAFE_LEFT_OFFSET() {
         return COUNTS_PER_INCH_STRAFE_LEFT_OFFSET;
     }
+
     public double getCOUNTS_PER_INCH_STRAFE_RIGHT_OFFSET() {
         return COUNTS_PER_INCH_STRAFE_RIGHT_OFFSET;
     }
+
     public String getAllianceStartPosition() {
         return allianceStartPosition;
     }
+
     public int getLIFTMAIN_COUNTS_PER_INCH(){return LIFTMAIN_COUNTS_PER_INCH;}
 
+    @Deprecated
     public robotConfig() {
         this.teamNumber = "";
         this.allianceColor = "";
         this.allianceStartPosition = "";
-        this.allianceParkPosition = "";
         this.delay = 0;
+        this.debug = 1;
         this.robotConfigBase = "";
+        this.robotMotorType = "";
     }
 
-    public boolean initConfig() {
-        boolean configLoaded = false;
+    public robotConfig (SharedPreferences sharedPreferences){
+        this.allianceColor = sharedPreferences.getString(ALLIANCE_COLOR.getSharedPrefString(), ALLIANCE_COLOR.getSharedPrefDefault());// Using a Function to Store The Robot Specification
+        this.teamNumber = sharedPreferences.getString(TEAM_NUMBER.getSharedPrefString(), TEAM_NUMBER.getSharedPrefDefault());
+        this.allianceStartPosition = sharedPreferences.getString(ALLIANCE_START_POSITION.getSharedPrefString(), ALLIANCE_START_POSITION.getSharedPrefDefault());
+        this.delay = Integer.parseInt(sharedPreferences.getString(START_DELAY.getSharedPrefString(), START_DELAY.getSharedPrefDefault()));
+        this.robotMotorType = sharedPreferences.getString(ROBOT_MOTOR_TYPE.getSharedPrefString(), ROBOT_MOTOR_TYPE.getSharedPrefDefault());
+        this.robotConfigBase = sharedPreferences.getString(ROBOT_BASE_CONFIG.getSharedPrefString(), ROBOT_BASE_CONFIG.getSharedPrefDefault());
+        this.debug = Integer.parseInt(sharedPreferences.getString(DEBUG.getSharedPrefString(), DEBUG.getSharedPrefDefault()));
+
+        initConfig();
+    }
+
+    public void initConfig() {
         libraryMotorType.loadData(LibraryMotorType.MotorTypes.valueOf(robotMotorType));
 
         switch (robotConfigBase) {
@@ -238,7 +230,6 @@ public class robotConfig {
                 ROBOT_TRACK = 16.5;                                                     //  distance between centerline of rear wheels robot will pivot on rear wheel of omni on front, 16.5 track is 103.67 inches full circle
                 WHEEL_TURN_FUDGE = 1.0;                                                        // Fine tuning amount
                 COUNTS_PER_DEGREE = (((2 * 3.1415 * ROBOT_TRACK) * COUNTS_PER_INCH) / 360) * WHEEL_TURN_FUDGE;
-                configLoaded = true;
                 break;
             case "TileRunnerRegularOrbital":
                 REVERSE_DIRECTION = 1;                                                        // Reverse the direction without significant code changes, (using motor FORWARD REVERSE will affect the driver station as we use same robotconfig file
@@ -259,7 +250,6 @@ public class robotConfig {
                 MECANUM_TURN_OFFSET = 1.72;
                 COUNTS_PER_DEGREE_TILT_MOTOR = 30;
                 //number of encoder counts per inch
-                configLoaded = true;
                 break;
             case "TileRunnerMecanum":
                 REVERSE_DIRECTION = 1;                                                        // Reverse the direction without significant code changes, (using motor FORWARD REVERSE will affect the driver station as we use same robotconfig file
@@ -277,13 +267,11 @@ public class robotConfig {
                 WHEEL_TURN_FUDGE = 1.0;                                                        // Fine tuning amount
                 COUNTS_PER_DEGREE = (((2 * 3.1415 * ROBOT_TRACK) * COUNTS_PER_INCH) / 360) * WHEEL_TURN_FUDGE;
                 LIFTMAIN_COUNTS_PER_INCH = 420;                                                   //number of encoder counts per inch
-                LIFTTOP_COUNTS_PER_INCH = -420;                                                   //number of encoder counts per inch
                 MECANUM_TURN_OFFSET = 1.72;
-                configLoaded = true;
                 break;
             case "TileRunnerMecanumOrbital":
                 REVERSE_DIRECTION = 1;                                                        // Reverse the direction without significant code changes, (using motor FORWARD REVERSE will affect the driver station as we use same robotconfig file
-                COUNTS_PER_MOTOR_REV = libraryMotorType.getCOUNTSPERROTATION();;              // eg: TETRIX = 1440 pulses, NeveRest 20 = 560 pulses, NeveRest 40 =  1120, NeveRest 60 = 1680 pulses
+                COUNTS_PER_MOTOR_REV = libraryMotorType.getCOUNTSPERROTATION();               // eg: TETRIX = 1440 pulses, NeveRest 20 = 560 pulses, NeveRest 40 =  1120, NeveRest 60 = 1680 pulses
                 DRIVE_GEAR_REDUCTION = 1.0;                                                   // This is < 1.0 if geared UP, Tilerunner is geared up
                 WHEEL_DIAMETER_INCHES = 4.0;                                                  // For figuring circumference
                 WHEEL_ACTUAL_FUDGE = 1.02;                                                    // Fine tuning amount
@@ -299,7 +287,6 @@ public class robotConfig {
                 LIFTMAIN_COUNTS_PER_INCH = 287;
                 MECANUM_TURN_OFFSET = 1.72;
                 COUNTS_PER_DEGREE_TILT_MOTOR = 48;
-                configLoaded = true;
                 break;
             case "TileRunnerOmni":
                 REVERSE_DIRECTION = 1;                                                       // Reverse the direction without significant code changes, (using motor FORWARD REVERSE will affect the driver station as we use same robotconfig file
@@ -311,7 +298,6 @@ public class robotConfig {
                 ROBOT_TRACK = 16.5;                                                     //  distance between centerline of rear wheels robot will pivot on rear wheel of omni on front, 16.5 track is 103.67 inches full circle
                 WHEEL_TURN_FUDGE = 1.0;                                                        // Fine tuning amount
                 COUNTS_PER_DEGREE = (((2 * 3.1415 * ROBOT_TRACK) * COUNTS_PER_INCH) / 360) * WHEEL_TURN_FUDGE;
-                configLoaded = true;
                 break;
             case "5291 Tank Tread-2x40 Custom":   //for tank tread base
                 REVERSE_DIRECTION = 1;
@@ -324,7 +310,6 @@ public class robotConfig {
                 WHEEL_TURN_FUDGE = 1.12;                                                        // Fine tuning amount
                 COUNTS_PER_DEGREE = (((2 * 3.1415 * ROBOT_TRACK) * COUNTS_PER_INCH) / 360) * WHEEL_TURN_FUDGE;
                 MECANUM_TURN_OFFSET = 0;
-                configLoaded = true;                                                      //load the power table
                 break;
             case "11231 2016 Custom": //2016 - 11231 Drivetrain
                 COUNTS_PER_MOTOR_REV = libraryMotorType.getCOUNTSPERROTATION();                // eg: TETRIX = 1440 pulses, NeveRest 20 = 560 pulses, NeveRest 40 =  1120, NeveRest 60 = 1680 pulses
@@ -335,8 +320,7 @@ public class robotConfig {
                 ROBOT_TRACK = 18;                                                     //  distance between centerline of rear wheels robot will pivot on rear wheel of omni on front, 16.5 track is 103.67 inches full circle
                 COUNTS_PER_DEGREE = ((2 * 3.1415926535 * ROBOT_TRACK) * COUNTS_PER_INCH) / 360;
                 MECANUM_TURN_OFFSET = 0;
-                //loadPowerTableTileRunner();                                                         //load the power table
-                configLoaded = true;
+                //loadPowerTableTileRunner();
                 break;
             default:  //default for competition TileRunner-2x40
                 REVERSE_DIRECTION = 1;
@@ -348,10 +332,8 @@ public class robotConfig {
                 ROBOT_TRACK = 16.5;                                                     //  distance between centerline of rear wheels robot will pivot on rear wheel of omni on front, 16.5 track is 103.67 inches full circle
                 COUNTS_PER_DEGREE = ((2 * 3.1415 * ROBOT_TRACK) * COUNTS_PER_INCH) / 360;
                 MECANUM_TURN_OFFSET = 0;
-                configLoaded = false;
                 break;
         }
-        return configLoaded;
     }
 
     public String getTeamNumber() {
@@ -374,20 +356,20 @@ public class robotConfig {
         this.allianceStartPosition = allianceStartPositions;
     }
 
-    public String getAllianceParkPosition() {
-        return allianceParkPosition;
-    }
-
-    public void setAllianceParkPosition(String allianceParkPositions) {
-        this.allianceParkPosition = allianceParkPositions;
-    }
-
     public int getDelay() {
         return delay;
     }
 
     public void setDelay(int delay) {
         this.delay = delay;
+    }
+
+    public int getDebug(){
+        return debug;
+    }
+
+    public void setDebug(int debug){
+        this.debug = debug;
     }
 
     public String getRobotConfigBase() {

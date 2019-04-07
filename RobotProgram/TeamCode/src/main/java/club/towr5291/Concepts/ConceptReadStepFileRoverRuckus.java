@@ -83,7 +83,6 @@ public class ConceptReadStepFileRoverRuckus extends LinearOpMode {
         robotconfig.setTeamNumber("5291");
         robotconfig.setAllianceColor("Blue");
         robotconfig.setAllianceStartPosition("Left");
-        robotconfig.setAllianceParkPosition("alliance");
         fileLogger.writeEvent(debug,"Status", "Reading Steps : ");
 
         autonomousStepsMap = autonomousStepsTest.ReadStepFile(robotconfig);
