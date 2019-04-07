@@ -363,9 +363,6 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 break;
         }
 
-        //now we have loaded the config from sharedpreferences we can setup the robot
-        ourRobotConfig.initConfig();
-
         //adjust debug level based on saved settings
         fileLogger.setDebugLevel(debug);
 
