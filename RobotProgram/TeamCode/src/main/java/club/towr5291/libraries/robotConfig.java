@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 
 import java.util.HashMap;
 
+import club.towr5291.functions.FileLogger;
 import club.towr5291.functions.ReadStepFileRoverRuckus;
 
 import static club.towr5291.functions.Constants.SharedPreferencesValues.ALLIANCE_COLOR;
@@ -158,19 +159,15 @@ public class robotConfig {
     public double getCOUNTS_PER_INCH() {
         return COUNTS_PER_INCH;
     }
-
     public double getCOUNTS_PER_DEGREE() {
         return COUNTS_PER_DEGREE;
     }
-
     public double getROBOT_TRACK() {
         return ROBOT_TRACK;
     }
-
     public double getCOUNTS_PER_INCH_STRAFE() {
         return COUNTS_PER_INCH_STRAFE;
     }
-
     public double getCOUNTS_PER_INCH_STRAFE_FRONT_OFFSET() {
         return COUNTS_PER_INCH_STRAFE_FRONT_OFFSET;
     }
@@ -185,10 +182,6 @@ public class robotConfig {
 
     public double getCOUNTS_PER_INCH_STRAFE_RIGHT_OFFSET() {
         return COUNTS_PER_INCH_STRAFE_RIGHT_OFFSET;
-    }
-
-    public String getAllianceStartPosition() {
-        return allianceStartPosition;
     }
 
     public int getLIFTMAIN_COUNTS_PER_INCH(){return LIFTMAIN_COUNTS_PER_INCH;}
@@ -339,7 +332,6 @@ public class robotConfig {
     public String getTeamNumber() {
         return teamNumber;
     }
-
     public void setTeamNumber(String teamNumber) {
         this.teamNumber = teamNumber;
     }
@@ -347,7 +339,6 @@ public class robotConfig {
     public String getAllianceColor() {
         return allianceColor;
     }
-
     public void setAllianceColor(String allianceColor) {
         this.allianceColor = allianceColor;
     }
@@ -355,11 +346,13 @@ public class robotConfig {
     public void setAllianceStartPosition(String allianceStartPositions) {
         this.allianceStartPosition = allianceStartPositions;
     }
+    public String getAllianceStartPosition(){
+        return this.allianceStartPosition;
+    }
 
     public int getDelay() {
         return delay;
     }
-
     public void setDelay(int delay) {
         this.delay = delay;
     }
@@ -367,7 +360,6 @@ public class robotConfig {
     public int getDebug(){
         return debug;
     }
-
     public void setDebug(int debug){
         this.debug = debug;
     }
@@ -375,7 +367,6 @@ public class robotConfig {
     public String getRobotConfigBase() {
         return this.robotConfigBase;
     }
-
     public void setRobotConfigBase(String robotConfig) {
         this.robotConfigBase = robotConfig;
     }
@@ -383,7 +374,6 @@ public class robotConfig {
     public void setRobotMotorType(String type){
         this.robotMotorType = type;
     }
-
     public String getRobotMotorType() {
         return this.robotMotorType;
     }

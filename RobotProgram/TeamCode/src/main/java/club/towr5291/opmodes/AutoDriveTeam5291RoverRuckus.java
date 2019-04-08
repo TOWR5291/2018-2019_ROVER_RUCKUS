@@ -32,32 +32,25 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package club.towr5291.opmodes;
 
+//Android Imports
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.TextView;
 
+//Qualcomm Imports
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DigitalChannel;
-import com.qualcomm.robotcore.hardware.I2cAddr;
-import com.qualcomm.robotcore.hardware.I2cDevice;
-import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
-import com.qualcomm.robotcore.hardware.I2cDeviceSynchImpl;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
-import com.vuforia.Image;
-import com.vuforia.PIXEL_FORMAT;
 
+//FTC Imports
 import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
-import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
@@ -65,18 +58,16 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import org.firstinspires.ftc.robotcore.internal.opmode.OpModeManagerImpl;
-import org.firstinspires.ftc.robotcore.internal.usb.exception.RobotUsbUnspecifiedException;
-import org.opencv.android.Utils;
-import org.opencv.core.CvType;
+
+//OpenCV Imports
 import org.opencv.core.Mat;
 
+//Java Imports
 import java.util.HashMap;
 
+//Local Imports
 import club.towr5291.R;
 import club.towr5291.functions.Constants;
 import club.towr5291.functions.FileLogger;
@@ -93,7 +84,6 @@ import club.towr5291.libraries.TOWR5291LEDControl;
 import club.towr5291.libraries.robotConfig;
 import club.towr5291.libraries.robotConfigSettings;
 import club.towr5291.functions.TOWR5291Utils;
-import club.towr5291.opmodes.OpModeMasterLinear;
 import club.towr5291.robotconfig.HardwareArmMotorsRoverRuckus;
 import club.towr5291.robotconfig.HardwareDriveMotors;
 import club.towr5291.robotconfig.HardwareSensorsRoverRuckus;
@@ -124,6 +114,7 @@ Written by Ian Haden/Wyatt Ashley October 2018
 2018-10-27 - Ian Haden  - Converted to ROVER RUCKUS
 
 */
+
 @Autonomous(name="5291 Autonomous Drive Rover Ruckus", group="5291")
 //@Disabled
 public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
@@ -262,8 +253,6 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
     private int mintCurrentLiftCountMotor2          = 0;
     private int mintLiftStartCountMotor1            = 0;
     private int mintLiftStartCountMotor2            = 0;
-    private double mintCurrentLiftPosCountMotor1    = mintCurrentLiftCountMotor1 - mintLiftStartCountMotor1;
-    private double mintCurrentLiftPosCountMotor2    = mintCurrentLiftCountMotor2 - mintLiftStartCountMotor2;
 
     //hashmap for the steps to be stored in.  A Hashmap is like a fancy array
     //private HashMap<String, LibraryStateSegAutoRoverRuckus> autonomousSteps = new HashMap<String, LibraryStateSegAutoRoverRuckus>();
@@ -343,15 +332,6 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         //load menu settings and setup robot and debug level
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(hardwareMap.appContext);
         ourRobotConfig = new robotConfig(sharedPreferences);
-
-        //Do not need the code below any more because there is a function to do this now and make every thing easyer
-//        ourRobotConfig.setAllianceColor(sharedPreferences.getString("club.towr5291.Autonomous.Color", "Red"));// Using a Function to Store The Robot Specification
-//        ourRobotConfig.setTeamNumber(sharedPreferences.getString("club.towr5291.Autonomous.TeamNumber", "0000"));
-//        ourRobotConfig.setAllianceStartPosition(sharedPreferences.getString("club.towr5291.Autonomous.Position", "Left"));
-//        ourRobotConfig.setDelay(Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Delay", "0")));
-//        ourRobotConfig.setRobotMotorType(sharedPreferences.getString("club.towr5291.Autonomous.RobotMotorChoice", "ANDY40SPUR"));
-//        ourRobotConfig.setRobotConfigBase(sharedPreferences.getString("club.towr5291.Autonomous.RobotConfigBase", "TileRunner2x40"));
-//        debug = Integer.parseInt(sharedPreferences.getString("club.towr5291.Autonomous.Debug", "1"));
         debug = ourRobotConfig.getDebug();
 
         switch (ourRobotConfig.getAllianceStartPosition()){
@@ -509,46 +489,6 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
             //adjust the LED state
             mint5291LEDStatus = LEDs.LEDControlUpdate(mint5291LEDStatus);
 
-            //need to capture picture and process it.
-//            if (!mblnDisableVisionProcessing) {
-                //start capturing frames for analysis
-//                if (mblnReadyToCapture) {
-//
-//                    try {
-//                        VuforiaLocalizer.CloseableFrame frame = RoverRuckusVuforia.getVuforia().getFrameQueue().take(); //takes the frame at the head of the queue
-//                        long numImages = frame.getNumImages();
-//                        fileLogger.writeEvent(3, "VISION", "Number of Images " + numImages);
-//
-//                        for (int i = 0; i < numImages; i++) {
-//                            if (frame.getImage(i).getFormat() == PIXEL_FORMAT.RGB565) {
-//                                rgb = frame.getImage(i);
-//                                break;
-//                            }
-//                        }
-//
-//                        /*rgb is now the Image object that we’ve used in the video*/
-//                        Bitmap bm = Bitmap.createBitmap(rgb.getWidth(), rgb.getHeight(), Bitmap.Config.RGB_565);
-//                        bm.copyPixelsFromBuffer(rgb.getPixels());
-//
-//                        //put the image into a MAT for OpenCV
-//                        tmp = new Mat(rgb.getWidth(), rgb.getHeight(), CvType.CV_8UC4);
-//                        Utils.bitmapToMat(bm, tmp);
-//                        //close the frame, prevents memory leaks and crashing
-//                        frame.close();
-//                    } catch (InterruptedException e) {
-//                        dashboard.displayPrintf(1, "VUFORIA --- ERROR ERROR ERROR");
-//                        dashboard.displayPrintf(2, "VUFORIA --- ERROR ERROR ERROR");
-//                    }
-//                    quadrant = 6;
-//
-//                    mColour = elementColour.RoverRuckusOCV(fileLogger, dashboard, tmp, 0, true, 6, false);
-//                    fileLogger.writeEvent(3, "VISION", "Colour Returned " + mColour);
-//                    dashboard.displayPrintf(2, "Element Detected-" + mColour);
-//
-//                    mintCaptureLoop++;
-//                }
-//            }
-
             switch (mintCurrentStateStep) {
                 case STATE_INIT:
                     fileLogger.writeEvent(1,"mintCurrentStateStep:- " + mintCurrentStateStep + " mintCurrentStateStep " + mintCurrentStateStep);
@@ -652,8 +592,8 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         //tensorFlowRoverRuckus.shutdown();
 
         //switch opmode to teleop
-        //opModeManager = (OpModeManagerImpl) onStop.internalOpModeServices;
-        //opModeManager.initActiveOpMode(TeleOpMode);
+        opModeManager = (OpModeManagerImpl) onStop.internalOpModeServices;
+        opModeManager.initActiveOpMode(TeleOpMode);
         //opmode not active anymore
     }
 
