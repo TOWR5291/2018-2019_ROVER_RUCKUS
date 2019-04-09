@@ -180,7 +180,22 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
 
             //drivers controller, operation based on the mode selection
             switch ((int)controllerAMode.getTickCurrValue()) {
+
+                //last years driving mode, prefered not to use
                 case 1:
+                    dashboard.displayPrintf(5, "Controller Mode -- ", "Mecanum Drive Relic Recovery (BAD)");
+                    fileLogger.writeEvent(debug,"Controller Mode", "Mecanum Drive Relic Recovery");
+                    /*
+                     * This was made just for Rover Ruckus becaues the drivers wanted something new!
+                     * THis also allows for strafing
+                     */
+                    Robot.baseMotor1.setPower(Range.clip(-gamepad1.left_stick_y + gamepad1.left_stick_x + gamepad1.right_stick_x, -1, 1));
+                    Robot.baseMotor2.setPower(Range.clip(-gamepad1.left_stick_y - gamepad1.left_stick_x + gamepad1.right_stick_x, -1, 1));
+                    Robot.baseMotor3.setPower(Range.clip(-gamepad1.left_stick_y - gamepad1.left_stick_x - gamepad1.right_stick_x, -1, 1));
+                    Robot.baseMotor4.setPower(Range.clip(-gamepad1.left_stick_y + gamepad1.left_stick_x - gamepad1.right_stick_x, -1, 1));
+                    break;
+
+                case 2:
                     fileLogger.writeEvent(debug,"Controller Mode -- ", "POV");
                     dashboard.displayPrintf(5, "Controller POV:");
                     /*
@@ -195,7 +210,7 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
                     fileLogger.writeEvent(debug,"SetPowers Done");
                     break;
 
-                case 2:
+                case 3:
                     dashboard.displayPrintf(5, "Controller Mode -- ", "Tank");
                     fileLogger.writeEvent("Controller Mode -- ", "Tank");
                     /*
@@ -208,7 +223,7 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
                     Robot.setHardwareDriveRightMotorPower(-gamepad1.right_stick_y * robotPowerMultiplier.getTickCurrValue());
                     break;
 
-                case 3:
+                case 4:
                     dashboard.displayPrintf(5, "Controller Mode -- ", "Mecanum Drive 18-19");
                     fileLogger.writeEvent(debug,"Controller Mode -- ", "Mecanum Drive New 2018-19");
                     /*
@@ -220,20 +235,6 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
                     Robot.baseMotor3.setPower(-gamepad1.left_stick_x + -gamepad1.left_stick_y + -gamepad1.right_stick_x);
                     Robot.baseMotor4.setPower(-gamepad1.left_stick_x + -gamepad1.left_stick_y + -gamepad1.right_stick_x);
 
-                    break;
-
-                //last years driving mode, prefered not to use
-                case 4:
-                    dashboard.displayPrintf(5, "Controller Mode -- ", "Mecanum Drive Relic Recovery (BAD)");
-                    fileLogger.writeEvent(debug,"Controller Mode", "Mecanum Drive Relic Recovery");
-                    /*
-                     * This was made just for Rover Ruckus becaues the drivers wanted something new!
-                     * THis also allows for strafing
-                     */
-                    Robot.baseMotor1.setPower(Range.clip(-gamepad1.left_stick_y + gamepad1.left_stick_x + gamepad1.right_stick_x, -1, 1));
-                    Robot.baseMotor2.setPower(Range.clip(-gamepad1.left_stick_y - gamepad1.left_stick_x + gamepad1.right_stick_x, -1, 1));
-                    Robot.baseMotor3.setPower(Range.clip(-gamepad1.left_stick_y - gamepad1.left_stick_x - gamepad1.right_stick_x, -1, 1));
-                    Robot.baseMotor4.setPower(Range.clip(-gamepad1.left_stick_y + gamepad1.left_stick_x - gamepad1.right_stick_x, -1, 1));
                     break;
 
             } //Switch ControllerA
@@ -306,7 +307,7 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
         controllerAMode.setTickMin(1);
         controllerAMode.setTickIncrement(1);
         controllerAMode.setTickMax(controllerAModes);
-        controllerAMode.setTickValue(4);
+        controllerAMode.setTickValue(1);
         fileLogger.writeEvent(debug, "initFunctions" ,  "ControllerAMode End");
 
         fileLogger.writeEvent(debug, "initFunctions" ,  "ControllerBMode Start");

@@ -594,8 +594,8 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         //tensorFlowRoverRuckus.shutdown();
 
         //switch opmode to teleop
-        opModeManager = (OpModeManagerImpl) onStop.internalOpModeServices;
-        opModeManager.initActiveOpMode(TeleOpMode);
+        //opModeManager = (OpModeManagerImpl) onStop.internalOpModeServices;
+        //opModeManager.initActiveOpMode(TeleOpMode);
         //opmode not active anymore
     }
 
@@ -1595,7 +1595,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 adafruitIMUHeading = getAdafruitHeading();
                 mdblGyrozAccumulated = adafruitIMUHeading;
                 mdblGyrozAccumulated = teamAngleAdjust(mdblGyrozAccumulated);//Set variables to MRgyro readings
-                mdblTurnAbsoluteGyro = Double.parseDouble(newAngleDirectionGyro((int) mdblGyrozAccumulated, (int) mdblRobotTurnAngle).substring(3));
+                //mdblTurnAbsoluteGyro = Double.parseDouble(newAngleDirectionGyro((int) mdblGyrozAccumulated, (int) mdblRobotTurnAngle).substring(3));
                 String mstrDirection = (newAngleDirectionGyro((int) mdblGyrozAccumulated, (int) mdblRobotTurnAngle).substring(0, 3));
                 fileLogger.writeEvent(3, "USING HEADING FROM IMU=" + useAdafruitIMU);
                 fileLogger.writeEvent(3, "Running, mdblGyrozAccumulated = " + mdblGyrozAccumulated);
@@ -2137,11 +2137,11 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                     switch (mLocation){
                         case OBJECT_RED_CENTER:
                             autonomousStepsFile.insertSteps(3, "TILT", 75,1, true, false, 50, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "DRIVE", 12,1, true, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "DRIVE", -6,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "DRIVE", 17,1, true, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "DRIVE", -10,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
                             autonomousStepsFile.insertSteps(3, "TILT", -84,1, false, false, 50, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
                             autonomousStepsFile.insertSteps(3, "LIFT", -22,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "TANKTURN", 180,.6, true, false, 5, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "TANKTURN", -185,.6, true, false, 5, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
                             autonomousStepsFile.insertSteps(3, "DRIVE", 9,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
                             break;
                         case OBJECT_RED_LEFT:
@@ -2155,9 +2155,9 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                             autonomousStepsFile.insertSteps(3, "DRIVE", 9,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
                             break;
                         default:  //right side, unfortunately we don't sample the right side so if its not left or center we assume right
-                            autonomousStepsFile.insertSteps(3, "TANKTURN", -45,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "TANKTURN", -46,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
                             autonomousStepsFile.insertSteps(3, "TILT", 75,1, true, false, 50, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "DRIVE", 16,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "DRIVE", 18,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
                             autonomousStepsFile.insertSteps(3, "DRIVE", -16,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
                             autonomousStepsFile.insertSteps(3, "TILT", -84,1, false, false, 50, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
                             autonomousStepsFile.insertSteps(3, "LIFT", -22,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
