@@ -2137,30 +2137,30 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                     switch (mLocation){
                         case OBJECT_RED_CENTER:
                             autonomousStepsFile.insertSteps(3, "TILT", 75,1, true, false, 50, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "DRIVE", 17,1, true, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "DRIVE", -10,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "DRIVE", 7,1, true, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "DRIVE", -6,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
                             autonomousStepsFile.insertSteps(3, "TILT", -84,1, false, false, 50, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "LIFT", -22,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "LIFT", -12,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
                             autonomousStepsFile.insertSteps(3, "TANKTURN", -185,.6, true, false, 5, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
                             autonomousStepsFile.insertSteps(3, "DRIVE", 9,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
                             break;
                         case OBJECT_RED_LEFT:
                             autonomousStepsFile.insertSteps(3, "TANKTURN", 30,.6, false, false, 5, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
                             autonomousStepsFile.insertSteps(3, "TILT", 75,1, true, false, 50, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "DRIVE", 16,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "DRIVE", -16,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "DRIVE", 6,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "DRIVE", -6,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
                             autonomousStepsFile.insertSteps(3, "TILT", -84,1, false, false, 50, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "LIFT", -22,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "LIFT", -12,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
                             autonomousStepsFile.insertSteps(3, "TANKTURN", 155,.6, true, false, 5, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
                             autonomousStepsFile.insertSteps(3, "DRIVE", 9,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
                             break;
                         default:  //right side, unfortunately we don't sample the right side so if its not left or center we assume right
                             autonomousStepsFile.insertSteps(3, "TANKTURN", -46,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
                             autonomousStepsFile.insertSteps(3, "TILT", 75,1, true, false, 50, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "DRIVE", 18,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "DRIVE", -16,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "DRIVE", 8,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "DRIVE", -6,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
                             autonomousStepsFile.insertSteps(3, "TILT", -84,1, false, false, 50, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "LIFT", -22,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "LIFT", -12,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
                             autonomousStepsFile.insertSteps(3, "TANKTURN", -145,.6, true, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
                             autonomousStepsFile.insertSteps(3, "DRIVE", 9,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
                             break;
