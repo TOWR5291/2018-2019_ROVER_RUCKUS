@@ -336,7 +336,7 @@ public class ConceptCallabrateOCV extends OpModeMasterLinear
             calibrate = true;
 
         dashboard.displayPrintf(2, "Calibatrate " + calibrate);
-        Colour = elementColour.RoverRuckusOCV(fileLogger, dashboard, tmp, 0, true, 7, calibrate);
+        Colour = elementColour.RoverRuckusOCV(fileLogger, dashboard, tmp, 0, false, 3, calibrate);
 
         for (VuforiaTrackable trackable : trackables) {
             /**

@@ -2110,7 +2110,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                             //mColour = elementColour.RoverRuckusOCV(fileLogger, dashboard, mat, 0, true, 6, false);
                             //check if gold is middle
                             if (mColour == Constants.ObjectColours.OBJECT_NONE)
-                                if (elementColour.RoverRuckusOCV(fileLogger, dashboard, mat, 0, false, 7, false) == Constants.ObjectColours.OBJECT_RED) {
+                                if (elementColour.RoverRuckusOCV(fileLogger, dashboard, mat, 0, false, 3, false) == Constants.ObjectColours.OBJECT_RED) {
                                     mColour = Constants.ObjectColours.OBJECT_RED;
                                     mLocation = Constants.ObjectColours.OBJECT_RED_CENTER;
                                 }
@@ -2136,13 +2136,14 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
 
                     switch (mLocation){
                         case OBJECT_RED_CENTER:
-                            autonomousStepsFile.insertSteps(3, "TILT", 75,1, true, false, 50, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "TILT", 20,.5, true, false, 50, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "TILT", 55,1, false, false, 50, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
                             autonomousStepsFile.insertSteps(3, "DRIVE", 7,1, true, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
                             autonomousStepsFile.insertSteps(3, "DRIVE", -6,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "TILT", -84,1, false, false, 50, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "TILT", -87,1, false, false, 50, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
                             autonomousStepsFile.insertSteps(3, "LIFT", -12,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "TANKTURN", -185,.6, true, false, 5, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "DRIVE", 9,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "TANKTURN", 195,.6, true, false, 5, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            autonomousStepsFile.insertSteps(3, "DRIVE", 5,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
                             break;
                         case OBJECT_RED_LEFT:
                             autonomousStepsFile.insertSteps(3, "TANKTURN", 30,.6, false, false, 5, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
