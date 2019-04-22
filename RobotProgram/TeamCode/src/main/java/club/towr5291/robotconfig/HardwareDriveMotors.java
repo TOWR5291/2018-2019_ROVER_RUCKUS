@@ -319,6 +319,25 @@ public class HardwareDriveMotors
 
     }
 
+
+    public boolean getHardwareBaseDriveBusy() {
+        boolean blnDrive1 = false;
+        boolean blnDrive2 = false;
+        boolean blnDrive3 = false;
+        boolean blnDrive4 = false;
+
+        if (baseMotor1 != null)
+            blnDrive1 = (baseMotor1.isBusy());
+        if (baseMotor2 != null)
+            blnDrive2 = (baseMotor2.isBusy());
+        if (baseMotor3 != null)
+            blnDrive3 = (baseMotor3.isBusy());
+        if (baseMotor4 != null)
+            blnDrive4 = (baseMotor4.isBusy());
+
+        return (blnDrive1) || (blnDrive2) || (blnDrive3) || (blnDrive4);
+    }
+
     public boolean[] isBusy(){
         boolean MotorsBusy[] = new boolean[4];
         if (baseMotor1 != null) MotorsBusy[0] = baseMotor1.isBusy();
@@ -724,6 +743,7 @@ public class HardwareDriveMotors
         setHardwareDriveRight1MotorPower(wheelSpeeds[2]);
         setHardwareDriveRight2MotorPower(wheelSpeeds[3]);
     }
+
     public void mecanumDrive_Cartesian(double x, double y, double rotation, double gyroAngle, double speedToMultplayBy) {
 
         double xIn = x;

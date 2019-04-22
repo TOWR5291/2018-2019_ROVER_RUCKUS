@@ -153,7 +153,7 @@ public class RoverRuckusOCV {
             case 3:
                 //bottom right
                 // Just get where the Jewel is so we don't analyse the wrong items in the image
-                roi = new Rect(img.width() / 2, img.height() / 2 - (int)offset, img.width() / 2, img.height() / 2);
+                roi = new Rect(img.width() / 2, img.height() / 3 - (int)offset, img.width() / 2, img.height() / 2);
                 break;
             case 4:
                 // bottom left
@@ -174,6 +174,16 @@ public class RoverRuckusOCV {
                 // center bottom
                 // Just get where the object is so we don't analyse the wrong items in the image
                 roi = new Rect(img.width() / 3, img.height() / 2 - (int)offset, img.width() / 3, img.height() / 2 - (int)offset);
+                break;
+            case 8:
+                //middle left third
+                // Just get where the Jewel is so we don't analyse the wrong items in the image
+                roi = new Rect(0, img.height() / 3 - (int)offset, img.width() / 2, img.height() / 3);
+                break;
+            case 9:
+                // center middle third
+                // Just get where the object is so we don't analyse the wrong items in the image
+                roi = new Rect(img.width() / 3, img.height() / 3 - (int)offset, img.width() / 3, img.height() / 3);
                 break;
             default:
                 // Just get where the object is so we don't analyse the wrong items in the image

@@ -275,7 +275,7 @@ public class robotConfig {
                 COUNTS_PER_INCH_STRAFE_RIGHT_OFFSET = 1;
                 COUNTS_PER_INCH_STRAFE = COUNTS_PER_INCH * 1.1;
                 ROBOT_TRACK = 16.5;                                                     //  distance between centerline of rear wheels robot will pivot on rear wheel of omni on front, 16.5 track is 103.67 inches full circle
-                WHEEL_TURN_FUDGE = 1.0;                                                        // Fine tuning amount
+                WHEEL_TURN_FUDGE = 1.15;                                                        // Fine tuning amount
                 COUNTS_PER_DEGREE = (((2 * 3.1415 * ROBOT_TRACK) * COUNTS_PER_INCH) / 360) * WHEEL_TURN_FUDGE;
                 LIFTMAIN_COUNTS_PER_INCH = 287;
                 MECANUM_TURN_OFFSET = 1.72;

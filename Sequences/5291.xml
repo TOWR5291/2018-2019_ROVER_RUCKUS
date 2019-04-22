@@ -2,29 +2,34 @@
 <Robot type="FirstInspires-FTC">
     <LynxUsbDevice name="Expansion Hub Portal 1" serialNumber="DQ17BDAY" parentModuleAddress="1">
         <LynxModule name="Expansion Hub 1" port="1">
-            <NeveRest20Gearmotor name="leftMotor1" port="0" />
-            <NeveRest20Gearmotor name="leftMotor2" port="1" />
-            <NeveRest20Gearmotor name="rightMotor1" port="2" />
-            <NeveRest20Gearmotor name="rightMotor2" port="3" />
-            <Servo name="teamMarkerServo" port="0" />
-            <DigitalDevice name="limitSwitch3" port="0" />
-            <DigitalDevice name="limitSwitch4" port="1" />
+            <RevRobotics40HDHexMotor name="liftMotor1" port="0" />
+            <RevRobotics40HDHexMotor name="liftMotor2" port="1" />
+            <RevRobotics40HDHexMotor name="tiltMotor1" port="2" />
+            <RevRobotics40HDHexMotor name="tiltMotor2" port="3" />
+            <Servo name="intakeServo1" port="0" />
+            <Servo name="teamMarkerServo" port="1" />
+            <DigitalDevice name="limitSwitch4A" port="0" />
+            <DigitalDevice name="limitSwitch4B" port="1" />
+            <DigitalDevice name="limitSwitch3A" port="2" />
+            <DigitalDevice name="limitSwitch3B" port="3" />
+            <DigitalDevice name="limitSwitch2A" port="4" />
+            <DigitalDevice name="limitSwitch2B" port="5" />
+            <DigitalDevice name="limitSwitch1A" port="6" />
+            <DigitalDevice name="limitSwitch1B" port="7" />
             <LynxEmbeddedIMU name="imu2" port="0" bus="0" />
         </LynxModule>
         <LynxModule name="Expansion Hub 2" port="2">
-            <Motor name="liftMotor1" port="0" />
-            <Motor name="liftMotor2" port="1" />
-            <Motor name="tiltMotor1" port="2" />
-            <Motor name="intakeMotor" port="3" />
-            <Servo name="intakeServo" port="0" />
+            <RevRobotics20HDHexMotor name="leftMotor1" port="0" />
+            <RevRobotics20HDHexMotor name="rightMotor1" port="1" />
+            <RevRobotics20HDHexMotor name="leftMotor2" port="2" />
+            <RevRobotics20HDHexMotor name="rightMotor2" port="3" />
+            <Servo name="intakeServo2" port="0" />
             <DigitalDevice name="blue1" port="0" />
             <DigitalDevice name="red1" port="1" />
-            <DigitalDevice name="blue2" port="2" />
-            <DigitalDevice name="red2" port="3" />
-            <DigitalDevice name="green1" port="4" />
-            <DigitalDevice name="green2" port="5" />
-            <DigitalDevice name="limitSwitch1" port="6" />
-            <DigitalDevice name="limitSwitch2" port="7" />
+            <DigitalDevice name="green2" port="2" />
+            <DigitalDevice name="green1" port="3" />
+            <DigitalDevice name="blue2" port="4" />
+            <DigitalDevice name="red2" port="5" />
             <LynxEmbeddedIMU name="imu" port="0" bus="0" />
         </LynxModule>
     </LynxUsbDevice>

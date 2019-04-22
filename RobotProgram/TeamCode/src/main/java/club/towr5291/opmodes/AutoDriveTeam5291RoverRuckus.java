@@ -45,6 +45,7 @@ import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -74,6 +75,7 @@ import club.towr5291.functions.Constants;
 import club.towr5291.functions.FileLogger;
 import club.towr5291.functions.ReadStepFileRoverRuckus;
 import club.towr5291.functions.RoverRuckusOCV;
+import club.towr5291.functions.TOWR5291PID;
 import club.towr5291.functions.TOWR5291TextToSpeech;
 import club.towr5291.libraries.ImageCaptureOCV;
 import club.towr5291.libraries.LibraryMotorType;
@@ -224,10 +226,10 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
     private int mintStepLeftTarget2;                         //Left Motor 2   - encoder target position
     private int mintStepRightTarget1;                        //Right Motor 1  - encoder target position
     private int mintStepRightTarget2;                        //Right Motor 2  - encoder target position
-    private int mintStartPositionMain;                       //Main Lift Motor - start Position
-    private int mintStartPositionTop;                        //Main Lift Motor - start Position
-    private int mintTargetPositionMain;                      //Main Lift Motor - start Position
-    private int mintTargetPositionTop;                       //Main Lift Motor - start Position
+    private double mdblDistanceToMoveTilt1;                  //Tilt Motor 1 - encoder target position
+    private double mdblDistanceToMoveTilt2;                  //Tilt Motor 2 - encoder target position
+    private double mdblTargetPositionTop1;                   //Main Lift Motor 1 - target Position
+    private double mdblTargetPositionTop2;                   //Main Lift Motor 1 - target Position
     private double dblStepSpeedTempLeft;
     private double dblStepSpeedTempRight;
     private double mdblStepTurnL;                            //used when decoding the step, this will indicate if the robot is turning left
@@ -247,7 +249,9 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
     private int quadrant;
     private int imuStartCorrectionVar = 0;
     private int imuMountCorrectionVar = 90;
-
+    private boolean blnCrossZeroPositive = false;
+    private boolean blnCrossZeroNegative = false;
+    private boolean blnReverseDir = false;
     /**
      * Variables for the lift and remembering the current position
      */
@@ -271,6 +275,9 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
     private Constants.ObjectColours mLocation;
 
     private TOWR5291TextToSpeech towr5291TextToSpeech = new TOWR5291TextToSpeech(false);
+
+    private TOWR5291PID PID1 = new TOWR5291PID();
+    private double dblStartVoltage = 0;
 
     //LED Strips
     private TOWR5291LEDControl LEDs;
@@ -478,6 +485,9 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         towr5291TextToSpeech.Speak("Completed Loading, Waiting for Start", debug);
         dashboard.displayPrintf(10, "Init - Complete, Wait for Start");
 
+        imu.stopAccelerationIntegration();
+
+        dblStartVoltage = getBatteryVoltage();
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
@@ -664,8 +674,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
             case "STRAFE":
                 MecanumStrafe();
                 break;
-            case "RRE":  // Right turn with a Radius in Parm 1
-            case "LRE":  // Left turn with a Radius in Parm 1
+            case "RADIUSTURN":
                 RadiusTurnStep();
                 break;
             case "DRIVE":  // Drive forward a distance in inches and power setting
@@ -849,7 +858,6 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 mblnDisableVisionProcessing = true;  //disable vision processing
                 fileLogger.writeEvent(2,"mdblStepDistance   :- " + mdblStepDistance);
                 // Determine new target position
-
                 if (mblnNextStepLastPos) {
                     mintStartPositionLeft1 = mintLastEncoderDestinationLeft1;
                     mintStartPositionLeft2 = mintLastEncoderDestinationLeft2;
@@ -883,17 +891,32 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 fileLogger.writeEvent(2,"mStepLeftTarget1 :- " + mintStepLeftTarget1 + " mStepLeftTarget2 :- " + mintStepLeftTarget2);
                 fileLogger.writeEvent(2,"mStepRightTarget1:- " + mintStepRightTarget1 + " mStepRightTarget2:- " + mintStepRightTarget2);
 
-                if (!(robotDrive.baseMotor1.getMode().equals(DcMotor.RunMode.RUN_TO_POSITION))) {
-                    // set motor controller to mode, Turn On RUN_TO_POSITION
-                    robotDrive.setHardwareDriveRunToPosition();
-                }
+                // set motor controller to mode, Turn On RUN_TO_POSITION
+                robotDrive.setHardwareDriveRunToPosition();
 
-                mintCurrentStateDriveHeading = Constants.stepState.STATE_RUNNING;
+                mintCurrentStateDriveHeading = Constants.stepState.STATE_START;
                 robotDrive.setHardwareDrivePower(Math.abs(mdblStepSpeed));
 
                 dblStepSpeedTempRight = mdblStepSpeed;
                 dblStepSpeedTempLeft = mdblStepSpeed;
                 break;
+
+            case STATE_START:
+                if (robotDrive.getHardwareBaseDriveBusy()) {
+                    mintCurrentStateDriveHeading = Constants.stepState.STATE_RUNNING;
+                    fileLogger.writeEvent(2,"Base Drive Not Running Yet ");
+                }
+                robotDrive.setHardwareDrivePower(Math.abs(mdblStepSpeed));
+                //check timeout value
+                if (mStateTime.seconds() > mdblStepTimeout) {// Stop all motion;
+                    robotDrive.setHardwareDrivePower(0);
+                    fileLogger.writeEvent(1,"Timeout Drive didn't engage:- " + mStateTime.seconds());
+                    //  Transition to a new state.
+                    mintCurrentStateDriveHeading = Constants.stepState.STATE_COMPLETE;
+                    deleteParallelStep();
+                }
+                break;
+
             case STATE_RUNNING:
                 // pass target position to motor controller
                 robotDrive.baseMotor1.setTargetPosition(mintStepLeftTarget1);
@@ -924,7 +947,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 dblDistanceToEndRight2 = (mintStepRightTarget2 - intRight2MotorEncoderPosition) / ourRobotConfig.getCOUNTS_PER_INCH();
 
                 //if getting close ramp down speed
-                dblDistanceToEnd = (dblDistanceToEndLeft1 + dblDistanceToEndRight1 + dblDistanceToEndLeft2 + dblDistanceToEndRight2) / 4;
+                dblDistanceToEnd = Math.max(Math.max(Math.max(Math.abs(dblDistanceToEndLeft1),Math.abs(dblDistanceToEndRight1)),Math.abs(dblDistanceToEndLeft2)),Math.abs(dblDistanceToEndRight2));
 
                 //parameter 1 or 4 is use gyro for direction,  setting either of these to 1 will get gyro correction
                 // if parameter 1 is true
@@ -952,24 +975,33 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                         dblStepSpeedTempLeft /= dblMaxSpeed;
                         dblStepSpeedTempRight /= dblMaxSpeed;
                     }
-
                 }
                 fileLogger.writeEvent(3,"dblDistanceToEnd " + dblDistanceToEnd);
 
                 if (mblnRobotLastPos) {
-                    if (dblDistanceToEnd <= 3.0) {
-                        fileLogger.writeEvent(3,"mblnRobotLastPos Complete         ");
+                    if (Math.abs(dblDistanceToEnd) <= mdblRobotParm6) {
                         mblnNextStepLastPos = true;
+                        fileLogger.writeEvent(3,"mblnRobotLastPos Complete Near END " + Math.abs(dblDistanceToEnd));
                         mblnDisableVisionProcessing = false;  //enable vision processing
                         mintCurrentStateDriveHeading = Constants.stepState.STATE_COMPLETE;
                         deleteParallelStep();
+                        break;
                     }
+                } else if (Math.abs(dblDistanceToEnd) <= mdblRobotParm6) {
+                    fileLogger.writeEvent(3,"mblnRobotLastPos Complete Near END " + Math.abs(dblDistanceToEnd));
+                    mintCurrentStateDriveHeading = Constants.stepState.STATE_COMPLETE;
+                    deleteParallelStep();
+                    break;
                 }
 
-                //if within error margin stop
-                //if (robotDrive.leftMotor1.isBusy() && robotDrive.rightMotor1.isBusy()) {
-                //get motor busy state bitmap is right2, right1, left2, left1
-                if (((robotDrive.getHardwareDriveIsBusy() & (robotConfig.motors.leftMotor1.toInt() | robotConfig.motors.rightMotor1.toInt())) == (robotConfig.motors.leftMotor1.toInt() | robotConfig.motors.rightMotor1.toInt()))) {
+                //stop driving when within .25 inch, sometimes takes a long time to get that last bit and times out.
+                //stop when drive motors stop
+                if (Math.abs(dblDistanceToEnd) <= 0.25) {
+                    fileLogger.writeEvent(3,"mblnRobotLastPos Complete Near END " + Math.abs(dblDistanceToEnd));
+                    mintCurrentStateDriveHeading = Constants.stepState.STATE_COMPLETE;
+                    deleteParallelStep();
+                    break;
+                } else if (robotDrive.getHardwareBaseDriveBusy()) {
                     fileLogger.writeEvent(3,"Encoder counts per inch = " + ourRobotConfig.getCOUNTS_PER_INCH() + " dblDistanceFromStart " + dblDistanceFromStart + " dblDistanceToEnd " + dblDistanceToEnd + " Power Level Left " + dblStepSpeedTempLeft + " Power Level Right " + dblStepSpeedTempRight + " Running to target  L1, L2, R1, R2  " + mintStepLeftTarget1 + ", " + mintStepLeftTarget2 + ", " + mintStepRightTarget1 + ",  " + mintStepRightTarget2 + ", " + " Running at position L1 " + intLeft1MotorEncoderPosition + " L2 " + intLeft2MotorEncoderPosition + " R1 " + intRight1MotorEncoderPosition + " R2 " + intRight2MotorEncoderPosition);
                     dashboard.displayPrintf(3, LABEL_WIDTH,"Path1", "Running to " + mintStepLeftTarget1 + ":" + mintStepRightTarget1);
                     dashboard.displayPrintf(4, LABEL_WIDTH,"Path2", "Running at " +intLeft1MotorEncoderPosition + ":" + intRight1MotorEncoderPosition);
@@ -978,11 +1010,12 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                     robotDrive.setHardwareDriveLeftMotorPower(dblStepSpeedTempLeft);
                     robotDrive.setHardwareDriveRightMotorPower(dblStepSpeedTempRight);
                 } else {
-                    robotDrive.setHardwareDrivePower(0);
+                    //robotDrive.setHardwareDrivePower(0);
                     fileLogger.writeEvent(2,"Complete         ");
                     mblnDisableVisionProcessing = false;  //enable vision processing
                     mintCurrentStateDriveHeading = Constants.stepState.STATE_COMPLETE;
                     deleteParallelStep();
+                    break;
                 }
 
                 //check timeout value
@@ -992,6 +1025,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                     //  Transition to a new state.
                     mintCurrentStateDriveHeading = Constants.stepState.STATE_COMPLETE;
                     deleteParallelStep();
+                    break;
                 }
                 break;
         }
@@ -1178,23 +1212,26 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                             mblnDisableVisionProcessing = false;  //enable vision processing
                             mintCurrentStatePivotTurn = Constants.stepState.STATE_COMPLETE;
                             deleteParallelStep();
+                            break;
                         }
                     }
-                    //if (!robotDrive.rightMotor1.isBusy()) {
+
                     //get motor busy state bitmap is right2, right1, left2, left1
-                    if (((robotDrive.getHardwareDriveIsBusy() & robotConfig.motors.rightMotor1.toInt()) == robotConfig.motors.rightMotor1.toInt())) {
+                    if (!robotDrive.getHardwareBaseDriveBusy()) {
                         fileLogger.writeEvent(1,"Complete.......");
                         mblnDisableVisionProcessing = false;  //enable vision processing
                         mintCurrentStatePivotTurn = Constants.stepState.STATE_COMPLETE;
                         deleteParallelStep();
+                        break;
                     }
                 } else {
                     // Stop all motion by setting power to 0
-                    robotDrive.setHardwareDrivePower(0);
+                    //robotDrive.setHardwareDrivePower(0);
                     fileLogger.writeEvent(1,"Complete.......");
                     mblnDisableVisionProcessing = false;  //enable vision processing
                     mintCurrentStatePivotTurn = Constants.stepState.STATE_COMPLETE;
                     deleteParallelStep();
+                    break;
                 }
             }
             //check timeout value
@@ -1304,10 +1341,13 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 dblDistanceToEndRight1 = (mintStepRightTarget1 - intRight1MotorEncoderPosition) / ourRobotConfig.getCOUNTS_PER_INCH();
                 dblDistanceToEndRight2 = (mintStepRightTarget2 - intRight2MotorEncoderPosition) / ourRobotConfig.getCOUNTS_PER_INCH();
 
+                double dblDistanceToEnd = Math.max(Math.max(Math.max(Math.abs(dblDistanceToEndLeft1),Math.abs(dblDistanceToEndRight1)),Math.abs(dblDistanceToEndLeft2)),Math.abs(dblDistanceToEndRight2));
+
                 fileLogger.writeEvent(3,"Current LPosition1:- " + intLeft1MotorEncoderPosition + " LTarget1:- " + mintStepLeftTarget1);
                 fileLogger.writeEvent(3,"Current LPosition2:- " + intLeft2MotorEncoderPosition + " LTarget2:- " + mintStepLeftTarget2);
                 fileLogger.writeEvent(3,"Current RPosition1:- " + intRight1MotorEncoderPosition + " RTarget1:- " + mintStepRightTarget1);
                 fileLogger.writeEvent(3,"Current RPosition2:- " + intRight2MotorEncoderPosition + " RTarget2:- " + mintStepRightTarget2);
+                fileLogger.writeEvent(3,"Distance to end:- " + dblDistanceToEnd);
 
                 dashboard.displayPrintf(4, LABEL_WIDTH, "Left  Target: ", "Running to %7d :%7d", mintStepLeftTarget1, mintStepLeftTarget2);
                 dashboard.displayPrintf(5, LABEL_WIDTH, "Left  Actual: ", "Running at %7d :%7d", intLeft1MotorEncoderPosition, intLeft2MotorEncoderPosition);
@@ -1315,22 +1355,36 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 dashboard.displayPrintf(7, LABEL_WIDTH, "Right Actual: ", "Running at %7d :%7d", intRight1MotorEncoderPosition, intRight2MotorEncoderPosition);
 
                 if (mblnRobotLastPos) {
-                    if (((Math.abs(dblDistanceToEndRight1 + dblDistanceToEndRight2) / 2) < 2.2) && ((Math.abs(dblDistanceToEndLeft1 + dblDistanceToEndLeft2) / 2) < 2.2)) {
+                    if (Math.abs(dblDistanceToEnd) <= mdblRobotParm6) {
+                        fileLogger.writeEvent(3,"Complete NextStepLasp......." + dblDistanceToEnd);
                         mblnNextStepLastPos = true;
                         mblnDisableVisionProcessing = false;  //enable vision processing
                         mintCurrentStateTankTurn = Constants.stepState.STATE_COMPLETE;
                         deleteParallelStep();
+                        break;
                     }
+                } else if (Math.abs(dblDistanceToEnd) <= mdblRobotParm6) {
+                    fileLogger.writeEvent(3,"Complete Early ......." + dblDistanceToEnd);
+                    fileLogger.writeEvent(3,"mblnRobotLastPos Complete Near END ");
+                    mintCurrentStateTankTurn = Constants.stepState.STATE_COMPLETE;
+                    deleteParallelStep();
+                    break;
                 }
 
-                //if within error margin stop
-                //get motor busy state bitmap is right2, right1, left2, left1
-                if (!robotDrive.baseMotor1.isBusy() || (!robotDrive.baseMotor3.isBusy())) {
+                //stop driving when within .25 inch, sometimes takes a long time to get that last bit and times out.
+                //stop when drive motors stop
+                if (Math.abs(dblDistanceToEnd) <= 0.25) {
+                    fileLogger.writeEvent(3,"dblDistanceToEnd Complete Near END " + Math.abs(dblDistanceToEnd));
+                    mintCurrentStateTankTurn = Constants.stepState.STATE_COMPLETE;
+                    deleteParallelStep();
+                    break;
+                } else if (!robotDrive.getHardwareBaseDriveBusy()) {
                     fileLogger.writeEvent(3,"Complete.......");
-                    robotDrive.setHardwareDrivePower(0);
+                    //robotDrive.setHardwareDrivePower(0);
                     mblnDisableVisionProcessing = false;  //enable vision processing
                     mintCurrentStateTankTurn = Constants.stepState.STATE_COMPLETE;
                     deleteParallelStep();
+                    break;
                 }
             }
             //check timeout value
@@ -1623,19 +1677,38 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 dashboard.displayPrintf(7, LABEL_WIDTH, "Right Target: ", "Running to %7d :%7d", mintStepRightTarget1, mintStepRightTarget2);
                 dashboard.displayPrintf(8, LABEL_WIDTH, "Right Actual: ", "Running at %7d :%7d", intRight1MotorEncoderPosition, intRight2MotorEncoderPosition);
 
+                double dblDistanceToEnd = Math.max(Math.max(Math.max(Math.abs(dblDistanceToEndLeft1),Math.abs(dblDistanceToEndRight1)),Math.abs(dblDistanceToEndLeft2)),Math.abs(dblDistanceToEndRight2));
+
                 if (mblnRobotLastPos) {
-                    if ((((dblDistanceToEndRight1 + dblDistanceToEndRight2) / 2) < 2) && (((dblDistanceToEndLeft1 + dblDistanceToEndLeft2) / 2) < 2)) {
+                    if (Math.abs(dblDistanceToEnd) <= mdblRobotParm6) {
+                        fileLogger.writeEvent(3,"Complete NextStepLasp......." + dblDistanceToEnd);
                         mblnNextStepLastPos = true;
+                        mblnDisableVisionProcessing = false;  //enable vision processing
                         mintCurrentStateMecanumStrafe = Constants.stepState.STATE_COMPLETE;
                         deleteParallelStep();
+                        break;
                     }
+                } else if (Math.abs(dblDistanceToEnd) <= mdblRobotParm6) {
+                    fileLogger.writeEvent(3,"Complete Early ......." + dblDistanceToEnd);
+                    fileLogger.writeEvent(3,"mblnRobotLastPos Complete Near END ");
+                    mintCurrentStateMecanumStrafe = Constants.stepState.STATE_COMPLETE;
+                    deleteParallelStep();
+                    break;
                 }
 
-                if (!robotDrive.baseMotor1.isBusy() || (!robotDrive.baseMotor3.isBusy()) || (!robotDrive.baseMotor2.isBusy()) || (!robotDrive.baseMotor4.isBusy())) {
-                    robotDrive.setHardwareDrivePower(0);
+                //stop driving when within .25 inch, sometimes takes a long time to get that last bit and times out.
+                //stop when drive motors stop
+                if (Math.abs(dblDistanceToEnd) <= 0.25) {
+                    fileLogger.writeEvent(3,"mblnRobotLastPos Complete Near END " + Math.abs(dblDistanceToEnd));
+                    mintCurrentStateMecanumStrafe = Constants.stepState.STATE_COMPLETE;
+                    deleteParallelStep();
+                    break;
+                } else if (!robotDrive.getHardwareBaseDriveBusy()) {
+                    //robotDrive.setHardwareDrivePower(0);
                     fileLogger.writeEvent(1, "Complete         ");
                     mintCurrentStateMecanumStrafe = Constants.stepState.STATE_COMPLETE;
                     deleteParallelStep();
+                    break;
                 }
 
             } //end Case Running
@@ -1645,6 +1718,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 //  Transition to a new state.
                 mintCurrentStateMecanumStrafe = Constants.stepState.STATE_COMPLETE;
                 deleteParallelStep();
+                break;
             }
             break;
         }
@@ -1736,96 +1810,107 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         fileLogger.setEventTag("TankTurnGyroHeading()");
         switch (mintCurrentStateTankTurnGyroHeading) {
             case STATE_INIT: {
+                double gain = 0.13;
+                if (dblStartVoltage > 13.1){
+                    gain = 0.13;
+                } else if (dblStartVoltage > 12.8) {
+                    gain =0.132;
+                } else {
+                    gain = 0.133;
+                }
+                PID1 = new TOWR5291PID(runtime,0,0,gain,0,0);
                 double adafruitIMUHeading;
                 adafruitIMUHeading = getAdafruitHeading();
                 mdblPowerBoost = 0;
                 mintStableCount = 0;
                 mstrWiggleDir = "";
                 mdblRobotTurnAngle = mdblStepDistance;
+                mdblTankTurnGyroRequiredHeading = mdblRobotTurnAngle + adafruitIMUHeading;
+                blnCrossZeroPositive = false;
+                blnCrossZeroNegative = false;
+                if (mdblTankTurnGyroRequiredHeading > 360) {
+                    blnCrossZeroPositive = true;
+                    while (mdblTankTurnGyroRequiredHeading > 360)
+                        mdblTankTurnGyroRequiredHeading = mdblTankTurnGyroRequiredHeading - 360;
+                }
+                else if (mdblTankTurnGyroRequiredHeading < 0) {
+                    blnCrossZeroNegative = true;
+                    while (mdblTankTurnGyroRequiredHeading < 0)
+                        mdblTankTurnGyroRequiredHeading = 360 + mdblTankTurnGyroRequiredHeading;
+                }
+                if (mdblRobotParm1 > 0) {
+                    if ((adafruitIMUHeading - mdblRobotTurnAngle) > 180)
+                        blnCrossZeroNegative = true;
+                    if (mdblRobotTurnAngle < 0)
+                        mdblRobotTurnAngle = mdblRobotTurnAngle + 360;
+                    mdblTankTurnGyroRequiredHeading = mdblRobotTurnAngle;
+                }
+                if (Math.abs(adafruitIMUHeading - mdblRobotTurnAngle) > 180){
+                    blnReverseDir = true;
+                }
+
                 fileLogger.writeEvent(3,"USING HEADING FROM IMU=" + useAdafruitIMU);
                 fileLogger.writeEvent(3,"mdblRobotTurnAngle " + mdblRobotTurnAngle + " adafruitIMUHeading " + adafruitIMUHeading);
-                //mdblTurnAbsoluteGyro = Double.parseDouble(newAngleDirection((int) adafruitIMUHeading, (int) mdblRobotTurnAngle).substring(3));
+                fileLogger.writeEvent(3,"mdblTankTurnGyroRequiredHeading " + mdblTankTurnGyroRequiredHeading);
                 mdblTurnAbsoluteGyro = TOWR5291Utils.getNewHeading((int) adafruitIMUHeading, (int) mdblRobotTurnAngle);
                 robotDrive.setHardwareDriveRunWithoutEncoders();
                 mintCurrentStateTankTurnGyroHeading = Constants.stepState.STATE_RUNNING;
             }
             break;
             case STATE_RUNNING: {
-                double adafruitIMUHeading;
-                adafruitIMUHeading = getAdafruitHeading();
-                mdblGyrozAccumulated = adafruitIMUHeading;
-                mdblGyrozAccumulated = teamAngleAdjust(mdblGyrozAccumulated);//Set variables to MRgyro readings
-                mdblTurnAbsoluteGyro = Double.parseDouble(newAngleDirectionGyro((int) mdblGyrozAccumulated, (int) mdblRobotTurnAngle).substring(3));
-                String mstrDirection = (newAngleDirectionGyro((int) mdblGyrozAccumulated, (int) mdblRobotTurnAngle).substring(0, 3));
+                double adafruitIMUHeading = getAdafruitHeading();
+                fileLogger.writeEvent(3,"Running, before adafruitIMUHeading   = " + adafruitIMUHeading);
+                if (adafruitIMUHeading > 360)
+                    while (adafruitIMUHeading > 360)
+                        adafruitIMUHeading = adafruitIMUHeading - 360;
+                else if (adafruitIMUHeading < 0)
+                    while (adafruitIMUHeading < 0)
+                        adafruitIMUHeading =  360 + adafruitIMUHeading;
 
-                fileLogger.writeEvent(3,"USING HEADING FROM IMU=" + useAdafruitIMU);
-                fileLogger.writeEvent(3,"Running, mdblGyrozAccumulated = " + mdblGyrozAccumulated);
-                fileLogger.writeEvent(3,"Running, mdblTurnAbsoluteGyro = " + mdblTurnAbsoluteGyro);
-                fileLogger.writeEvent(3,"Running, mstrDirection        = " + mstrDirection);
-                fileLogger.writeEvent(3,"Running, adafruitIMUHeading   = " + adafruitIMUHeading);
+                //no longer near the 0 crossing point
+                if ((adafruitIMUHeading > 90 ) && (adafruitIMUHeading < 270 )) {
+                    blnCrossZeroPositive = false;
+                    blnCrossZeroNegative = false;
+                }
 
-                if (Math.abs(mdblTurnAbsoluteGyro) > 21) {  //Continue while the robot direction is further than three degrees from the target
-                    mintStableCount = 0;
-                    fileLogger.writeEvent(3,"High Speed.....");
-                    if (mstrDirection.equals("LTE")) {
-                        //want to turn left
-                        fileLogger.writeEvent(3,"Left Turn.....");
-                        if (mstrWiggleDir.equals("RTE")) {
-                            mdblPowerBoost = mdblPowerBoost - 0.01;
-                            mintPowerBoostCount = 0;
-                        }
-                        mstrWiggleDir = "LTE";
-                        robotDrive.setHardwareDriveLeftMotorPower(mdblStepSpeed);
-                        robotDrive.setHardwareDriveRightMotorPower(-mdblStepSpeed);
-                    } else if (mstrDirection.equals("RTE")) {
-                        //want to turn left
-                        if (mstrWiggleDir.equals("LTE")) {
-                            mdblPowerBoost = mdblPowerBoost - 0.01;
-                            mintPowerBoostCount = 0;
-                        }
-                        mstrWiggleDir = "RTE";
-                        fileLogger.writeEvent(3,"Right Turn.....");
-                        robotDrive.setHardwareDriveLeftMotorPower(-mdblStepSpeed);
-                        robotDrive.setHardwareDriveRightMotorPower(mdblStepSpeed);
+                if (blnCrossZeroPositive && (adafruitIMUHeading >= 270) )
+                    adafruitIMUHeading = adafruitIMUHeading - 360;
+                else if (blnCrossZeroNegative && (adafruitIMUHeading >= 270))
+                    adafruitIMUHeading = adafruitIMUHeading - 360;
+
+                fileLogger.writeEvent(3,"Running, after adafruitIMUHeading   = " + adafruitIMUHeading);
+                double dblError = mdblRobotParm6;
+                if (dblError == 0) {
+                    dblError = 1;
+                }
+                if (Math.abs(mdblTankTurnGyroRequiredHeading - adafruitIMUHeading) > dblError) {  //Continue while the robot direction is further than param1 degrees from the target
+                    fileLogger.writeEvent(3,"adafruitIMUHeading....." + adafruitIMUHeading);
+                    //fileLogger.writeEvent(3,"Math.sin(adafruitIMUHeading * (Math.PI / 180.0)....." + Math.sin(adafruitIMUHeading * (Math.PI / 180.0)));
+                    fileLogger.writeEvent(3,"mdblTankTurnGyroRequiredHeading....." + mdblTankTurnGyroRequiredHeading);
+                    //fileLogger.writeEvent(3,"Correction....." + Math.sin(mdblTankTurnGyroRequiredHeading * (Math.PI / 180.0)));
+                    //double correction = PID1.PIDCorrection(runtime,Math.sin(adafruitIMUHeading * (Math.PI / 180.0)), Math.sin(mdblTankTurnGyroRequiredHeading * (Math.PI / 180.0)));
+                    double correction = PID1.PIDCorrection(runtime,adafruitIMUHeading, mdblTankTurnGyroRequiredHeading);
+
+                    fileLogger.writeEvent(3,"Correction....." + correction);
+                    if (Math.abs(adafruitIMUHeading - mdblRobotTurnAngle) > 180){
+                        blnReverseDir = true;
+                    } else {
+                        blnReverseDir = false;
                     }
-                } else if (Math.abs(mdblTurnAbsoluteGyro) > mdblRobotParm1) {  //Continue while the robot direction is further than three degrees from the target
-                    mintStableCount = 0;
-                    mintPowerBoostCount++;
-                    if (mintPowerBoostCount > 50) {
-                        mdblPowerBoost = mdblPowerBoost + 0.01;
-                        mintPowerBoostCount = 0;
-                    }
-                    fileLogger.writeEvent(3, "TankTurnGyro()", "Slow Speed Nearing final angle.....");
-                    if (mstrDirection.equals("LTE")) {
-                        //want to turn left
-                        if (mstrWiggleDir.equals("RTE")) {
-                            mdblPowerBoost = mdblPowerBoost - 0.01;
-                            mintPowerBoostCount = 0;
-                        }
-                        mstrWiggleDir = "LTE";
-                        fileLogger.writeEvent(3, "TankTurnGyro()", "Left Turn.....");
-                        robotDrive.setHardwareDriveLeftMotorPower(.12 + mdblPowerBoost);
-                        robotDrive.setHardwareDriveRightMotorPower(-(0.12 + mdblPowerBoost));
-                    } else if (mstrDirection.equals("RTE")) {
-                        //want to turn left
-                        if (mstrWiggleDir.equals("LTE")) {
-                            mdblPowerBoost = mdblPowerBoost - 0.01;
-                            mintPowerBoostCount = 0;
-                        }
-                        mstrWiggleDir = "RTE";
-                        fileLogger.writeEvent(3, "TankTurnGyro()", "Right Turn.....");
-                        robotDrive.setHardwareDriveLeftMotorPower(-(0.12 + mdblPowerBoost));
-                        robotDrive.setHardwareDriveRightMotorPower(0.12 + mdblPowerBoost);
-                    }
+
+                    if (blnReverseDir)
+                        correction = -correction;
+                    robotDrive.setHardwareDriveLeftMotorPower( -mdblStepSpeed * correction);
+                    robotDrive.setHardwareDriveRightMotorPower( mdblStepSpeed * correction);
                 } else {
-                    mintStableCount++;
-                    if (mintStableCount > 20) {
-                        fileLogger.writeEvent(3, "TankTurnGyro()", "Complete.....");
-                        robotDrive.setHardwareDriveRunUsingEncoders();
-                        robotDrive.setHardwareDrivePower(0);
-                        mintCurrentStateTankTurnGyroHeading = Constants.stepState.STATE_COMPLETE;
-                        deleteParallelStep();
-                    }
+                    robotDrive.setHardwareDriveLeftMotorPower(0);
+                    robotDrive.setHardwareDriveRightMotorPower(0);
+                    robotDrive.setHardwareDriveRunWithoutEncoders();
+                    fileLogger.writeEvent(1, "TankTurnGyro()", "Complete Near Enough:- " + Math.abs(mdblTankTurnGyroRequiredHeading - adafruitIMUHeading) + " Range:- " + mdblRobotParm6);
+                    //  Transition to a new state.
+                    mintCurrentStateTankTurnGyroHeading = Constants.stepState.STATE_COMPLETE;
+                    deleteParallelStep();
+                    break;
                 }
             } //end Case Running
             //check timeout value
@@ -1856,7 +1941,6 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 else
                     mdblTankTurnGyroRequiredHeading = mdblRobotTurnAngle + adafruitIMUHeading;
                 fileLogger.writeEvent(3,",mdblRobotTurnAngle " + mdblRobotTurnAngle + " adafruitIMUHeading " + adafruitIMUHeading + " Target Heading " + mdblTankTurnGyroRequiredHeading);
-                //mdblTurnAbsoluteGyro = Double.parseDouble(newAngleDirection((int)adafruitIMUHeading, (int) mdblRobotTurnAngle).substring(3));
                 mdblTurnAbsoluteGyro = TOWR5291Utils.getNewHeading((int) adafruitIMUHeading, (int) mdblRobotTurnAngle);
                 mintCurrentStateGyroTurnEncoder5291 = Constants.stepState.STATE_RUNNING;
             }
@@ -1865,13 +1949,8 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 double adafruitIMUHeading;
                 adafruitIMUHeading = getAdafruitHeading();
                 mdblGyrozAccumulated = teamAngleAdjust(mdblGyrozAccumulated); //Set variables to MRgyro readings
-                //mdblTurnAbsoluteGyro = Double.parseDouble(newAngleDirectionGyro ((int)mdblGyrozAccumulated, (int)mdblRobotTurnAngle).substring(3));
-                //String mstrDirection = (newAngleDirectionGyro ((int)mdblGyrozAccumulated, (int)mdblRobotTurnAngle).substring(0, 3));
                 fileLogger.writeEvent(3,"Running, mdblGyrozAccumulated = " + mdblGyrozAccumulated);
-                //fileLogger.writeEvent(3,"Running, mdblTurnAbsoluteGyro = " + mdblTurnAbsoluteGyro);
-                //fileLogger.writeEvent(3,"Running, mstrDirection        = " + mstrDirection);
                 fileLogger.writeEvent(3,"Running, adafruitIMUHeading   = " + adafruitIMUHeading);
-                //fileLogger.writeEvent(3,"Running, new angle   = " + (newAngleDirectionGyroOffset ((int)adafruitIMUHeading, (int)mdblTankTurnGyroRequiredHeading)));
                 fileLogger.writeEvent(3,"Running, new angle   = " + (newAngleDirectionGyroOffset ((int)adafruitIMUHeading, (int)mdblTankTurnGyroRequiredHeading)));
 
                 //only keep aiming for target if the angle is greater than the error specified in parm1
@@ -1895,9 +1974,6 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
 
     private void moveLiftUpDown(){
 
-        double dblDistanceToMoveLift1;
-        double dblDistanceToMoveLift2;
-
         fileLogger.setEventTag("moveLiftUpDown()");
 
         switch (mintCurrentStateMoveLift){
@@ -1911,23 +1987,23 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 //check timeout value
                 if (mStateTime.milliseconds() > mdblRobotParm1) {
                     if (mdblRobotParm2 == 0){
-                        dblDistanceToMoveLift1 = robotArms.getLiftMotor1Encoder() + (mdblStepDistance * ourRobotConfig.getLIFTMAIN_COUNTS_PER_INCH());
-                        dblDistanceToMoveLift2 = robotArms.getLiftMotor2Encoder() + (mdblStepDistance * ourRobotConfig.getLIFTMAIN_COUNTS_PER_INCH());
+                        mdblTargetPositionTop1 = robotArms.getLiftMotor1Encoder() + (mdblStepDistance * ourRobotConfig.getLIFTMAIN_COUNTS_PER_INCH());
+                        mdblTargetPositionTop2 = robotArms.getLiftMotor2Encoder() + (mdblStepDistance * ourRobotConfig.getLIFTMAIN_COUNTS_PER_INCH());
                     } else if (mdblRobotParm2 == 1){
                         double distaceInCounts = (mdblStepDistance * ourRobotConfig.getLIFTMAIN_COUNTS_PER_INCH());
-                        dblDistanceToMoveLift1 = (robotArms.getLiftMotor1Encoder() - mintLiftStartCountMotor1) + distaceInCounts;
-                        dblDistanceToMoveLift2 = (robotArms.getLiftMotor2Encoder() - mintLiftStartCountMotor2) + distaceInCounts;
+                        mdblTargetPositionTop1 = (robotArms.getLiftMotor1Encoder() - mintLiftStartCountMotor1) + distaceInCounts;
+                        mdblTargetPositionTop2 = (robotArms.getLiftMotor2Encoder() - mintLiftStartCountMotor2) + distaceInCounts;
                     } else {
-                        dblDistanceToMoveLift1 = 0;
-                        dblDistanceToMoveLift2 = 0;
+                        mdblTargetPositionTop1 = 0;
+                        mdblTargetPositionTop2 = 0;
                         fileLogger.writeEvent("ERROR ERROR ERROR ERROR ERROR ERROR ERROR");
                         fileLogger.writeEvent("ERROR ERROR ERROR ERROR ERROR ERROR ERROR");
-                        fileLogger.writeEvent("ERROR MOVING LIFT PARM 1 IS THE MODE CSN BE 0 OR 1");
+                        fileLogger.writeEvent("ERROR MOVING LIFT PARM 1 IS THE MODE CAN BE 0 OR 1");
                         fileLogger.writeEvent("Mode 1 is to move a certain distance so like move out 1 more inch");
                         fileLogger.writeEvent("Mode 2 is to move to a spot so move to 5 inches on the lift");
                     }
-                    robotArms.liftMotor1.setTargetPosition((int)dblDistanceToMoveLift1);
-                    robotArms.liftMotor2.setTargetPosition((int)dblDistanceToMoveLift2);
+                    robotArms.liftMotor1.setTargetPosition((int)mdblTargetPositionTop1);
+                    robotArms.liftMotor2.setTargetPosition((int)mdblTargetPositionTop2);
 
                     robotArms.setHardwareLiftPower(mdblStepSpeed);
 
@@ -1942,28 +2018,51 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 robotArms.setHardwareLiftPower(mdblStepSpeed);
                 fileLogger.writeEvent(2, "Motor Speed Set: Busy 1 " + robotArms.liftMotor1.isBusy() + " Busy 2 " + robotArms.liftMotor2.isBusy());
 
-                if ((!(robotArms.liftMotor1.isBusy())) || (!(robotArms.liftMotor2.isBusy()))){
-                    fileLogger.writeEvent(2, "Motor 1 is not busy");
-                    fileLogger.writeEvent(2, "Motor 2 is not busy");
-                    robotArms.setHardwareLiftPower(0);
-                    fileLogger.writeEvent(5, "LIFT MOTOR POWER IS 0");
-                    mintCurrentLiftCountMotor1 = robotArms.liftMotor1.getCurrentPosition();
-                    mintCurrentLiftCountMotor2 = robotArms.liftMotor2.getCurrentPosition();
-                    fileLogger.writeEvent(5, "Lift Motor 1 Current Encoder Count: " + String.valueOf(mintCurrentLiftCountMotor1));
-                    fileLogger.writeEvent(5, "Lift Motor 2 Current Encoder Count: " + String.valueOf(mintCurrentLiftCountMotor2));
-                    fileLogger.writeEvent(2, "Finished");
+                //determine how close to target we are
+                double dblDistanceToEndLift1 = (mdblTargetPositionTop1 - robotArms.getLiftMotor1Encoder()) / ourRobotConfig.getLIFTMAIN_COUNTS_PER_INCH();
+                double dblDistanceToEndLift2 = (mdblTargetPositionTop2 - robotArms.getLiftMotor2Encoder()) / ourRobotConfig.getLIFTMAIN_COUNTS_PER_INCH();
+
+                //if getting close ramp down speed
+                double dblDistanceToEnd = Math.max(Math.abs(dblDistanceToEndLift1),Math.abs(dblDistanceToEndLift2));
+
+                fileLogger.writeEvent(3,"Distance to END " + Math.abs(dblDistanceToEnd));
+                fileLogger.writeEvent(5,"Lift Motor 1 Current Encoder Count: " + String.valueOf(robotArms.liftMotor1.getCurrentPosition()));
+                fileLogger.writeEvent(5,"Lift Motor 2 Current Encoder Count: " + String.valueOf(robotArms.liftMotor2.getCurrentPosition()));
+
+                if (Math.abs(dblDistanceToEnd) <= mdblRobotParm6) {
+                    fileLogger.writeEvent(3,"mblnRobotLastPos Complete Near END " + Math.abs(dblDistanceToEnd));
                     mintCurrentStateMoveLift = Constants.stepState.STATE_COMPLETE;
+                    robotArms.setHardwareLiftPower(20);
                     deleteParallelStep();
+                    break;
+                }
+
+                //we are close enough.. don't waste time
+                if (Math.abs(dblDistanceToEnd) <= .25) {
+                    fileLogger.writeEvent(3,"mblnRobotLastPos Complete Close enough " + Math.abs(dblDistanceToEnd));
+                    mintCurrentStateMoveLift = Constants.stepState.STATE_COMPLETE;
+                    robotArms.setHardwareLiftPower(20);
+                    deleteParallelStep();
+                    break;
+                }
+
+                if ((!(robotArms.liftMotor1.isBusy())) || (!(robotArms.liftMotor2.isBusy()))){
+                    //robotArms.setHardwareLiftPower(0);
+                    //fileLogger.writeEvent(5, "LIFT MOTOR POWER IS 0");
+                    fileLogger.writeEvent(2,"Finished");
+                    mintCurrentStateMoveLift = Constants.stepState.STATE_COMPLETE;
+                    robotArms.setHardwareLiftPower(0);
+                    deleteParallelStep();
+                    break;
                 }
                 //check timeout value
                 if (mStateTime.seconds() > mdblStepTimeout) {
                     robotArms.setHardwareLiftPower(0);
                     fileLogger.writeEvent(1,"Timeout:- " + mStateTime.seconds());
-                    mintCurrentLiftCountMotor1 = robotArms.liftMotor1.getCurrentPosition();
-                    mintCurrentLiftCountMotor2 = robotArms.liftMotor2.getCurrentPosition();
                     //  Transition to a new state.
                     mintCurrentStateMoveLift = Constants.stepState.STATE_COMPLETE;
                     deleteParallelStep();
+                    break;
                 }
                 break;
         }
@@ -2012,8 +2111,6 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
     }
 
     private void tiltMotor(){
-        double dblDistanceToMoveTilt1;
-        double dblDistanceToMoveTilt2;
 
         fileLogger.setEventTag("tiltMotor()");
 
@@ -2023,14 +2120,14 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 robotArms.tiltMotor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 robotArms.tiltMotor2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-                dblDistanceToMoveTilt1 = robotArms.tiltMotor1.getCurrentPosition() + (mdblStepDistance * ourRobotConfig.getCOUNTS_PER_DEGREE_TILT());
-                dblDistanceToMoveTilt2 = robotArms.tiltMotor2.getCurrentPosition() + (mdblStepDistance * ourRobotConfig.getCOUNTS_PER_DEGREE_TILT());
+                mdblDistanceToMoveTilt1 = robotArms.tiltMotor1.getCurrentPosition() + (mdblStepDistance * ourRobotConfig.getCOUNTS_PER_DEGREE_TILT());
+                mdblDistanceToMoveTilt2 = robotArms.tiltMotor2.getCurrentPosition() + (mdblStepDistance * ourRobotConfig.getCOUNTS_PER_DEGREE_TILT());
 
-                fileLogger.writeEvent(2, "Distance to move = " + mdblStepDistance + ", dblDistanceToMoveTilt1 " + dblDistanceToMoveTilt1);
-                fileLogger.writeEvent(2, "Distance to move = " + mdblStepDistance + ", dblDistanceToMoveTilt2 " + dblDistanceToMoveTilt2);
+                fileLogger.writeEvent(2, "Distance to move = " + mdblStepDistance + ", dblDistanceToMoveTilt1 " + mdblDistanceToMoveTilt1);
+                fileLogger.writeEvent(2, "Distance to move = " + mdblStepDistance + ", dblDistanceToMoveTilt2 " + mdblDistanceToMoveTilt2);
 
-                robotArms.tiltMotor1.setTargetPosition((int)dblDistanceToMoveTilt1);
-                robotArms.tiltMotor2.setTargetPosition((int)dblDistanceToMoveTilt2);
+                robotArms.tiltMotor1.setTargetPosition((int)mdblDistanceToMoveTilt1);
+                robotArms.tiltMotor2.setTargetPosition((int)mdblDistanceToMoveTilt2);
 
                 robotArms.tiltMotor1.setPower(mdblStepSpeed);
                 robotArms.tiltMotor2.setPower(mdblStepSpeed);
@@ -2046,11 +2143,40 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 robotArms.tiltMotor1.setPower(mdblStepSpeed);
                 robotArms.tiltMotor2.setPower(mdblStepSpeed);
 
-                fileLogger.writeEvent(2, "Motor Speed Set: Busy 1 " + robotArms.tiltMotor1.isBusy());
-                fileLogger.writeEvent(2, "Motor Speed Set: Busy 2 " + robotArms.tiltMotor2.isBusy());
+                fileLogger.writeEvent(3,"Current Encoder 1 = " + robotArms.tiltMotor1.getCurrentPosition() + " Expected Encoder " + robotArms.tiltMotor1.getTargetPosition());
+                fileLogger.writeEvent(3,"Current Encoder 2 = " + robotArms.tiltMotor2.getCurrentPosition() + " Expected Encoder " + robotArms.tiltMotor2.getTargetPosition());
 
-                fileLogger.writeEvent(3, "Current Encoder 1 = " + robotArms.tiltMotor1.getCurrentPosition() + " Expected Encoder " + robotArms.tiltMotor1.getTargetPosition());
-                fileLogger.writeEvent(3, "Current Encoder 2 = " + robotArms.tiltMotor1.getCurrentPosition() + " Expected Encoder " + robotArms.tiltMotor2.getTargetPosition());
+                //determine how close to target we are
+                double dblDistanceToMoveTilt1 = (mdblDistanceToMoveTilt1 - robotArms.tiltMotor1.getCurrentPosition()) / ourRobotConfig.getCOUNTS_PER_DEGREE_TILT();
+                double dblDistanceToMoveTilt2 = (mdblDistanceToMoveTilt2 - robotArms.tiltMotor2.getCurrentPosition()) / ourRobotConfig.getCOUNTS_PER_DEGREE_TILT();
+
+                //if getting close ramp down speed
+                double dblDistanceToEnd = Math.max(Math.abs(dblDistanceToMoveTilt1),Math.abs(dblDistanceToMoveTilt2));
+
+                fileLogger.writeEvent(3,"Distance to end " + Math.abs(dblDistanceToEnd));
+
+                if (Math.abs(dblDistanceToEnd) <= mdblRobotParm6) {
+                    fileLogger.writeEvent(3,"mblnRobotLastPos Complete Near END " + Math.abs(dblDistanceToEnd));
+                    robotArms.tiltMotor1.setPower(20);
+                    robotArms.tiltMotor2.setPower(20);
+                    mintCurrentStateTiltMotor = Constants.stepState.STATE_COMPLETE;
+                    deleteParallelStep();
+                    break;
+                }
+
+                //we are close enough.. don't waste time 2 degrees
+                if (Math.abs(dblDistanceToEnd) <= 2) {
+                    fileLogger.writeEvent(3,"mblnRobotLastPos Complete Close enough " + Math.abs(dblDistanceToEnd));
+                    robotArms.tiltMotor1.setPower(20);
+                    robotArms.tiltMotor2.setPower(20);
+                    if (mdblRobotParm2 > 0) {
+                        robotArms.tiltMotor1.setPower(0);
+                        robotArms.tiltMotor2.setPower(0);
+                    }
+                    mintCurrentStateTiltMotor = Constants.stepState.STATE_COMPLETE;
+                    deleteParallelStep();
+                    break;
+                }
 
                 if (mdblRobotParm1 > 0){
                     if ((robotArms.tiltMotor1.getCurrentPosition() < (robotArms.tiltMotor1.getTargetPosition() + mdblRobotParm1))
@@ -2063,16 +2189,22 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
 
                         fileLogger.writeEvent(2, "Finished");
                         mintCurrentStateTiltMotor = Constants.stepState.STATE_COMPLETE;
+                        if (mdblRobotParm2 > 0) {
+                            robotArms.tiltMotor1.setPower(0);
+                            robotArms.tiltMotor2.setPower(0);
+                        }
                         deleteParallelStep();
                         break;
                     }
                 } else {
                     if (!(robotArms.tiltMotor1.isBusy()) && !(robotArms.tiltMotor2.isBusy())) {
-                        fileLogger.writeEvent(2, "Motor 1 is not busy");
-                        fileLogger.writeEvent(2, "Motor 2 is not busy");
                         //robotArms.tiltMotor1.setPower(0);
                         //robotArms.tiltMotor2.setPower(0);
                         fileLogger.writeEvent(2, "Finished");
+                        if (mdblRobotParm2 > 0) {
+                            robotArms.tiltMotor1.setPower(0);
+                            robotArms.tiltMotor2.setPower(0);
+                        }
                         mintCurrentStateTiltMotor = Constants.stepState.STATE_COMPLETE;
                         deleteParallelStep();
                         break;
@@ -2086,15 +2218,14 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                     //  Transition to a new state.
                     mintCurrentStateTiltMotor = Constants.stepState.STATE_COMPLETE;
                     deleteParallelStep();
+                    break;
                 }
                 break;
         }
     }
 
     private void findGold(){
-
         fileLogger.setEventTag("findGold()");
-
         switch (mintCurrentStateFindGold){
             case STATE_INIT:
                 if (mStateTime.milliseconds() > mdblRobotParm1) {
@@ -2103,19 +2234,18 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                     mboolFoundGold = false;
                     mColour = Constants.ObjectColours.OBJECT_NONE;
                     mLocation = Constants.ObjectColours.OBJECT_NONE;
-
                     imageCaptureOCV.takeImage(new ImageCaptureOCV.OnImageCapture() {
                         @Override
                         public void OnImageCaptureVoid(Mat mat) {
                             //mColour = elementColour.RoverRuckusOCV(fileLogger, dashboard, mat, 0, true, 6, false);
                             //check if gold is middle
-                            if (mColour == Constants.ObjectColours.OBJECT_NONE)
-                                if (elementColour.RoverRuckusOCV(fileLogger, dashboard, mat, 0, false, 3, false) == Constants.ObjectColours.OBJECT_RED) {
+                            if (mColour == Constants.ObjectColours.OBJECT_NONE)  //was quad 3
+                                if (elementColour.RoverRuckusOCV(fileLogger, dashboard, mat, 0, false, 9, false) == Constants.ObjectColours.OBJECT_RED) {
                                     mColour = Constants.ObjectColours.OBJECT_RED;
                                     mLocation = Constants.ObjectColours.OBJECT_RED_CENTER;
                                 }
-                            if (mColour == Constants.ObjectColours.OBJECT_NONE) {
-                                if (elementColour.RoverRuckusOCV(fileLogger, dashboard, mat, 0, false, 4, false) == Constants.ObjectColours.OBJECT_RED) {
+                            if (mColour == Constants.ObjectColours.OBJECT_NONE) { //was quad 4
+                                if (elementColour.RoverRuckusOCV(fileLogger, dashboard, mat, 0, false, 8, false) == Constants.ObjectColours.OBJECT_RED) {
                                     mColour = Constants.ObjectColours.OBJECT_RED;
                                     mLocation = Constants.ObjectColours.OBJECT_RED_LEFT;
                                 }
@@ -2136,38 +2266,164 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
 
                     switch (mLocation){
                         case OBJECT_RED_CENTER:
-                            autonomousStepsFile.insertSteps(3, "TILT", 20,.5, true, false, 50, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "TILT", 55,1, false, false, 50, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "DRIVE", 7,1, true, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "DRIVE", -6,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "TILT", -87,1, false, false, 50, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "LIFT", -12,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "TANKTURN", 195,.6, true, false, 5, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "DRIVE", 5,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            switch (ourRobotConfig.getAllianceStartPosition()) {
+                                case "Left":
+                                    autonomousStepsFile.insertSteps(2, "DRIVE", 34, 0.8, false, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(2, "STRAFE", -8, 1, false, false, 0, 0, 0, 0, 0, 1.5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TANKTURNGYRO", 225, 1, false, false, 1, 0, 0, 0, 0, .5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", 40,.8, false, false, 0, 0, 0, 0, 0, 0.5,  mintCurrentStep + 1);
+                                    //autonomousStepsFile.insertSteps(4, "TANKTURN", -90, 0.6, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TANKTURNGYRO", 270, 1, false, false, 1, 0, 0, 0, 0, .5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", -13, 0.6, false, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TILT", -25, 1, false, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "LIFT", -8, 1, true, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", 27, 0.6, true, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
+                                break;
+                                case "Right":  //GOLD center
+                                    autonomousStepsFile.insertSteps(3, "LIFT", 18, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(1, "INTAKE", 0, .1, true, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TILT", -14, 1, true, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(1, "TEAMMARKER", 0, 0, true, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TILT", -68, 1, true, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", -63, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(1, "TEAMMARKER", 0, 0, false, false, 1, 0, 0, 0, 0, 0, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "STRAFE", 6, 1, true, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(4, "TANKTURNGYRO", 46, 1, false, false, 1, 0, 0, 0, 0, 1, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", -50, 1, false, false, 0, 0, 0, 0, 0, 1, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TANKTURNGYRO", 180, 1, false, false, 1, 0, 0, 0, 0, .5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "LIFT", -24, 1, true, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TILT", -25, 1, true, false, 0, 0, 0, 0, 0, 3, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(1, "INTAKE", 0, 0, true, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DELAY", 0, 0, false, false, 500, 0, 0, 0, 0, 3, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TILT", 35, 1, false, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "LIFT", 18, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(1, "INTAKE", 0, .1, true, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TILT", 65, 1, true, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(1, "INTAKE", 0, 0, true, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", 7, 0.6, false, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "LIFT", 5, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(1, "INTAKE", 0, .1, true, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TILT", -65, 1, false, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", -9, 0.6, true, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(1, "TANKTURNGYRO", 180, 1, false, false, 1, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(4, "TANKTURNGYRO", 180, 1, false, false, 1, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TILT", -25, 1, false, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(5, "LIFT", -11, 1, true, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", 9, 0.6, true, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
+                                break;
+                            }
                             break;
                         case OBJECT_RED_LEFT:
-                            autonomousStepsFile.insertSteps(3, "TANKTURN", 30,.6, false, false, 5, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "TILT", 75,1, true, false, 50, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "DRIVE", 6,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "DRIVE", -6,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "TILT", -84,1, false, false, 50, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "LIFT", -12,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "TANKTURN", 155,.6, true, false, 5, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "DRIVE", 9,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            switch (ourRobotConfig.getAllianceStartPosition()) {
+                                case "Left":
+                                    autonomousStepsFile.insertSteps(2, "DRIVE", 40, 0.8, false, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(2, "STRAFE", -6, 1, false, false, 0, 0, 0, 0, 0, 1.5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TANKTURNGYRO", 225, 1, false, false, 1, 0, 0, 0, 0, .5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", 40,.8, false, false, 0, 0, 0, 0, 0, 0.5,  mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(2, "TANKTURNGYRO", 270,1, false, false, 1, 0, 0, 0, 0, 1,  mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", -8,.6, false, false, 0, 0, 0, 0, 0, 0.6,  mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", 18,.6, false, false, 0, 0, 0, 0, 0, 0.6,  mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TANKTURNGYRO", 330,1, false, false, 1, 0, 0, 0, 0, 1,  mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TILT", -25,1, false, false, 50, 0, 0, 0, 0, 3,  mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "LIFT", -8,1, true, false, 0, 0, 0, 0, 0, 0.5,  mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", 6,.6, true, false, 0, 0, 0, 0, 0, 0.5,  mintCurrentStep + 1);
+                                break;
+                                case "Right":  //GOLD LEFT
+                                    autonomousStepsFile.insertSteps(3, "LIFT", 20, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(1, "INTAKE", 0, .1, true, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TILT", -10, 1, true, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(1, "TEAMMARKER", 0, 0, true, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TILT", -65, 1, false, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", -55, 1, true, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(1, "TEAMMARKER", 0, 0, false, false, 1, 0, 0, 0, 0, 0, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(1, "TANKTURNGYRO", 46, 1, true, false, 1, 0, 0, 0, 0, 1, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(1, "STRAFE", 5, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", 30, 1, false, false, 0, 0, 0, 0, 0, 1, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(1, "STRAFE", 10, 1, true, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TANKTURNGYRO", 46, 1, false, false, 1, 0, 0, 0, 0, 1, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", -36, 1, false, false, 0, 0, 0, 0, 0, 1, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(2, "TANKTURNGYRO", 135, 1, false, false, 1, 0, 0, 0, 0, .5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "LIFT", -20, 1, true, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TILT", -25, 1, true, false, 0, 0, 0, 0, 0, 3, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(1, "INTAKE", 0, 0, true, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DELAY", 0, 0, false, false, 500, 0, 0, 0, 0, 3, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TILT", 35, 1, false, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "LIFT", 18, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(1, "INTAKE", 0, .1, true, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(2, "TANKTURNGYRO", 180, 1, false, false, 1, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TILT", 65, 1, false, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(1, "INTAKE", 0, 0, true, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", 13, 0.6, false, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "LIFT", 5, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(1, "INTAKE", 0, .1, true, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TILT", -65, 1, false, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", -13, 0.6, true, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(1, "TANKTURNGYRO", 150, 1, false, false, 1, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(2, "TANKTURNGYRO", 150, 1, false, false, 1, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TILT", -25, 1, false, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(5, "LIFT", -13, 1, true, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", 9, 0.6, true, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
+                                break;
+                            }
                             break;
                         default:  //right side, unfortunately we don't sample the right side so if its not left or center we assume right
-                            autonomousStepsFile.insertSteps(3, "TANKTURN", -46,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "TILT", 75,1, true, false, 50, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "DRIVE", 8,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "DRIVE", -6,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "TILT", -84,1, false, false, 50, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "LIFT", -12,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "TANKTURN", -145,.6, true, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-                            autonomousStepsFile.insertSteps(3, "DRIVE", 9,1, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
+                            switch (ourRobotConfig.getAllianceStartPosition()) {
+                                case "Left":
+                                    autonomousStepsFile.insertSteps(2, "DRIVE", 45, 0.8, false, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(2, "STRAFE", -8, 1, false, false, 0, 0, 0, 0, 0, 1.5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TANKTURNGYRO", 225, 1, false, false, 1, 0, 0, 0, 0, .5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", 40,.8, false, false, 0, 0, 0, 0, 0, 0.5,  mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TANKTURNGYRO", 270,1, false, false, 1, 0, 0, 0, 0, 2,  mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", -11,.6, false, false, 0, 0, 0, 0, 0, 0.6,  mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", 13,.6, false, false, 0, 0, 0, 0, 0, 0.6,  mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(2, "TANKTURNGYOR", 45,1, false, false, 1, 0, 0, 0, 0, 2,  mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TILT", -25,1, false, false, 50, 0, 0, 0, 0, 3,  mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "LIFT", -8,1, true, false, 0, 0, 0, 0, 0, 0.5,  mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", 17,.6, true, false, 0, 0, 0, 0, 0, 0.5,  mintCurrentStep + 1);
+                                break;
+                                case "Right":  //GOLD Right
+                                    autonomousStepsFile.insertSteps(3, "LIFT", 18, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(1, "INTAKE", 0, .1, true, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TILT", -10, 1, true, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(1, "TEAMMARKER", 0, 0, false, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TILT", -68, 1, true, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "LIFT", 5, 1, true, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", -59, 1, true, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(1, "TANKTURNGYRO", 46, 1, false, false, 1, 0, 0, 0, 0, .5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(1, "TEAMMARKER", 0, 0, false, false, 1, 0, 0, 0, 0, 0, mintCurrentStep + 1);
+                                    //autonomousStepsFile.insertSteps(2, "STRAFE", 5, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", 46, 1, false, false, 0, 0, 0, 0, 0, 1, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(2, "STRAFE", 28, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(2, "TANKTURNGYRO", 46, 1, false, false, 1, 0, 0, 0, 0, .5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", -18, 1, false, false, 0, 0, 0, 0, 0, 1, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "LIFT", -5, 1, true, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(2, "TANKTURNGYRO", 90, 1, false, false, 1, 0, 0, 0, 0, .5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(2, "DRIVE", -14, 1, false, false, 0, 0, 0, 0, 0, 1, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "LIFT", -16, 1, true, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TILT", -25, 1, true, false, 0, 0, 0, 0, 0, 3, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(1, "INTAKE", 0, 0, true, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DELAY", 0, 0, false, false, 500, 0, 0, 0, 0, 3, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TILT", 30, 1, false, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "LIFT", 16, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(1, "INTAKE", 0, .1, true, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TANKTURNGYRO", 180, 1, true, false, 1, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TILT", 65, 1, false, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(1, "INTAKE", 0, 0, true, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", 10, 0.6, true, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "LIFT", 5, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(1, "INTAKE", 0, .1, false, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TILT", -55, 1, true, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", -11, 0.6, true,false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
+                                    //autonomousStepsFile.insertSteps(1, "TANKTURNGYRO", 210, 1, false, false, 1, 0, 0, 0, 0, 1, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(4, "TANKTURNGYRO", 215, 1, false, false, 1, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
+                                    //autonomousStepsFile.insertSteps(3, "TANKTURN", -130, 0.6, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TILT", -35, 1, false, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(4, "LIFT", -8, 1, true, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", 9, 0.6, true, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
+                                break;
+                            }
                             break;
                     }
-
-                    //autonomousStepsFile.insertSteps(3, "DRIVE", -14,mdblStepSpeed, true, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
 
                     //need to insert the next steps
                     //if we found gold we need to move forward and knock it off
@@ -2185,7 +2441,6 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
 //                        }
 //                        //autonomousStepsFile.insertSteps(3, "DRIVE", 18,mdblStepSpeed, false, false, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
 //                        //autonomousStepsFile.insertSteps(3, "DRIVE", -18,mdblStepSpeed, false, true, 0, 0, 0, 0, 0, 0,  mintCurrentStep + 1);
-//                        autonomousStepsFile.insertSteps(3, "TANKTURN", 180, mdblStepSpeed, false, false, 0,0,0,0,0,0,mintCurrentStep + 1);
 //                    } else {
 //                        fileLogger.writeEvent(3,"Found NOTHING ");
 //                        switch (mintFindGoldLoop) {
@@ -2233,27 +2488,37 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
 
         fileLogger.setEventTag("releaseTeamMarker()");
 
-        switch (mintCurrentStateTeamMarker){
+        switch (mintCurrentStateTeamMarker) {
             case STATE_INIT:
                 fileLogger.writeEvent(2, "Initialised");
                 robotArms.teamMarkerServo.setPosition(mdblTeamMarkerDrop);
 
-                if (mdblRobotParm1 == 1){
+                if (mdblRobotParm1 == 1) {
                     robotArms.teamMarkerServo.setPosition(mdblTeamMarkerDrop);
-                } else if (mdblRobotParm1 == 0){
+                } else if (mdblRobotParm1 == 0) {
                     robotArms.teamMarkerServo.setPosition(mdblTeamMarkerHome);
+                    mintCurrentStateTeamMarker = Constants.stepState.STATE_COMPLETE;
+                    break;
                 }
-
                 mintCurrentStateTeamMarker = Constants.stepState.STATE_RUNNING;
-
                 break;
             case STATE_RUNNING:
                 fileLogger.writeEvent(2, "Running");
-
-                fileLogger.writeEvent(2, "Open for " + mdblRobotParm1 + "ms, now closing");
                 //  Transition to a new state.
-                mintCurrentStateTeamMarker = Constants.stepState.STATE_COMPLETE;
-                deleteParallelStep();
+                //check timeout value
+                if (mdblRobotParm2 != 0) {
+                    if (mStateTime.milliseconds() > mdblRobotParm2) {
+                        robotArms.teamMarkerServo.setPosition(mdblTeamMarkerHome);
+                        fileLogger.writeEvent(2, "Open for " + mdblRobotParm1 + "ms, now closing");
+                        //  Transition to a new state.
+                        mintCurrentStateTeamMarker = Constants.stepState.STATE_COMPLETE;
+                        deleteParallelStep();
+                        break;
+                    }
+                } else {
+                    mintCurrentStateTeamMarker = Constants.stepState.STATE_COMPLETE;
+                    deleteParallelStep();
+                }
 
                 //check timeout value
                 if (mStateTime.seconds() > mdblStepTimeout) {
@@ -2582,7 +2847,6 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         return Range.clip(error * PCoeff, -1, 1);
     }
 
-
     private Double getAdafruitPitch ()
     {
         Orientation angles;
@@ -2595,7 +2859,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         }
     }
 
-    private Double getAdafruitHeading ()
+    private Double getAdafruitHeading()
     {
         Orientation angles;
         angles = imu.getAngularOrientation().toAxesReference(AxesReference.INTRINSIC).toAxesOrder(AxesOrder.ZYX);
@@ -2609,13 +2873,25 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
 
     //for adafruit IMU as it returns z angle only
     private double angleToHeading(double z) {
-        double angle = -z + imuStartCorrectionVar + imuMountCorrectionVar;
+        double angle = -z;// + imuStartCorrectionVar + imuMountCorrectionVar;
         if (angle < 0)
             return angle + 360;
         else if (angle > 360)
             return angle - 360;
         else
             return angle;
+    }
+
+    // Computes the current battery voltage
+    double getBatteryVoltage() {
+        double result = Double.POSITIVE_INFINITY;
+        for (VoltageSensor sensor : hardwareMap.voltageSensor) {
+            double voltage = sensor.getVoltage();
+            if (voltage > 0) {
+                result = Math.min(result, voltage);
+            }
+        }
+        return result;
     }
 
     private boolean checkAllStatesComplete () {
