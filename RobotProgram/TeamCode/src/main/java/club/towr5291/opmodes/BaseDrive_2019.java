@@ -171,8 +171,8 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
             robotPowerMultiplier.incrementTick(gamepad1.dpad_up);
             robotPowerMultiplier.decrementTick(gamepad1.dpad_down);
 
-            controllerAMode.incrementTick(gamepad1.start);
-            controllerBMode.incrementTick(gamepad2.start);
+            //controllerAMode.incrementTick(gamepad1.start);
+            //controllerBMode.incrementTick(gamepad2.start);
 
             dashboard.displayPrintf(6, "Power Multiplier:  " + robotPowerMultiplier.getTickCurrValue());
             dashboard.displayPrintf(7, "Controller A Mode: " + (int)controllerAMode.getTickCurrValue());
