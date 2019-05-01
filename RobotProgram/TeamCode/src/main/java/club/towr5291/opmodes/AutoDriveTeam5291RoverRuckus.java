@@ -2339,7 +2339,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                                     autonomousStepsFile.insertSteps(1, "TANKTURNGYRO", 46, 1, true, false, 1, 0, 0, 0, 0, 1, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(1, "STRAFE", 5, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "DRIVE", 30, 1, false, false, 0, 0, 0, 0, 0, 1, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(1, "STRAFE", 10, 1, true, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(1, "STRAFE", 10, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "TANKTURNGYRO", 46, 1, false, false, 1, 0, 0, 0, 0, 1, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "DRIVE", -36, 1, false, false, 0, 0, 0, 0, 0, 1, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(2, "TANKTURNGYRO", 135, 1, false, false, 1, 0, 0, 0, 0, .5, mintCurrentStep + 1);
@@ -2361,7 +2361,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                                     autonomousStepsFile.insertSteps(1, "TANKTURNGYRO", 150, 1, false, false, 1, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(2, "TANKTURNGYRO", 150, 1, false, false, 1, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "TILT", -25, 1, false, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(5, "LIFT", -13, 1, true, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(5, "LIFT", -10, 1, true, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "DRIVE", 9, 0.6, true, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
                                 break;
                             }
