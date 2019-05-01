@@ -10,12 +10,14 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
+import org.firstinspires.ftc.robotcore.internal.android.dex.EncodedValueReader;
 
 import club.towr5291.R;
 import club.towr5291.functions.Constants;
 import club.towr5291.functions.FileLogger;
 import club.towr5291.functions.TOWR5291Tick;
 import club.towr5291.functions.TOWR5291Toggle;
+import club.towr5291.libraries.DeadReckoning;
 import club.towr5291.libraries.LibraryMotorType;
 import club.towr5291.libraries.TOWR5291LEDControl;
 import club.towr5291.libraries.TOWRDashBoard;
@@ -84,6 +86,8 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
         return dashboard;
     }
 
+    public DeadReckoning deadReckoning;
+
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -121,6 +125,7 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
         fileLogger.writeEvent(1,"Team Number", ourRobotConfig.getTeamNumber());
 
         Robot.init(fileLogger, hardwareMap, robotConfigSettings.robotConfigChoice.valueOf(ourRobotConfig.getRobotConfigBase()), LibraryMotorType.MotorTypes.valueOf(ourRobotConfig.getRobotMotorType()));// Starting robot Hardware map
+        //Robot.init(fileLogger, hardwareMap, robotConfigSettings.robotConfigChoice.TileRunnerRegular, LibraryMotorType.MotorTypes.ANDY20ORBIT);// Starting robot Hardware map
         Arms.init(hardwareMap, dashboard);
         Sensors.init(hardwareMap);
         dashboard.displayPrintf(0, "Robot Base Loaded");
@@ -148,10 +153,14 @@ public class BaseDrive_2019 extends OpModeMasterLinear {
 
         dashboard.displayPrintf(1, "Waiting for Start");
         // Wait for the game to start (driver presses PLAY)
+
         waitForStart();
         dashboard.clearDisplay();
 
         fileLogger.writeEvent("Starting Loop");
+
+        deadReckoning = new DeadReckoning(Robot.baseMotor1, Robot.baseMotor2, Robot.baseMotor3, this);
+        deadReckoning.start();
 
         //dashboard.clearDisplay();
 
