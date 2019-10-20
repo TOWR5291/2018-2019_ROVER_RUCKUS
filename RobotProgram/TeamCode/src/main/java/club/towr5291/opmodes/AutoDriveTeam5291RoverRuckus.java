@@ -45,6 +45,8 @@ import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.PIDCoefficients;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
@@ -239,11 +241,27 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
     private int mintLastEncoderDestinationLeft2;             //used to store the encoder destination from current Step
     private int mintLastEncoderDestinationRight1;            //used to store the encoder destination from current Step
     private int mintLastEncoderDestinationRight2;            //used to store the encoder destination from current Step
+    private int mintLastPositionLeft1_1;
+    private int mintLastPositionLeft2_1;
+    private int mintLastPositionLeft1_2;
+    private int mintLastPositionLeft2_2;
+    private int mintLastPositionRight1_1;
+    private int mintLastPositionRight2_1;
+    private int mintLastPositionRight1_2;
+    private int mintLastPositionRight2_2;
+    private boolean blnMotor1Stall1 = false;
+    private boolean blnStallTimerStarted = false;
+    private boolean blnMotorStall1 = false;
+    private boolean blnMotorStall2 = false;
+    private boolean blnMotorStall3 = false;
+    private boolean blnMotorStall4 = false;
+
     private boolean mblnNextStepLastPos;                     //used to detect using encoders or previous calc'd position
     private int mintStepDelay;                               //used when decoding the step, this will indicate how long the delay is on ms.
     private boolean mblnDisableVisionProcessing = false;     //used when moving to disable vision to allow faster speed reading encoders.
     private int mintStepRetries = 0;                         //used to count retries on a step
-    private ElapsedTime mStateTime = new ElapsedTime();     // Time into current state, used for the timeout
+    private ElapsedTime mStateTime = new ElapsedTime();      // Time into current state, used for the timeout
+    private ElapsedTime mStateStalTimee = new ElapsedTime(); // Time into current state, used for the timeout
     private int mintStepNumber;
     private boolean flipit = false;
     private int quadrant;
@@ -277,6 +295,11 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
     private TOWR5291TextToSpeech towr5291TextToSpeech = new TOWR5291TextToSpeech(false);
 
     private TOWR5291PID PID1 = new TOWR5291PID();
+    private TOWR5291PID PIDLEFT1 = new TOWR5291PID();
+    private TOWR5291PID PIDLEFT2 = new TOWR5291PID();
+    private TOWR5291PID PIDRIGHT1 = new TOWR5291PID();
+    private TOWR5291PID PIDRIGHT2 = new TOWR5291PID();
+    private int intdirection;
     private double dblStartVoltage = 0;
 
     //LED Strips
@@ -488,6 +511,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
         imu.stopAccelerationIntegration();
 
         dblStartVoltage = getBatteryVoltage();
+
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
@@ -672,7 +696,8 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 PivotTurnStep();
                 break;
             case "STRAFE":
-                MecanumStrafe();
+                //MecanumStrafe();
+                MecanumStrafeTime();
                 break;
             case "RADIUSTURN":
                 RadiusTurnStep();
@@ -1624,9 +1649,6 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 robotDrive.setHardwareDriveRunToPosition();
                 rdblSpeed = mdblStepSpeed;
 
-                if (rdblSpeed >= 0.7) {
-                    rdblSpeed = 0.7;  //This is the maximum speed, anything above 0.6 is the same as a speed of 1 for drive to position
-                }
                 // set power on motor controller to start moving
                 robotDrive.setHardwareDrivePower(rdblSpeed);  //set motor power
                 mintCurrentStateMecanumStrafe = Constants.stepState.STATE_RUNNING;
@@ -1634,9 +1656,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
             break;
             case STATE_RUNNING: {
                 rdblSpeed = mdblStepSpeed;
-                if (rdblSpeed >= 0.7) {
-                    rdblSpeed = 0.7;  //This is the maximum speed, anything above 0.6 is the same as a speed of 1 for drive to position
-                }
+
                 // pass target position to motor controller
                 robotDrive.baseMotor1.setTargetPosition(mintStepLeftTarget1);
                 robotDrive.baseMotor2.setTargetPosition(mintStepLeftTarget2);
@@ -1695,6 +1715,35 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                     deleteParallelStep();
                     break;
                 }
+/*
+                if ((mintLastPositionLeft1_1 < (mintLastPositionLeft2_1 + 3)) && (mintLastPositionLeft1_1 > (mintLastPositionLeft2_1 - 3)))
+                    blnMotor1Stall1 = true;
+                if ((mintLastPositionLeft1_2 < (mintLastPositionLeft2_2 + 3)) && (mintLastPositionLeft1_2 > (mintLastPositionLeft2_2 - 3)))
+                    blnMotorStall2 = true;
+                if ((mintLastPositionRight1_1 < (mintLastPositionRight2_1 + 3)) && (mintLastPositionRight1_1 > (mintLastPositionRight2_1 + 3)))
+                    blnMotorStall3 = true;
+                if ((mintLastPositionRight1_2 < (mintLastPositionRight2_2 + 3)) && (mintLastPositionRight1_2 < (mintLastPositionRight2_2 + 3)))
+                    blnMotorStall4 = true;
+
+                mintLastPositionLeft2_1 = robotDrive.baseMotor1.getCurrentPosition();
+                mintLastPositionLeft2_2 = robotDrive.baseMotor2.getCurrentPosition();
+                mintLastPositionRight2_1 = robotDrive.baseMotor3.getCurrentPosition();
+                mintLastPositionRight2_2 = robotDrive.baseMotor4.getCurrentPosition();
+
+                if (!blnStallTimerStarted) {
+                    if (blnMotorStall1 && blnMotorStall2 && blnMotorStall3 && blnMotorStall4) {
+                        mStateStalTimee.reset();
+                        blnStallTimerStarted = true;
+                    }
+                } else if (mStateStalTimee.milliseconds() > 500) {
+                    mintCurrentStateMecanumStrafe = Constants.stepState.STATE_COMPLETE;
+                    deleteParallelStep();
+                    break;
+                }
+
+                if (!blnMotor1Stall1 || !blnMotorStall2 || !blnMotorStall3 || !blnMotorStall4)
+                    blnStallTimerStarted = false;
+*/
 
                 //stop driving when within .25 inch, sometimes takes a long time to get that last bit and times out.
                 //stop when drive motors stop
@@ -1716,6 +1765,176 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
             if (mStateTime.seconds() > mdblStepTimeout) {
                 fileLogger.writeEvent(1, "Timeout:- " + mStateTime.seconds());
                 //  Transition to a new state.
+                mintCurrentStateMecanumStrafe = Constants.stepState.STATE_COMPLETE;
+                deleteParallelStep();
+                break;
+            }
+            break;
+        }
+    }
+
+    private void MecanumStrafeTime() {
+        fileLogger.setEventTag("MecanumStrafeTime()");
+
+        double dblDistanceToEndLeft1;
+        double dblDistanceToEndLeft2;
+        double dblDistanceToEndRight1;
+        double dblDistanceToEndRight2;
+        double dblDistanceFromStartLeft1;
+        double dblDistanceFromStartLeft2;
+        double dblDistanceFromStartRight1;
+        double dblDistanceFromStartRight2;
+
+        int intLeft1MotorEncoderPosition;
+        int intLeft2MotorEncoderPosition;
+        int intRight1MotorEncoderPosition;
+        int intRight2MotorEncoderPosition;
+        double rdblSpeed;
+
+        switch (mintCurrentStateMecanumStrafe) {
+            case STATE_INIT: {
+                double adafruitIMUHeading;
+                double currentHeading;
+                PIDLEFT1 = new TOWR5291PID(runtime,0,0,3,3,0);
+                PIDLEFT2 = new TOWR5291PID(runtime,0,0,3,3,0);
+                PIDRIGHT1 = new TOWR5291PID(runtime,0,0,3,3,0);
+                PIDRIGHT2 = new TOWR5291PID(runtime,0,0,3,3,0);
+
+                mblnDisableVisionProcessing = true;  //disable vision processing
+
+                // Get Current Encoder positions
+                if (mblnNextStepLastPos) {
+                    mintStartPositionLeft1 = mintLastEncoderDestinationLeft1;
+                    mintStartPositionLeft2 = mintLastEncoderDestinationLeft2;
+                    mintStartPositionRight1 = mintLastEncoderDestinationRight1;
+                    mintStartPositionRight2 = mintLastEncoderDestinationRight2;
+                } else {
+                    mintStartPositionLeft1 = robotDrive.baseMotor1.getCurrentPosition();
+                    mintStartPositionLeft2 = robotDrive.baseMotor2.getCurrentPosition();
+                    mintStartPositionRight1 = robotDrive.baseMotor3.getCurrentPosition();
+                    mintStartPositionRight2 = robotDrive.baseMotor4.getCurrentPosition();
+                }
+                mblnNextStepLastPos = false;
+
+                mintStepLeftTarget1 = mintStartPositionLeft1 - (int) (mdblStepDistance * ourRobotConfig.getCOUNTS_PER_INCH_STRAFE_LEFT_OFFSET() * ourRobotConfig.getCOUNTS_PER_INCH_STRAFE() * ourRobotConfig.getCOUNTS_PER_INCH_STRAFE_FRONT_OFFSET());
+                mintStepLeftTarget2 = mintStartPositionLeft2 + (int) (mdblStepDistance * ourRobotConfig.getCOUNTS_PER_INCH_STRAFE_LEFT_OFFSET() * ourRobotConfig.getCOUNTS_PER_INCH_STRAFE() * ourRobotConfig.getCOUNTS_PER_INCH_STRAFE_REAR_OFFSET());
+                mintStepRightTarget1 = mintStartPositionRight1 + (int) (mdblStepDistance * ourRobotConfig.getCOUNTS_PER_INCH_STRAFE_RIGHT_OFFSET() * ourRobotConfig.getCOUNTS_PER_INCH_STRAFE() * ourRobotConfig.getCOUNTS_PER_INCH_STRAFE_FRONT_OFFSET());
+                mintStepRightTarget2 = mintStartPositionRight2 - (int) (mdblStepDistance * ourRobotConfig.getCOUNTS_PER_INCH_STRAFE_RIGHT_OFFSET() * ourRobotConfig.getCOUNTS_PER_INCH_STRAFE() * ourRobotConfig.getCOUNTS_PER_INCH_STRAFE_REAR_OFFSET());
+
+                //store the encoder positions so next step can calculate destination
+                mintLastEncoderDestinationLeft1 = mintStepLeftTarget1;
+                mintLastEncoderDestinationLeft2 = mintStepLeftTarget2;
+                mintLastEncoderDestinationRight1 = mintStepRightTarget1;
+                mintLastEncoderDestinationRight2 = mintStepRightTarget2;
+
+                // set motor controller to mode
+                robotDrive.setHardwareDriveRunWithoutEncoders();
+                if (mdblStepDistance > 0) {
+                    intdirection = 1;
+                } else {
+                    intdirection = 1;
+                }
+
+                // set power on motor controller to start moving
+                //robotDrive.setHardwareDrivePower(rdblSpeed);  //set motor power
+                robotDrive.baseMotor1.setPower(mdblStepSpeed * intdirection);
+                robotDrive.baseMotor2.setPower(-mdblStepSpeed * intdirection);
+                robotDrive.baseMotor3.setPower(-mdblStepSpeed * intdirection);
+                robotDrive.baseMotor4.setPower(mdblStepSpeed * intdirection);
+
+                mintCurrentStateMecanumStrafe = Constants.stepState.STATE_RUNNING;
+            }
+            break;
+            case STATE_RUNNING: {
+                intLeft1MotorEncoderPosition = robotDrive.baseMotor1.getCurrentPosition();
+                intLeft2MotorEncoderPosition = robotDrive.baseMotor2.getCurrentPosition();
+                intRight1MotorEncoderPosition = robotDrive.baseMotor3.getCurrentPosition();
+                intRight2MotorEncoderPosition = robotDrive.baseMotor4.getCurrentPosition();
+
+                double correctionleft1 = PIDLEFT1.PIDCorrection(runtime,mintStepLeftTarget1, intLeft1MotorEncoderPosition);
+                double correctionleft2 = PIDLEFT2.PIDCorrection(runtime,mintStepLeftTarget2, intLeft2MotorEncoderPosition);
+                double correctionright1 = PIDRIGHT1.PIDCorrection(runtime,mintStepRightTarget1, intRight1MotorEncoderPosition);
+                double correctionright2 = PIDRIGHT2.PIDCorrection(runtime,mintStepRightTarget2, intRight2MotorEncoderPosition);
+
+                robotDrive.baseMotor1.setPower(mdblStepSpeed * correctionleft1 * intdirection);
+                robotDrive.baseMotor2.setPower(mdblStepSpeed * correctionleft2 * intdirection);
+                robotDrive.baseMotor3.setPower(mdblStepSpeed * correctionright1 * intdirection);
+                robotDrive.baseMotor4.setPower(mdblStepSpeed * correctionright2 * intdirection);
+
+                //robotDrive.baseMotor1.setPower(mdblStepSpeed * intdirection);
+                //robotDrive.baseMotor2.setPower(mdblStepSpeed * intdirection);
+                //robotDrive.baseMotor3.setPower(mdblStepSpeed * intdirection);
+                //robotDrive.baseMotor4.setPower(mdblStepSpeed * intdirection);
+
+                //determine how close to target we are
+                dblDistanceToEndLeft1 = (mintStepLeftTarget1 - intLeft1MotorEncoderPosition) / ourRobotConfig.getCOUNTS_PER_INCH();
+                dblDistanceToEndLeft2 = (mintStepLeftTarget2 - intLeft2MotorEncoderPosition) / ourRobotConfig.getCOUNTS_PER_INCH();
+                dblDistanceToEndRight1 = (mintStepRightTarget1 - intRight1MotorEncoderPosition) / ourRobotConfig.getCOUNTS_PER_INCH();
+                dblDistanceToEndRight2 = (mintStepRightTarget2 - intRight2MotorEncoderPosition) / ourRobotConfig.getCOUNTS_PER_INCH();
+
+                dblDistanceFromStartLeft1 = (mintStartPositionLeft1 + intLeft1MotorEncoderPosition) / ourRobotConfig.getCOUNTS_PER_INCH();
+                dblDistanceFromStartLeft2 = (mintStartPositionLeft1 + intLeft2MotorEncoderPosition) / ourRobotConfig.getCOUNTS_PER_INCH();
+                dblDistanceFromStartRight1 = (mintStartPositionRight1 + intRight1MotorEncoderPosition) / ourRobotConfig.getCOUNTS_PER_INCH();
+                dblDistanceFromStartRight2 = (mintStartPositionRight2 + intRight2MotorEncoderPosition) / ourRobotConfig.getCOUNTS_PER_INCH();
+
+                fileLogger.writeEvent(3, "Timer- " + mStateTime.milliseconds() + " Left1Distance:- " + dblDistanceFromStartLeft1);
+                fileLogger.writeEvent(3, "Timer- " + mStateTime.milliseconds() + " Left2Distance:- " + dblDistanceFromStartLeft2);
+                fileLogger.writeEvent(3, "Timer- " + mStateTime.milliseconds() + " Right1Distance:- " + dblDistanceFromStartRight1);
+                fileLogger.writeEvent(3, "Timer- " + mStateTime.milliseconds() + " Right2Distance:- " + dblDistanceFromStartRight2);
+
+                fileLogger.writeEvent(3, "Current LPosition1:- " + intLeft1MotorEncoderPosition + " LTarget1:- " + mintStepLeftTarget1);
+                fileLogger.writeEvent(3, "Current LPosition2:- " + intLeft2MotorEncoderPosition + " LTarget2:- " + mintStepLeftTarget2);
+                fileLogger.writeEvent(3, "Current RPosition1:- " + intRight1MotorEncoderPosition + " RTarget1:- " + mintStepRightTarget1);
+                fileLogger.writeEvent(3, "Current RPosition2:- " + intRight2MotorEncoderPosition + " RTarget2:- " + mintStepRightTarget2);
+
+                dashboard.displayPrintf(4,  "Mecanum Strafe Positions moving " + mdblStepDistance);
+                dashboard.displayPrintf(5, LABEL_WIDTH, "Left  Target: ", "Running to %7d :%7d", mintStepLeftTarget1, mintStepLeftTarget2);
+                dashboard.displayPrintf(6, LABEL_WIDTH, "Left  Actual: ", "Running at %7d :%7d", intLeft1MotorEncoderPosition, intLeft2MotorEncoderPosition);
+                dashboard.displayPrintf(7, LABEL_WIDTH, "Right Target: ", "Running to %7d :%7d", mintStepRightTarget1, mintStepRightTarget2);
+                dashboard.displayPrintf(8, LABEL_WIDTH, "Right Actual: ", "Running at %7d :%7d", intRight1MotorEncoderPosition, intRight2MotorEncoderPosition);
+
+                double dblDistanceToEnd = Math.max(Math.max(Math.max(Math.abs(dblDistanceToEndLeft1),Math.abs(dblDistanceToEndRight1)),Math.abs(dblDistanceToEndLeft2)),Math.abs(dblDistanceToEndRight2));
+
+                if (mdblRobotParm1 > 0) {
+                    if (mStateTime.milliseconds() > mdblRobotParm1) {
+                        fileLogger.writeEvent(3, "Complete Early ......." + dblDistanceToEnd);
+                        fileLogger.writeEvent(3, "mblnRobotLastPos Complete Near END ");
+                        mintCurrentStateMecanumStrafe = Constants.stepState.STATE_COMPLETE;
+                        robotDrive.setHardwareDrivePower(0);
+                        robotDrive.setHardwareDriveRunUsingEncoders();
+                        deleteParallelStep();
+                        break;
+                    }
+                }
+
+                if (mblnRobotLastPos) {
+                    if (Math.abs(dblDistanceToEnd) <= mdblRobotParm6) {
+                        fileLogger.writeEvent(3,"Complete NextStepLasp......." + dblDistanceToEnd);
+                        mblnNextStepLastPos = true;
+                        mblnDisableVisionProcessing = false;  //enable vision processing
+                        mintCurrentStateMecanumStrafe = Constants.stepState.STATE_COMPLETE;
+                        robotDrive.setHardwareDrivePower(0);
+                        robotDrive.setHardwareDriveRunUsingEncoders();
+                        deleteParallelStep();
+                        break;
+                    }
+                } else if (Math.abs(dblDistanceToEnd) <= mdblRobotParm6) {
+                    fileLogger.writeEvent(3,"Complete Early ......." + dblDistanceToEnd);
+                    fileLogger.writeEvent(3,"mblnRobotLastPos Complete Near END ");
+                    mintCurrentStateMecanumStrafe = Constants.stepState.STATE_COMPLETE;
+                    robotDrive.setHardwareDrivePower(0);
+                    robotDrive.setHardwareDriveRunUsingEncoders();
+                    deleteParallelStep();
+                    break;
+                }
+
+            } //end Case Running
+            //check timeout value
+            if (mStateTime.seconds() > mdblStepTimeout) {
+                fileLogger.writeEvent(1, "Timeout:- " + mStateTime.seconds());
+                //  Transition to a new state.
+                robotDrive.setHardwareDrivePower(0);
+                robotDrive.setHardwareDriveRunUsingEncoders();
                 mintCurrentStateMecanumStrafe = Constants.stepState.STATE_COMPLETE;
                 deleteParallelStep();
                 break;
@@ -1814,9 +2033,9 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 if (dblStartVoltage > 13.1){
                     gain = 0.13;
                 } else if (dblStartVoltage > 12.8) {
-                    gain =0.132;
+                    gain =0.131;
                 } else {
-                    gain = 0.133;
+                    gain = 0.132;
                 }
                 PID1 = new TOWR5291PID(runtime,0,0,gain,0,0);
                 double adafruitIMUHeading;
@@ -2032,7 +2251,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 if (Math.abs(dblDistanceToEnd) <= mdblRobotParm6) {
                     fileLogger.writeEvent(3,"mblnRobotLastPos Complete Near END " + Math.abs(dblDistanceToEnd));
                     mintCurrentStateMoveLift = Constants.stepState.STATE_COMPLETE;
-                    robotArms.setHardwareLiftPower(20);
+                    robotArms.setHardwareLiftPower(0);
                     deleteParallelStep();
                     break;
                 }
@@ -2041,7 +2260,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                 if (Math.abs(dblDistanceToEnd) <= .25) {
                     fileLogger.writeEvent(3,"mblnRobotLastPos Complete Close enough " + Math.abs(dblDistanceToEnd));
                     mintCurrentStateMoveLift = Constants.stepState.STATE_COMPLETE;
-                    robotArms.setHardwareLiftPower(20);
+                    robotArms.setHardwareLiftPower(0);
                     deleteParallelStep();
                     break;
                 }
@@ -2157,8 +2376,8 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
 
                 if (Math.abs(dblDistanceToEnd) <= mdblRobotParm6) {
                     fileLogger.writeEvent(3,"mblnRobotLastPos Complete Near END " + Math.abs(dblDistanceToEnd));
-                    robotArms.tiltMotor1.setPower(20);
-                    robotArms.tiltMotor2.setPower(20);
+                    robotArms.tiltMotor1.setPower(10);
+                    robotArms.tiltMotor2.setPower(10);
                     mintCurrentStateTiltMotor = Constants.stepState.STATE_COMPLETE;
                     deleteParallelStep();
                     break;
@@ -2269,7 +2488,7 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                             switch (ourRobotConfig.getAllianceStartPosition()) {
                                 case "Left":
                                     autonomousStepsFile.insertSteps(2, "DRIVE", 34, 0.8, false, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(2, "STRAFE", -8, 1, false, false, 0, 0, 0, 0, 0, 1.5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(2, "STRAFE", -4, 1, false, false, 0, 0, 0, 0, 0, 1.5, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "TANKTURNGYRO", 225, 1, false, false, 1, 0, 0, 0, 0, .5, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "DRIVE", 40,.8, false, false, 0, 0, 0, 0, 0, 0.5,  mintCurrentStep + 1);
                                     //autonomousStepsFile.insertSteps(4, "TANKTURN", -90, 0.6, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
@@ -2280,36 +2499,39 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                                     autonomousStepsFile.insertSteps(3, "DRIVE", 27, 0.6, true, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
                                 break;
                                 case "Right":  //GOLD center
-                                    autonomousStepsFile.insertSteps(3, "LIFT", 18, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "LIFT", 15, 1, false, false, 0, 0, 0, 0, 0, 1, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(1, "INTAKE", 0, .1, true, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "TILT", -14, 1, true, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(1, "TEAMMARKER", 0, 0, true, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(1, "TEAMMARKER", 0, 0, false, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "TILT", -68, 1, true, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(3, "DRIVE", -63, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "LIFT", 5, 1, false, false, 0, 0, 0, 0, 0, 1, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", -55, 1, true, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(4, "TANKTURNGYRO", 51, 1, false, false, 1, 0, 0, 0, 0, 1, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(1, "TEAMMARKER", 0, 0, false, false, 1, 0, 0, 0, 0, 0, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(3, "STRAFE", 6, 1, true, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(4, "TANKTURNGYRO", 46, 1, false, false, 1, 0, 0, 0, 0, 1, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(3, "DRIVE", -50, 1, false, false, 0, 0, 0, 0, 0, 1, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(3, "TANKTURNGYRO", 180, 1, false, false, 1, 0, 0, 0, 0, .5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", 52, 1, false, false, 0, 0, 0, 0, 0, 1, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(1, "TANKTURNGYRO", 0, 1, false, false, 1, 0, 0, 0, 0, .5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TANKTURNGYRO", 0, 1, false, false, 1, 0, 0, 0, 0, .5, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "LIFT", -24, 1, true, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "TILT", -25, 1, true, false, 0, 0, 0, 0, 0, 3, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(1, "INTAKE", 0, 0, true, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "DELAY", 0, 0, false, false, 500, 0, 0, 0, 0, 3, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "TILT", 35, 1, false, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(3, "LIFT", 18, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "LIFT", 22, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(1, "INTAKE", 0, .1, true, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "TILT", 65, 1, true, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(1, "INTAKE", 0, 0, true, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(3, "DRIVE", 7, 0.6, false, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(3, "LIFT", 5, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", 8, 0.6, false, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "LIFT", 7, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(1, "INTAKE", 0, .1, true, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "TILT", -65, 1, false, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(3, "DRIVE", -9, 0.6, true, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", -7, 0.6, true, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
+                                    //Step above is when we go into to the gold to pick it up
                                     autonomousStepsFile.insertSteps(1, "TANKTURNGYRO", 180, 1, false, false, 1, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(4, "TANKTURNGYRO", 180, 1, false, false, 1, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
+                                    //Turning two times to make suer that it is the right amount
                                     autonomousStepsFile.insertSteps(3, "TILT", -25, 1, false, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(5, "LIFT", -11, 1, true, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(3, "DRIVE", 9, 0.6, true, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(5, "LIFT", -14, 1, true, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", 8, 0.6, true, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
                                 break;
                             }
                             break;
@@ -2317,29 +2539,32 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                             switch (ourRobotConfig.getAllianceStartPosition()) {
                                 case "Left":
                                     autonomousStepsFile.insertSteps(2, "DRIVE", 40, 0.8, false, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(2, "STRAFE", -6, 1, false, false, 0, 0, 0, 0, 0, 1.5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(2, "STRAFE", -5, 1, false, false, 0, 0, 0, 0, 0, 1.5, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "TANKTURNGYRO", 225, 1, false, false, 1, 0, 0, 0, 0, .5, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "DRIVE", 40,.8, false, false, 0, 0, 0, 0, 0, 0.5,  mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(2, "TANKTURNGYRO", 270,1, false, false, 1, 0, 0, 0, 0, 1,  mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(3, "DRIVE", -8,.6, false, false, 0, 0, 0, 0, 0, 0.6,  mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", -6,.6, false, false, 0, 0, 0, 0, 0, 0.6,  mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "DRIVE", 18,.6, false, false, 0, 0, 0, 0, 0, 0.6,  mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "TANKTURNGYRO", 330,1, false, false, 1, 0, 0, 0, 0, 1,  mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "TILT", -25,1, false, false, 50, 0, 0, 0, 0, 3,  mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "LIFT", -8,1, true, false, 0, 0, 0, 0, 0, 0.5,  mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "DRIVE", 6,.6, true, false, 0, 0, 0, 0, 0, 0.5,  mintCurrentStep + 1);
+
                                 break;
                                 case "Right":  //GOLD LEFT
-                                    autonomousStepsFile.insertSteps(3, "LIFT", 20, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "LIFT", 15, 1, false, false, 0, 0, 0, 0, 0, 1, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(1, "INTAKE", 0, .1, true, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(3, "TILT", -10, 1, true, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(1, "TEAMMARKER", 0, 0, true, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(3, "TILT", -65, 1, false, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(3, "DRIVE", -55, 1, true, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TILT", -14, 1, true, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(1, "TEAMMARKER", 0, 0, false, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TILT", -68, 1, true, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "LIFT", 5, 1, false, false, 0, 0, 0, 0, 0, 1, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(1, "TEAMMARKER", 0, 0, false, false, 1, 0, 0, 0, 0, 0, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(1, "TANKTURNGYRO", 46, 1, true, false, 1, 0, 0, 0, 0, 1, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", -55, 1, true, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(4, "TANKTURNGYRO", 51, 1, false, false, 1, 0, 0, 0, 0, 1, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(1, "TEAMMARKER", 0, 0, false, false, 1, 0, 0, 0, 0, 0, mintCurrentStep + 1);
+
                                     autonomousStepsFile.insertSteps(1, "STRAFE", 5, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(3, "DRIVE", 30, 1, false, false, 0, 0, 0, 0, 0, 1, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(1, "STRAFE", 10, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", 40, 1, false, false, 0, 0, 0, 0, 0, 1, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "TANKTURNGYRO", 46, 1, false, false, 1, 0, 0, 0, 0, 1, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "DRIVE", -36, 1, false, false, 0, 0, 0, 0, 0, 1, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(2, "TANKTURNGYRO", 135, 1, false, false, 1, 0, 0, 0, 0, .5, mintCurrentStep + 1);
@@ -2348,21 +2573,21 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                                     autonomousStepsFile.insertSteps(1, "INTAKE", 0, 0, true, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "DELAY", 0, 0, false, false, 500, 0, 0, 0, 0, 3, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "TILT", 35, 1, false, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(3, "LIFT", 18, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "LIFT", 22, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(1, "INTAKE", 0, .1, true, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(2, "TANKTURNGYRO", 180, 1, false, false, 1, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "TILT", 65, 1, false, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(1, "INTAKE", 0, 0, true, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "DRIVE", 13, 0.6, false, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(3, "LIFT", 5, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "LIFT", 13, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(1, "INTAKE", 0, .1, true, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "TILT", -65, 1, false, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(3, "DRIVE", -13, 0.6, true, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", -11, 0.6, true, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(1, "TANKTURNGYRO", 150, 1, false, false, 1, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(2, "TANKTURNGYRO", 150, 1, false, false, 1, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "TILT", -25, 1, false, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(5, "LIFT", -10, 1, true, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(3, "DRIVE", 9, 0.6, true, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(5, "LIFT", -14, 1, true, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", 8, 0.6, true, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
                                 break;
                             }
                             break;
@@ -2370,13 +2595,13 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                             switch (ourRobotConfig.getAllianceStartPosition()) {
                                 case "Left":
                                     autonomousStepsFile.insertSteps(2, "DRIVE", 45, 0.8, false, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(2, "STRAFE", -8, 1, false, false, 0, 0, 0, 0, 0, 1.5, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(3, "TANKTURNGYRO", 225, 1, false, false, 1, 0, 0, 0, 0, .5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(2, "STRAFE", -5, 1, false, false, 0, 0, 0, 0, 0, 1.5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(2, "TANKTURNGYRO", 225, 1, false, false, 1, 0, 0, 0, 0, .5, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "DRIVE", 40,.8, false, false, 0, 0, 0, 0, 0, 0.5,  mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "TANKTURNGYRO", 270,1, false, false, 1, 0, 0, 0, 0, 2,  mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "DRIVE", -11,.6, false, false, 0, 0, 0, 0, 0, 0.6,  mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "DRIVE", 13,.6, false, false, 0, 0, 0, 0, 0, 0.6,  mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(2, "TANKTURNGYOR", 45,1, false, false, 1, 0, 0, 0, 0, 2,  mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(2, "TANKTURNGYRO", 45,1, false, false, 1, 0, 0, 0, 0, 2,  mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "TILT", -25,1, false, false, 50, 0, 0, 0, 0, 3,  mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "LIFT", -8,1, true, false, 0, 0, 0, 0, 0, 0.5,  mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "DRIVE", 17,.6, true, false, 0, 0, 0, 0, 0, 0.5,  mintCurrentStep + 1);
@@ -2388,38 +2613,51 @@ public class AutoDriveTeam5291RoverRuckus extends OpModeMasterLinear {
                                     autonomousStepsFile.insertSteps(1, "TEAMMARKER", 0, 0, false, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "TILT", -68, 1, true, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "LIFT", 5, 1, true, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(3, "DRIVE", -59, 1, true, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(1, "TANKTURNGYRO", 46, 1, false, false, 1, 0, 0, 0, 0, .5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", -5, 1, true, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(1, "TEAMMARKER", 0, 0, false, false, 1, 0, 0, 0, 0, 0, mintCurrentStep + 1);
-                                    //autonomousStepsFile.insertSteps(2, "STRAFE", 5, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(3, "DRIVE", 46, 1, false, false, 0, 0, 0, 0, 0, 1, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(2, "STRAFE", 28, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(2, "TANKTURNGYRO", 46, 1, false, false, 1, 0, 0, 0, 0, .5, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(3, "DRIVE", -18, 1, false, false, 0, 0, 0, 0, 0, 1, mintCurrentStep + 1);
+
+                                    autonomousStepsFile.insertSteps(3, "LIFT", 15, 1, false, false, 0, 0, 0, 0, 0, 1, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(1, "INTAKE", 0, .1, true, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TILT", -14, 1, true, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(1, "TEAMMARKER", 0, 0, false, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TILT", -68, 1, true, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "LIFT", 5, 1, false, false, 0, 0, 0, 0, 0, 1, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", -55, 1, true, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(4, "TANKTURNGYRO", 51, 1, false, false, 1, 0, 0, 0, 0, 1, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(1, "TEAMMARKER", 0, 0, false, false, 1, 0, 0, 0, 0, 0, mintCurrentStep + 1);
+
+                                    autonomousStepsFile.insertSteps(1, "STRAFE", 5, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+
+                                    autonomousStepsFile.insertSteps(1, "TANKTURNGYRO", 51, 1, false, false, 1, 0, 0, 0, 0, .5, mintCurrentStep + 1);
+                                    //autonomousStepsFile.insertSteps(2, "STRAFE", 8, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", 56, 1, false, false, 0, 0, 0, 0, 0, 1, mintCurrentStep + 1);
+                                    //autonomousStepsFile.insertSteps(2, "STRAFE", 18, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(2, "TANKTURNGYRO", 50, 1, false, false, 1, 0, 0, 0, 0, .5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", -46, 1, false, false, 0, 0, 0, 0, 0, 1, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "LIFT", -5, 1, true, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(2, "TANKTURNGYRO", 90, 1, false, false, 1, 0, 0, 0, 0, .5, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(2, "DRIVE", -14, 1, false, false, 0, 0, 0, 0, 0, 1, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(2, "DRIVE", -10, 1, false, false, 0, 0, 0, 0, 0, 1, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "LIFT", -16, 1, true, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "TILT", -25, 1, true, false, 0, 0, 0, 0, 0, 3, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(1, "INTAKE", 0, 0, true, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "DELAY", 0, 0, false, false, 500, 0, 0, 0, 0, 3, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "TILT", 30, 1, false, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(3, "LIFT", 16, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "LIFT", 22, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(1, "INTAKE", 0, .1, true, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "TANKTURNGYRO", 180, 1, true, false, 1, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "TILT", 65, 1, false, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(1, "INTAKE", 0, 0, true, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(3, "DRIVE", 10, 0.6, true, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(3, "LIFT", 5, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", 13, 0.6, true, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "LIFT", 12, 1, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(1, "INTAKE", 0, .1, false, false, 0, 0, 0, 0, 0, 0, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(3, "TILT", -55, 1, true, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TILT", -65, 1, true, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(3, "DRIVE", -11, 0.6, true,false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
                                     //autonomousStepsFile.insertSteps(1, "TANKTURNGYRO", 210, 1, false, false, 1, 0, 0, 0, 0, 1, mintCurrentStep + 1);
                                     autonomousStepsFile.insertSteps(4, "TANKTURNGYRO", 215, 1, false, false, 1, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
                                     //autonomousStepsFile.insertSteps(3, "TANKTURN", -130, 0.6, false, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(3, "TILT", -35, 1, false, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(4, "LIFT", -8, 1, true, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
-                                    autonomousStepsFile.insertSteps(3, "DRIVE", 9, 0.6, true, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "TILT", -25, 1, false, false, 50, 0, 0, 0, 0, 3, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(4, "LIFT", -14, 1, true, false, 0, 0, 0, 0, 0, 2, mintCurrentStep + 1);
+                                    autonomousStepsFile.insertSteps(3, "DRIVE", 8, 0.6, true, false, 0, 0, 0, 0, 0, 0.5, mintCurrentStep + 1);
                                 break;
                             }
                             break;
